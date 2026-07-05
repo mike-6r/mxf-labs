@@ -1,0 +1,18 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="300" rx="28" fill="#09090B"/>
+  <path d="M0 0h1200v300H0z" fill="url(#bg)"/>
+  <path d="M88 76h248v148H88zM364 76h176v148H364zM568 76h544v148H568z" stroke="#F7B955" stroke-opacity=".28" stroke-width="2"/>
+  <path d="M122 190h180M122 154h126M122 118h202" stroke="#fff" stroke-opacity=".2" stroke-width="12" stroke-linecap="round"/>
+  <path d="M424 112l38-26 38 26v54l-38 26-38-26v-54Z" fill="#F7B955" fill-opacity=".22"/>
+  <path d="M442 112h40v80h-40z" fill="#F7B955"/>
+  <path d="M620 190h420M620 154h296M620 118h370" stroke="#F7B955" stroke-opacity=".32" stroke-width="12" stroke-linecap="round"/>
+  <text x="88" y="260" fill="#F7F7F8" font-family="Arial, sans-serif" font-size="28" font-weight="800">MxF Prisons</text>
+  <text x="318" y="260" fill="#FFD79A" font-family="Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="4">MINES / PRESTIGE / TOKENS</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1D1408"/>
+      <stop offset=".55" stop-color="#101115"/>
+      <stop offset="1" stop-color="#2A1E0B"/>
+    </linearGradient>
+  </defs>
+</svg>

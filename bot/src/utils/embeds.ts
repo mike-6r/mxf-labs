@@ -4,6 +4,8 @@ import {
   ButtonStyle,
   EmbedBuilder,
   MessageFlags,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
   type ChatInputCommandInteraction,
   type InteractionReplyOptions,
   type InteractionUpdateOptions,
@@ -29,7 +31,7 @@ export function mxfEmbed(options: {
   const embed = new EmbedBuilder()
     .setColor(options.color ?? MXF_COLORS.primary)
     .setTitle(options.title)
-    .setFooter({ text: options.footer || "MxF Labs • Software Platform" });
+    .setFooter({ text: options.footer || "MxF Labs | Software Platform" });
 
   if (options.description) embed.setDescription(options.description);
   if (options.image) embed.setImage(options.image);
@@ -82,15 +84,43 @@ export async function updateOrReply(
 
 export function ticketPanelComponents() {
   return [
-    new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder().setCustomId("ticket:create:general").setLabel("General Support").setStyle(ButtonStyle.Primary),
-      new ButtonBuilder().setCustomId("ticket:create:product").setLabel("Product Support").setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder().setCustomId("ticket:create:license").setLabel("License Help").setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder().setCustomId("ticket:create:purchase").setLabel("Purchase Help").setStyle(ButtonStyle.Secondary),
+    new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+      new StringSelectMenuBuilder()
+        .setCustomId("ticket:create-select")
+        .setPlaceholder("Choose the support path that fits best")
+        .addOptions(
+          new StringSelectMenuOptionBuilder()
+            .setLabel("General Support")
+            .setValue("general")
+            .setDescription("Questions, access help, and anything not covered below."),
+          new StringSelectMenuOptionBuilder()
+            .setLabel("Product Support")
+            .setValue("product")
+            .setDescription("Plugin, bot, panel, or product-specific support."),
+          new StringSelectMenuOptionBuilder()
+            .setLabel("License Help")
+            .setValue("license")
+            .setDescription("Activations, resets, transfers, and license checks."),
+          new StringSelectMenuOptionBuilder()
+            .setLabel("Purchase Help")
+            .setValue("purchase")
+            .setDescription("Orders, invoices, payments, and checkout questions."),
+          new StringSelectMenuOptionBuilder()
+            .setLabel("Bug Report")
+            .setValue("bug")
+            .setDescription("Broken behavior, errors, logs, and reproduction steps."),
+          new StringSelectMenuOptionBuilder()
+            .setLabel("Custom Development")
+            .setValue("custom")
+            .setDescription("Websites, bots, plugins, dashboards, and client work."),
+        ),
     ),
     new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder().setCustomId("ticket:create:bug").setLabel("Bug Report").setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder().setCustomId("ticket:create:custom").setLabel("Custom Order").setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder().setCustomId("ticket:create:general").setLabel("General").setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId("ticket:create:purchase").setLabel("Purchase").setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder().setCustomId("ticket:create:license").setLabel("Licensing").setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder().setCustomId("ticket:create:bug").setLabel("Bug").setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder().setCustomId("ticket:create:custom").setLabel("Custom Build").setStyle(ButtonStyle.Secondary),
     ),
   ];
 }

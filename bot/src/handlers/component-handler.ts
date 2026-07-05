@@ -664,8 +664,41 @@ export async function handleModalSubmitInteraction(interaction: ModalSubmitInter
   }
 }
 
-export async function handleSelectMenuInteraction(interaction: StringSelectMenuInteraction) {
+export async function handleSelectMenuInteraction(interaction: StringSelectMenuInteraction, services: BotServices) {
   const [area, action] = interaction.customId.split(":");
+
+  if (area === "ticket" && action === "create-select") {
+    if (!interaction.guild) {
+      await interaction.reply({ embeds: [statusEmbed("Server Required", "Tickets must be opened inside the MxF Labs Discord server.", "error")], flags: [MessageFlags.Ephemeral] });
+      return;
+    }
+
+    const typeKey = (interaction.values[0] || "general") as TicketTypeKey;
+    if (["product", "license", "purchase", "bug", "custom"].includes(typeKey)) {
+      await interaction.showModal(buildTicketModal(typeKey));
+      return;
+    }
+
+    await interaction.deferReply({ ephemeral: true });
+    const result = await createDiscordTicket({
+      guild: interaction.guild,
+      website: services.website,
+      requester: interaction.user,
+      type: ticketTypeFromKey(typeKey),
+      subject: "General support request",
+      message: "Created from the MxF Labs ticket panel.",
+    });
+
+    await interaction.editReply({
+      embeds: [
+        result.ok
+          ? statusEmbed("Ticket Created", `Ticket created: <#${result.channel.id}>`)
+          : statusEmbed("Ticket Could Not Open", result.message, "error"),
+      ],
+    });
+    return;
+  }
+
   if (area !== "setup" || action !== "mode") return;
 
   if (!interaction.guild || !canRunSetupComponent(interaction)) {

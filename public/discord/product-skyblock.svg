@@ -1,0 +1,18 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="300" rx="28" fill="#09090B"/>
+  <path d="M0 0h1200v300H0z" fill="url(#bg)"/>
+  <path d="M94 190c74-82 148-82 222 0 74 82 148 82 222 0 74-82 148-82 222 0 74 82 148 82 222 0" stroke="#86EFAC" stroke-opacity=".28" stroke-width="16" stroke-linecap="round"/>
+  <path d="M168 104h166v92H168zM416 82h248v134H416zM746 104h286v92H746z" fill="#fff" fill-opacity=".06" stroke="#86EFAC" stroke-opacity=".24" stroke-width="2"/>
+  <path d="M514 142c0-32 24-58 54-58s54 26 54 58v36H514v-36Z" fill="#86EFAC" fill-opacity=".18"/>
+  <path d="M568 104c28 22 42 45 42 70h-84c0-25 14-48 42-70Z" fill="#86EFAC"/>
+  <path d="M198 134h108M198 164h78M782 134h190M782 164h132" stroke="#fff" stroke-opacity=".22" stroke-width="12" stroke-linecap="round"/>
+  <text x="94" y="260" fill="#F7F7F8" font-family="Arial, sans-serif" font-size="28" font-weight="800">MxF Skyblock</text>
+  <text x="344" y="260" fill="#B7F7CD" font-family="Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="4">ISLANDS / MINIONS / ECONOMY</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#071A12"/>
+      <stop offset=".55" stop-color="#101115"/>
+      <stop offset="1" stop-color="#0C2719"/>
+    </linearGradient>
+  </defs>
+</svg>

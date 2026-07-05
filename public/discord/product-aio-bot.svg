@@ -1,0 +1,19 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="300" rx="28" fill="#09090B"/>
+  <path d="M0 0h1200v300H0z" fill="url(#bg)"/>
+  <path d="M92 78h300v144H92zM438 78h214v144H438zM700 78h408v144H700z" stroke="#7DD3FC" stroke-opacity=".3" stroke-width="2"/>
+  <path d="M132 116h218M132 150h164M132 184h198M742 116h300M742 150h226M742 184h262" stroke="#fff" stroke-opacity=".22" stroke-width="12" stroke-linecap="round"/>
+  <path d="M506 110h78c22 0 40 18 40 40v26c0 22-18 40-40 40h-78c-22 0-40-18-40-40v-26c0-22 18-40 40-40Z" fill="#7DD3FC" fill-opacity=".18"/>
+  <path d="M496 148h98v34h-98zM520 126h50" stroke="#7DD3FC" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="524" cy="165" r="6" fill="#7DD3FC"/>
+  <circle cx="566" cy="165" r="6" fill="#7DD3FC"/>
+  <text x="92" y="260" fill="#F7F7F8" font-family="Arial, sans-serif" font-size="28" font-weight="800">MxF AIO Bot</text>
+  <text x="306" y="260" fill="#BAE6FD" font-family="Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="4">TICKETS / MODERATION / DASHBOARD</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#071521"/>
+      <stop offset=".55" stop-color="#101115"/>
+      <stop offset="1" stop-color="#0B1B2A"/>
+    </linearGradient>
+  </defs>
+</svg>

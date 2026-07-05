@@ -1,0 +1,18 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="300" rx="28" fill="#09090B"/>
+  <path d="M0 0h1200v300H0z" fill="url(#bg)"/>
+  <path d="M78 70h302v160H78z" fill="#fff" fill-opacity=".06"/>
+  <path d="M106 100h246M106 132h188M106 164h216M106 196h132" stroke="#fff" stroke-opacity=".22" stroke-width="12" stroke-linecap="round"/>
+  <path d="M506 74h220v152H506zM758 74h132v152H758zM922 74h198v152H922z" stroke="#FF6262" stroke-opacity=".35" stroke-width="2"/>
+  <path d="M574 121h84v58h-84zM794 110h60v82h-60zM972 124h98v44h-98z" fill="#FF6262" fill-opacity=".18"/>
+  <path d="M590 103l26 23 26-23v70l-26 24-26-24v-70Z" fill="#FF6262"/>
+  <text x="78" y="260" fill="#F7F7F8" font-family="Arial, sans-serif" font-size="28" font-weight="800">MxF Factions</text>
+  <text x="324" y="260" fill="#FF9A9A" font-family="Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="4">WAR CENTER / OUTPOSTS / ANALYTICS</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#21090D"/>
+      <stop offset=".52" stop-color="#101115"/>
+      <stop offset="1" stop-color="#2A1416"/>
+    </linearGradient>
+  </defs>
+</svg>

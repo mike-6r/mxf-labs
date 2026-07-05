@@ -1,0 +1,9 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="300" rx="28" fill="#0A0A0C"/>
+  <rect x="64" y="58" width="1072" height="184" rx="24" fill="#fff" fill-opacity=".045" stroke="#fff" stroke-opacity=".1"/>
+  <path d="M104 98h230M104 140h180M104 182h270" stroke="#FF9D9D" stroke-width="12" stroke-linecap="round" stroke-opacity=".55"/>
+  <path d="M728 72h264l92 92-92 92H728l92-92-92-92Z" fill="#FF6262" fill-opacity=".13"/>
+  <path d="M860 104v68l42 24 42-24v-68l-42-24-42 24Z" stroke="#F7F7F8" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M880 148l18 18 38-44" stroke="#FF6262" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="96" y="265" fill="#FF8D8D" font-family="Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="5">RULES / ACCESS / TRUST</text>
+</svg>

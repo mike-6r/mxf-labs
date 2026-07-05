@@ -1,0 +1,7 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="300" rx="28" fill="#0A0A0C"/>
+  <path d="M70 72h244v144H70V72ZM350 72h244v144H350V72ZM630 72h244v144H630V72ZM910 72h220v144H910V72Z" fill="#fff" fill-opacity=".045" stroke="#fff" stroke-opacity=".1"/>
+  <path d="M104 112h130M104 150h92M104 188h156M384 112h122M384 150h148M384 188h84M664 112h132M664 150h104M664 188h164M944 112h94M944 150h128M944 188h78" stroke="#FFB4B4" stroke-width="10" stroke-linecap="round" stroke-opacity=".62"/>
+  <circle cx="1015" cy="54" r="74" fill="#FF6262" fill-opacity=".12"/>
+  <text x="96" y="265" fill="#FF8D8D" font-family="Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="5">PRODUCT SUITE / COMMERCIAL SOFTWARE</text>
+</svg>

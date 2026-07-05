@@ -1,0 +1,7 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="300" rx="28" fill="#0A0A0C"/>
+  <path d="M100 84h300v132H100zM456 84h300v132H456zM812 84h288v132H812z" fill="#fff" fill-opacity=".045" stroke="#fff" stroke-opacity=".1"/>
+  <path d="M140 126h164M140 164h216M496 126h180M496 164h128M852 126h142M852 164h190" stroke="#FFB4B4" stroke-width="11" stroke-linecap="round" stroke-opacity=".56"/>
+  <circle cx="1054" cy="74" r="60" fill="#FF6262" fill-opacity=".12"/>
+  <text x="96" y="265" fill="#FF8D8D" font-family="Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="5">COMMUNITY / FEEDBACK / ROADMAP</text>
+</svg>

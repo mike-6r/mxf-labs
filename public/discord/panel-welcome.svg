@@ -1,0 +1,18 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="300" rx="28" fill="#0A0A0C"/>
+  <path d="M0 0h1200v300H0z" fill="url(#bg)"/>
+  <path d="M84 68h1032M84 232h1032" stroke="#fff" stroke-opacity=".08"/>
+  <path d="M88 84h180v132H88zM302 84h342v18H302zM302 128h258v14H302zM302 158h306v14H302zM302 188h184v14H302z" fill="#fff" fill-opacity=".08"/>
+  <circle cx="178" cy="150" r="48" fill="#FF6262" fill-opacity=".18"/>
+  <path d="M135 170v-42h15l28 30 28-30h15v42h-16v-19l-27 28-27-28v19h-16Z" fill="#F7F7F8"/>
+  <path d="M742 82h286c46 0 84 38 84 84v50H826c-46 0-84-38-84-84V82Z" fill="#FF6262" fill-opacity=".13"/>
+  <path d="M790 134h250M790 164h182M790 194h230" stroke="#FFB4B4" stroke-width="10" stroke-linecap="round" stroke-opacity=".55"/>
+  <text x="84" y="265" fill="#FF8D8D" font-family="Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="5">MXF LABS / SOFTWARE PLATFORM</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#16090B"/>
+      <stop offset=".52" stop-color="#101115"/>
+      <stop offset="1" stop-color="#281017"/>
+    </linearGradient>
+  </defs>
+</svg>

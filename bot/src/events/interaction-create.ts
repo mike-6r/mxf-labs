@@ -15,7 +15,7 @@ export async function onInteractionCreate(interaction: Interaction, client: Clie
   }
 
   if (interaction.isStringSelectMenu()) {
-    await handleSelectMenuInteraction(interaction);
+    await handleSelectMenuInteraction(interaction, services);
     return;
   }
 

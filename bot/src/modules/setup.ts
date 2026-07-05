@@ -4,6 +4,7 @@ import {
   ButtonStyle,
   ChannelType,
   PermissionFlagsBits,
+  StringSelectMenuBuilder,
   type CategoryChannel,
   type Guild,
   type GuildBasedChannel,
@@ -48,6 +49,15 @@ type SetupCategory = {
   name: string;
   kind: "public" | "support" | "product" | "customer" | "staff" | "log";
   modes: SetupMode[];
+};
+
+type SetupComponentRow = ActionRowBuilder<ButtonBuilder> | ActionRowBuilder<StringSelectMenuBuilder>;
+
+type SetupEmbedVisual = {
+  image?: string;
+  thumbnail?: string;
+  color?: number;
+  footer?: string;
 };
 
 export type SetupRepairTarget = "all" | "roles" | "channels";
@@ -383,17 +393,24 @@ async function sendSetupEmbedOnce(
   title: string,
   description: string,
   fields: Record<string, string | number | boolean> = {},
-  components: ActionRowBuilder<ButtonBuilder>[] = [],
+  components: SetupComponentRow[] = [],
+  visual: SetupEmbedVisual = {},
 ) {
   if (!channel?.isTextBased()) return;
   const existing = await channel.messages.fetch({ limit: 20 }).catch(() => null);
   const existingMessage = existing?.find((message) => message.author.id === channel.client.user?.id && message.embeds.some((embed) => embed.title === title));
+  const embed = mxfEmbed({
+    title,
+    description,
+    color: visual.color,
+    footer: visual.footer,
+    image: visual.image,
+    thumbnail: visual.thumbnail,
+  });
+  const fieldList = Object.entries(fields).map(([name, value]) => ({ name, value: String(value), inline: true }));
+  if (fieldList.length) embed.addFields(fieldList);
   const payload = {
-    embeds: [
-      mxfEmbed({ title, description }).addFields(
-        Object.entries(fields).map(([name, value]) => ({ name, value: String(value), inline: true })),
-      ),
-    ],
+    embeds: [embed],
     components,
   };
 
@@ -439,6 +456,27 @@ async function loadSetupContent(website?: WebsiteApiClient): Promise<SetupConten
   const response = await website.setupContent();
   if (!response.ok) return fallbackSetupContent();
   return { ...response.data.content, products: response.data.products };
+}
+
+function siteBase() {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.MXF_API_BASE_URL || "https://mxf-labs.com";
+  return baseUrl.replace(/\/$/, "");
+}
+
+function discordAsset(path: string) {
+  return `${siteBase()}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+function discordVisuals() {
+  return {
+    mark: discordAsset("/discord/mxf-mark.svg"),
+    welcome: discordAsset("/discord/panel-welcome.svg"),
+    rules: discordAsset("/discord/panel-rules.svg"),
+    tickets: discordAsset("/discord/panel-tickets.svg"),
+    products: discordAsset("/discord/panel-products.svg"),
+    verify: discordAsset("/discord/panel-verify.svg"),
+    community: discordAsset("/discord/panel-community.svg"),
+  };
 }
 
 function colorFromHex(value?: string | null) {
@@ -608,20 +646,23 @@ async function seedPremiumSetupEmbeds(input: {
     const fetched = id ? await input.guild.channels.fetch(id).catch(() => null) : null;
     return fetched?.isTextBased() ? (fetched as TextChannel) : null;
   };
+  const visuals = discordVisuals();
 
   await sendSetupEmbedOnce(
     await channel("welcome"),
     "Welcome To MxF Labs",
     [
-      input.content.welcomeEmbed,
-      "- Browse the product suite.",
-      "- Link your account.",
-      "- Open a private ticket when you need help.",
+      "Premium software, plugins, bots, licensing, and support in one connected workspace.",
+      "- Browse products and roadmap.",
+      "- Link your account for customer access.",
+      "- Open private support with the right context.",
     ].join("\n\n"),
     {
-      Platform: "Minecraft products, Discord tooling, licensing, support",
+      Platform: "Minecraft products, Discord tooling, licensing",
+      Access: "Account linking, support, product roles",
     },
     welcomeComponents(),
+    { image: visuals.welcome, thumbnail: visuals.mark },
   );
   await sendSetupEmbedOnce(
     await channel("rules"),
@@ -635,37 +676,51 @@ async function seedPremiumSetupEmbeds(input: {
     ].join("\n"),
     {},
     rulesComponents(),
+    { image: visuals.rules, thumbnail: visuals.mark },
   );
-  await sendSetupEmbedOnce(await channel("announcements"), "MxF Labs Announcements", "Official announcements, launch notes, maintenance windows, and customer-facing updates appear here.");
+  await sendSetupEmbedOnce(
+    await channel("announcements"),
+    "MxF Labs Announcements",
+    "Official launch notes, maintenance windows, availability updates, and customer-facing product news.",
+    {},
+    [],
+    { thumbnail: visuals.mark },
+  );
   await sendSetupEmbedOnce(
     await channel("productUpdates"),
     "MxF Labs Product Shop",
     (input.content.products.length ? input.content.products : productPanels)
       .slice(0, 4)
-      .map((panel) => `${panel.name} - ${panel.price} - ${panel.status}`)
+      .map((panel) => `**${panel.name}**\n${panel.price} / ${panel.status}`)
       .join("\n"),
     {},
     productShopComponents(),
+    { image: visuals.products, thumbnail: visuals.mark },
   );
-  await sendSetupEmbedOnce(await channel("changelog"), "Platform Changelog", "Release notes and product updates from MxF Labs.");
-  await sendSetupEmbedOnce(await channel("general"), "MxF Labs General", "Community discussion for the MxF Labs ecosystem.");
-  await sendSetupEmbedOnce(await channel("suggestions"), "Suggestions Panel", input.content.suggestionEmbed, {}, suggestionComponents());
-  await sendSetupEmbedOnce(await channel("polls"), "Polls Panel", "Product direction votes and community polls.");
-  await sendSetupEmbedOnce(await channel("giveaways"), "Giveaway Panel", input.content.giveawayEmbed, {}, giveawayPanelComponents());
-  await sendSetupEmbedOnce(await channel("supportInfo"), "Support Information", input.content.supportPanel);
+  await sendSetupEmbedOnce(await channel("changelog"), "Platform Changelog", "Release notes and product updates from MxF Labs.", {}, [], { thumbnail: visuals.mark });
+  await sendSetupEmbedOnce(await channel("general"), "MxF Labs General", "Community discussion for the MxF Labs ecosystem.", {}, [], { thumbnail: visuals.mark });
+  await sendSetupEmbedOnce(await channel("suggestions"), "Suggestions Panel", input.content.suggestionEmbed, {}, suggestionComponents(), { image: visuals.community, thumbnail: visuals.mark });
+  await sendSetupEmbedOnce(await channel("polls"), "Polls Panel", "Product direction votes and community polls.", {}, [], { thumbnail: visuals.mark });
+  await sendSetupEmbedOnce(await channel("giveaways"), "Giveaway Panel", input.content.giveawayEmbed, {}, giveawayPanelComponents(), { image: visuals.community, thumbnail: visuals.mark });
+  await sendSetupEmbedOnce(await channel("supportInfo"), "Support Information", input.content.supportPanel, {}, [], { thumbnail: visuals.mark });
   await sendSetupEmbedOnce(
     await channel("customerVerify"),
     "Customer Verify Panel",
-    "Link your MxF account, claim roles, and open the customer portal.",
+    "Link your account once. Product roles, ownership, downloads, license context, and support routing stay in sync from there.",
     {},
     customerVerifyComponents(),
+    { image: visuals.verify, thumbnail: visuals.mark },
   );
   await sendSetupEmbedOnce(
     await channel("createTicket"),
     "MxF Labs Support",
-    input.content.ticketPanel,
+    [
+      "Choose the path that best fits your request. Tickets are private, structured, and routed with enough context for faster answers.",
+      input.content.ticketPanel,
+    ].join("\n\n"),
     {},
     ticketPanelComponents(),
+    { image: visuals.tickets, thumbnail: visuals.mark },
   );
   await sendSetupEmbedOnce(
     await channel("faq"),
@@ -673,6 +728,7 @@ async function seedPremiumSetupEmbeds(input: {
     input.content.faqEmbed,
     {},
     faqComponents(),
+    { image: visuals.community, thumbnail: visuals.mark },
   );
   await sendSetupEmbedOnce(await channel("customerChat"), "Customer Chat", "A clean customer-only space for product discussion.");
   await sendSetupEmbedOnce(await channel("downloadsInfo"), "Downloads Information", "Downloads live in the customer portal behind signed links.");
@@ -794,11 +850,17 @@ export async function applySetup(input: { guild: Guild; actorId: string; mode: S
   if (ticketPanelChannel?.isTextBased() && "send" in ticketPanelChannel) {
     const existingPanel = await ticketPanelChannel.messages.fetch({ limit: 20 }).catch(() => null);
     if (!existingPanel?.some((message) => message.author.id === input.guild.client.user?.id && message.components.length > 0 && message.embeds.some((embed) => embed.title === "MxF Labs Support"))) {
+      const visuals = discordVisuals();
       await ticketPanelChannel.send({
         embeds: [
           mxfEmbed({
             title: "MxF Labs Support",
-            description: setupContent.ticketPanel,
+            description: [
+              "Choose the path that best fits your request. Tickets are private, structured, and routed with enough context for faster answers.",
+              setupContent.ticketPanel,
+            ].join("\n\n"),
+            image: visuals.tickets,
+            thumbnail: visuals.mark,
           }),
         ],
         components: ticketPanelComponents(),
