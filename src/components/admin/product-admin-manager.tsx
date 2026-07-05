@@ -17,6 +17,22 @@ type ProductMedia = {
   showcaseCaptions?: string[];
 };
 
+type ProductDiscordConfig = {
+  enabled?: boolean;
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  bannerImage?: string;
+  artworkImage?: string;
+  thumbnailImage?: string;
+  accentColor?: string;
+  channelKey?: string;
+  visibility?: "public" | "customers" | "staff" | "hidden";
+  roleRequirement?: string;
+  features?: string[];
+  buttons?: ProductButton[];
+};
+
 type ProductDisplay = {
   layoutTemplate?: string;
   featured?: boolean;
@@ -40,6 +56,7 @@ type ProductDisplay = {
   detailSectionTitles?: Record<string, string>;
   featureCategories?: ProductFeatureCategory[];
   featurePaginationLimit?: number;
+  discord?: ProductDiscordConfig;
 };
 
 type ProductFeatureCategory = {
@@ -157,13 +174,26 @@ type Values = {
   detailSectionTitles: string;
   featureCategories: string;
   featurePaginationLimit: string;
+  discordEnabled: boolean;
+  discordTitle: string;
+  discordSubtitle: string;
+  discordDescription: string;
+  discordBannerImage: string;
+  discordArtworkImage: string;
+  discordThumbnailImage: string;
+  discordAccentColor: string;
+  discordChannelKey: string;
+  discordVisibility: string;
+  discordRoleRequirement: string;
+  discordFeatures: string;
+  discordButtonsText: string;
   buttonsText: string;
   seoTitle: string;
   seoDescription: string;
   seoImage: string;
 };
 
-const tabs = ["Basics", "Pricing", "Features", "Media", "Layout", "Detail UX", "Buttons", "Roadmap", "Docs", "License Rules", "SEO"];
+const tabs = ["Basics", "Pricing", "Features", "Media", "Layout", "Detail UX", "Discord", "Buttons", "Roadmap", "Docs", "License Rules", "SEO"];
 const statuses = [...PRODUCT_STATUS_OPTIONS];
 const currencies = ["USD", "EUR", "GBP", "CAD", "AUD"];
 const layoutTemplates = ["flagship", "compact", "coming-soon", "free", "infrastructure-api"];
@@ -172,6 +202,7 @@ const cardStyles = ["orbital", "minimal", "terminal", "stacked"];
 const heroStyles = ["constellation", "minimal", "terminal", "stacked", "image"];
 const progressPlacements = ["card", "hero", "detail", "hidden"];
 const buttonStyles = ["primary", "secondary", "ghost"];
+const discordVisibilities = ["public", "customers", "staff", "hidden"];
 const defaultDetailTabs = ["overview", "features", "showcase", "documentation", "licensing", "roadmap", "faq", "changelog"];
 const defaultDetailSectionOrder = ["overview", "features", "showcase", "documentation", "licensing", "roadmap", "faq"];
 
@@ -328,7 +359,23 @@ function valuesFromProduct(product?: ProductItem): Values {
     detailSectionTitles: {},
     featureCategories: [],
     featurePaginationLimit: 8,
+    discord: {
+      enabled: true,
+      title: "",
+      subtitle: "",
+      description: "",
+      bannerImage: "",
+      artworkImage: "",
+      thumbnailImage: "",
+      accentColor: "",
+      channelKey: "",
+      visibility: "public",
+      roleRequirement: "",
+      features: [],
+      buttons: [],
+    },
   });
+  const discord = display.discord || {};
   const seo = parseJsonObject<ProductSeo>(product?.seoJson, { title: "", description: "", image: "" });
 
   return {
@@ -388,6 +435,19 @@ function valuesFromProduct(product?: ProductItem): Values {
     detailSectionTitles: recordToText(display.detailSectionTitles),
     featureCategories: categoriesToText(display.featureCategories),
     featurePaginationLimit: String(display.featurePaginationLimit ?? 8),
+    discordEnabled: discord.enabled !== false,
+    discordTitle: discord.title || "",
+    discordSubtitle: discord.subtitle || "",
+    discordDescription: discord.description || "",
+    discordBannerImage: discord.bannerImage || "",
+    discordArtworkImage: discord.artworkImage || "",
+    discordThumbnailImage: discord.thumbnailImage || "",
+    discordAccentColor: discord.accentColor || display.accentColor || "#ff6262",
+    discordChannelKey: discord.channelKey || "",
+    discordVisibility: discordVisibilities.includes(discord.visibility || "") ? discord.visibility || "public" : "public",
+    discordRoleRequirement: discord.roleRequirement || "",
+    discordFeatures: Array.isArray(discord.features) ? discord.features.join("\n") : "",
+    discordButtonsText: buttonsToText(JSON.stringify(discord.buttons || [])),
     buttonsText: buttonsToText(product?.buttonsJson),
     seoTitle: seo.title || "",
     seoDescription: seo.description || "",
@@ -445,6 +505,21 @@ function toPayload(values: Values, override?: Partial<Values>) {
       detailSectionTitles: textToRecord(next.detailSectionTitles),
       featureCategories: textToFeatureCategories(next.featureCategories),
       featurePaginationLimit: next.featurePaginationLimit,
+      discord: {
+        enabled: next.discordEnabled,
+        title: next.discordTitle,
+        subtitle: next.discordSubtitle,
+        description: next.discordDescription,
+        bannerImage: next.discordBannerImage,
+        artworkImage: next.discordArtworkImage,
+        thumbnailImage: next.discordThumbnailImage,
+        accentColor: next.discordAccentColor,
+        channelKey: next.discordChannelKey,
+        visibility: next.discordVisibility,
+        roleRequirement: next.discordRoleRequirement,
+        features: splitList(next.discordFeatures),
+        buttons: textToButtons(next.discordButtonsText),
+      },
     },
     buttons: textToButtons(next.buttonsText),
     seo: {
@@ -894,6 +969,63 @@ function TabFields({
           onChange={(value) => update("featurePaginationLimit", value)}
           helper="How many features show before the Show all button. Recommended: 6-8."
         />
+      </div>
+    );
+  }
+
+  if (tab === "Discord") {
+    return (
+      <div className="grid gap-4 md:grid-cols-2">
+        <Toggle label="Enable Discord product panel" checked={values.discordEnabled} onChange={(checked) => update("discordEnabled", checked)} />
+        <Select label="Discord visibility" value={values.discordVisibility} options={discordVisibilities} onChange={(value) => update("discordVisibility", value)} />
+        <Field label="Panel title" value={values.discordTitle} onChange={(value) => update("discordTitle", value)} helper="Falls back to the product name when empty." />
+        <Field label="Panel subtitle" value={values.discordSubtitle} onChange={(value) => update("discordSubtitle", value)} helper="Short positioning line, such as Commercial Plugin." />
+        <TextArea
+          label="Discord description"
+          value={values.discordDescription}
+          onChange={(value) => update("discordDescription", value)}
+          className="md:col-span-2"
+          helper="Keep this short. Discord panels should market; the website documents."
+        />
+        <MediaField
+          label="Discord banner"
+          value={values.discordBannerImage}
+          slot="featuredImage"
+          canUpload={canUpload}
+          onChange={(value) => update("discordBannerImage", value)}
+          onUpload={uploadMedia}
+          helper="Wide optional banner. Relative paths are converted to the site URL by the bot."
+        />
+        <MediaField
+          label="Discord artwork"
+          value={values.discordArtworkImage}
+          slot="showcaseImages"
+          canUpload={canUpload}
+          onChange={(value) => update("discordArtworkImage", value)}
+          onUpload={uploadMedia}
+          helper="Optional square/hero artwork. The bot falls back gracefully when empty."
+        />
+        <MediaField
+          label="Discord thumbnail"
+          value={values.discordThumbnailImage}
+          slot="cardImage"
+          canUpload={canUpload}
+          onChange={(value) => update("discordThumbnailImage", value)}
+          onUpload={uploadMedia}
+          helper="Small logo or icon artwork."
+        />
+        <Field label="Discord accent color" value={values.discordAccentColor} onChange={(value) => update("discordAccentColor", value)} helper="Hex color. Falls back to product accent." />
+        <Field label="Discord channel key" value={values.discordChannelKey} onChange={(value) => update("discordChannelKey", value)} helper="Optional setup channel key. Example: mxfFactions." />
+        <Field label="Role requirement" value={values.discordRoleRequirement} onChange={(value) => update("discordRoleRequirement", value)} helper="Optional public note such as Verified Customer." />
+        <TextArea label="Discord feature bullets" value={values.discordFeatures} onChange={(value) => update("discordFeatures", value)} className="md:col-span-2" helper="One short bullet per line. Recommended: 3-4." />
+        <TextArea
+          label="Discord buttons"
+          value={values.discordButtonsText}
+          onChange={(value) => update("discordButtonsText", value)}
+          className="md:col-span-2"
+          helper="One per line: Label|/path-or-url|primary. Recommended labels: View Product, Documentation, Support, Waitlist."
+        />
+        {uploadStatus ? <p className="md:col-span-2 rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white/54">{uploadStatus}</p> : null}
       </div>
     );
   }

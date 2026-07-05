@@ -26,6 +26,32 @@ function parseList(value: string) {
   }
 }
 
+function parseObject(value: string) {
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed as Record<string, unknown> : {};
+  } catch {
+    return {};
+  }
+}
+
+function parseButtons(value: string) {
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed)
+      ? parsed
+          .map((item) => ({
+            label: typeof item?.label === "string" ? item.label : "",
+            href: typeof item?.href === "string" ? item.href : "",
+            style: typeof item?.style === "string" ? item.style : "secondary",
+          }))
+          .filter((item) => item.label && item.href)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function POST(request: Request) {
   const unauthorized = requireDiscordBot(request);
   if (unauthorized) return unauthorized;
@@ -40,6 +66,12 @@ export async function POST(request: Request) {
         name: true,
         shortDescription: true,
         featuresJson: true,
+        highlightedFeaturesJson: true,
+        buttonsJson: true,
+        mediaJson: true,
+        displayJson: true,
+        category: true,
+        icon: true,
         price: true,
         defaultActivationLimit: true,
         status: true,
@@ -67,9 +99,21 @@ export async function POST(request: Request) {
         betaTester: settings["discord.role.beta_tester_label"],
       },
     },
-    products: products.map((product) => ({
-      ...product,
-      features: parseList(product.featuresJson),
-    })),
+    products: products.map((product) => {
+      const display = parseObject(product.displayJson);
+      const media = parseObject(product.mediaJson);
+      const discord = parseObject(String(display.discord ? JSON.stringify(display.discord) : "{}"));
+      return {
+        ...product,
+        features: parseList(product.featuresJson),
+        highlightedFeatures: parseList(product.highlightedFeaturesJson),
+        buttons: parseButtons(product.buttonsJson),
+        media,
+        display,
+        discord,
+        category: product.category,
+        icon: product.icon,
+      };
+    }),
   });
 }

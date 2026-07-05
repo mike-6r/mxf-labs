@@ -45,7 +45,7 @@ async function main() {
   assert.ok(SETUP_CHANNELS.length >= 25, "setup channel catalog should include full platform channels");
   assert.ok(uniqueValues(SETUP_ROLES, (role) => role.name.toLowerCase()), "setup role names should be unique");
   assert.ok(uniqueValues(SETUP_CHANNELS, (channel) => `${channel.category}:${channel.name}`), "setup channels should be unique per category");
-  assert.deepEqual(SETUP_CATEGORIES.map((category) => category.name), ["INFORMATION", "COMMUNITY", "PRODUCTS", "SUPPORT", "CUSTOMER AREA", "STAFF", "LOGS", "ARCHIVED TICKETS"], "setup categories should match the production server map");
+  assert.deepEqual(SETUP_CATEGORIES.map((category) => category.name), ["INFORMATION", "COMMUNITY", "PRODUCTS", "SUPPORT", "CUSTOMERS", "STAFF", "LOGS", "ARCHIVED"], "setup categories should match the production server map");
   for (const roleName of ["MxF Owner", "MxF Admin", "MxF Developer", "MxF Support", "MxF Moderator", "MxF Customer", "Verified Customer", "MxF Factions Owner", "MxF Prisons Owner", "MxF Skyblock Owner", "MxF AIO Bot User", "Giveaway Ping", "Announcement Ping", "Update Ping", "Beta Tester"]) {
     assert.ok(SETUP_ROLES.some((role) => role.name === roleName), `setup role ${roleName} should exist`);
   }

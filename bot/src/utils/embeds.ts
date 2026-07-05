@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 
 export const MXF_COLORS = {
-  primary: 0x3df5c4,
+  primary: 0xff6262,
   blue: 0x66a3ff,
   warning: 0xffcf5a,
   danger: 0xff5f7a,
@@ -22,14 +22,19 @@ export function mxfEmbed(options: {
   description?: string;
   color?: number;
   footer?: string;
+  image?: string | null;
+  thumbnail?: string | null;
+  timestamp?: boolean;
 }) {
   const embed = new EmbedBuilder()
     .setColor(options.color ?? MXF_COLORS.primary)
     .setTitle(options.title)
-    .setTimestamp(new Date())
-    .setFooter({ text: options.footer || "MxF Labs Discord OS" });
+    .setFooter({ text: options.footer || "MxF Labs • Software Platform" });
 
   if (options.description) embed.setDescription(options.description);
+  if (options.image) embed.setImage(options.image);
+  if (options.thumbnail) embed.setThumbnail(options.thumbnail);
+  if (options.timestamp) embed.setTimestamp(new Date());
   return embed;
 }
 

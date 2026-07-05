@@ -155,10 +155,10 @@ const PRODUCTION_SETUP_CATEGORIES: SetupCategory[] = [
   { key: "community", name: "COMMUNITY", kind: "public", modes: STANDARD },
   { key: "products", name: "PRODUCTS", kind: "product", modes: STANDARD },
   { key: "support", name: "SUPPORT", kind: "support", modes: BASIC },
-  { key: "customerArea", name: "CUSTOMER AREA", kind: "customer", modes: STANDARD },
+  { key: "customerArea", name: "CUSTOMERS", kind: "customer", modes: STANDARD },
   { key: "staff", name: "STAFF", kind: "staff", modes: STANDARD },
   { key: "logs", name: "LOGS", kind: "log", modes: STANDARD },
-  { key: "archivedTickets", name: "ARCHIVED TICKETS", kind: "staff", modes: STANDARD },
+  { key: "archivedTickets", name: "ARCHIVED", kind: "staff", modes: STANDARD },
 ];
 
 const PRODUCTION_SETUP_CHANNELS: SetupChannel[] = [
@@ -441,23 +441,49 @@ async function loadSetupContent(website?: WebsiteApiClient): Promise<SetupConten
   return { ...response.data.content, products: response.data.products };
 }
 
+function colorFromHex(value?: string | null) {
+  if (!value) return undefined;
+  const normalized = value.trim().replace(/^#/, "");
+  if (!/^[0-9a-f]{6}$/i.test(normalized)) return undefined;
+  return Number.parseInt(normalized, 16);
+}
+
+function recordString(value: unknown, key: string) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return "";
+  const item = (value as Record<string, unknown>)[key];
+  return typeof item === "string" ? item : "";
+}
+
 function customizedProductPanel(panel: (typeof productPanels)[number], content: SetupContent) {
   const product = content.products.find((item) => item.slug === panel.slug);
   if (!product) {
     return { ...panel, summary: `${content.productPanel}\n\n${panel.summary}` };
   }
 
+  const discord = product.discord || {};
+  if (discord.enabled === false || discord.visibility === "hidden") return null;
+  const displayAccent = typeof product.display?.accentColor === "string" ? product.display.accentColor : "";
+  const mediaBanner = recordString(product.media, "featuredImage") || recordString(product.media, "heroImage");
+  const mediaThumbnail = recordString(product.media, "cardImage");
+  const configuredButtons = (discord.buttons?.length ? discord.buttons : product.buttons || [])
+    .map((button) => ({ label: button.label, href: button.href }))
+    .filter((button) => button.label && button.href);
+
   return {
     ...panel,
-    name: product.name || panel.name,
-    summary: `${content.productPanel}\n\n${product.shortDescription || panel.summary}`,
-    features: product.features.length ? product.features.slice(0, 5) : panel.features,
+    name: discord.title || product.name || panel.name,
+    subtitle: discord.subtitle || product.category || panel.subtitle,
+    summary: discord.description || product.shortDescription || panel.summary,
+    features: (discord.features?.length ? discord.features : product.highlightedFeatures?.length ? product.highlightedFeatures : product.features.length ? product.features : panel.features).slice(0, 4),
     price: product.price || panel.price,
-    activationLimit: product.defaultActivationLimit || panel.activationLimit,
     status: product.status || panel.status,
-    version: product.version || panel.version,
-    docsPath: product.documentationLink?.startsWith("/") ? product.documentationLink : panel.docsPath,
-    supportPath: product.supportLink?.startsWith("/") ? product.supportLink : panel.supportPath,
+    docsPath: product.documentationLink || panel.docsPath,
+    supportPath: product.supportLink || panel.supportPath,
+    category: product.category || panel.category,
+    accentColor: colorFromHex(discord.accentColor || displayAccent),
+    bannerImage: discord.bannerImage || discord.artworkImage || mediaBanner || panel.bannerImage,
+    thumbnailImage: discord.thumbnailImage || mediaThumbnail || panel.thumbnailImage,
+    buttons: configuredButtons.length ? configuredButtons : panel.buttons,
   };
 }
 
@@ -465,11 +491,15 @@ async function sendProductPanelOnce(channel: TextChannel | null | undefined, pan
   if (!channel?.isTextBased()) return;
   const existing = await channel.messages.fetch({ limit: 20 }).catch(() => null);
   const nextPanel = customizedProductPanel(panel, content);
+  if (!nextPanel) return;
   const payload = {
     embeds: [productPanelEmbed(nextPanel)],
     components: productPanelButtons(nextPanel),
   };
-  const existingMessage = existing?.find((message) => message.author.id === channel.client.user?.id && message.embeds.some((embed) => embed.footer?.text === "MxF Labs Product Panel" && embed.title === nextPanel.name));
+  const existingMessage = existing?.find((message) =>
+    message.author.id === channel.client.user?.id &&
+    message.embeds.some((embed) => embed.title === nextPanel.name || (["MxF Labs Product Panel", "MxF Labs"].includes(embed.footer?.text || "") && embed.title === panel.name)),
+  );
 
   if (existingMessage) {
     await existingMessage.edit(payload).catch(() => null);
@@ -584,12 +614,12 @@ async function seedPremiumSetupEmbeds(input: {
     "Welcome To MxF Labs",
     [
       input.content.welcomeEmbed,
-      "MxF Labs builds commercial Minecraft products, Discord tooling, licensing infrastructure, and custom software for serious server operators.",
-      "Start with the product catalog, link your account, then open a private ticket if you need help.",
+      "- Browse the product suite.",
+      "- Link your account.",
+      "- Open a private ticket when you need help.",
     ].join("\n\n"),
     {
-      Setup: input.mode,
-      Products: "Factions, Prisons, Skyblock, AIO Bot",
+      Platform: "Minecraft products, Discord tooling, licensing, support",
     },
     welcomeComponents(),
   );
@@ -610,23 +640,23 @@ async function seedPremiumSetupEmbeds(input: {
   await sendSetupEmbedOnce(
     await channel("productUpdates"),
     "MxF Labs Product Shop",
-    productPanels.map((panel) => `${panel.name} - ${panel.price} - ${panel.status}\n${panel.summary}`).join("\n\n"),
+    (input.content.products.length ? input.content.products : productPanels)
+      .slice(0, 4)
+      .map((panel) => `${panel.name} - ${panel.price} - ${panel.status}`)
+      .join("\n"),
     {},
     productShopComponents(),
   );
-  await sendSetupEmbedOnce(await channel("changelog"), "Platform Changelog", "Clean release summaries for website, bot, licensing, and support-system changes.");
-  await sendSetupEmbedOnce(await channel("general"), "MxF Labs General", "Customer discussion, product questions, and release chatter belong here. Use support tickets for private billing/license issues.");
+  await sendSetupEmbedOnce(await channel("changelog"), "Platform Changelog", "Release notes and product updates from MxF Labs.");
+  await sendSetupEmbedOnce(await channel("general"), "MxF Labs General", "Community discussion for the MxF Labs ecosystem.");
   await sendSetupEmbedOnce(await channel("suggestions"), "Suggestions Panel", input.content.suggestionEmbed, {}, suggestionComponents());
-  await sendSetupEmbedOnce(await channel("polls"), "Polls Panel", "Community polls, product direction votes, and release-priority feedback can be posted here by staff.");
+  await sendSetupEmbedOnce(await channel("polls"), "Polls Panel", "Product direction votes and community polls.");
   await sendSetupEmbedOnce(await channel("giveaways"), "Giveaway Panel", input.content.giveawayEmbed, {}, giveawayPanelComponents());
-  await sendSetupEmbedOnce(await channel("supportInfo"), "Support Information", input.content.supportPanel, {
-    ResponseTarget: "24-48 hours",
-    TicketPanel: "#create-ticket",
-  });
+  await sendSetupEmbedOnce(await channel("supportInfo"), "Support Information", input.content.supportPanel);
   await sendSetupEmbedOnce(
     await channel("customerVerify"),
     "Customer Verify Panel",
-    "Link your Discord account to MxF Labs so ownership, license access, product roles, and support context can sync from the website.",
+    "Link your MxF account, claim roles, and open the customer portal.",
     {},
     customerVerifyComponents(),
   );
@@ -644,9 +674,9 @@ async function seedPremiumSetupEmbeds(input: {
     {},
     faqComponents(),
   );
-  await sendSetupEmbedOnce(await channel("customerChat"), "Customer Chat", "Verified customers can discuss products, releases, configuration questions, and server operations here without exposing private account details.");
-  await sendSetupEmbedOnce(await channel("downloadsInfo"), "Downloads Information", "Downloads are delivered through the customer portal with signed temporary links. Never repost paid files or private builds.");
-  await sendSetupEmbedOnce(await channel("licenseHelp"), "License Help", "Use this area for general licensing guidance. Open a private ticket before sharing license keys, server IPs, HWIDs, or purchase details.", {}, faqComponents());
+  await sendSetupEmbedOnce(await channel("customerChat"), "Customer Chat", "A clean customer-only space for product discussion.");
+  await sendSetupEmbedOnce(await channel("downloadsInfo"), "Downloads Information", "Downloads live in the customer portal behind signed links.");
+  await sendSetupEmbedOnce(await channel("licenseHelp"), "License Help", "Need account or license help? Open a private ticket before sharing keys.", {}, faqComponents());
   for (const panel of productPanels) {
     await sendProductPanelOnce(await channel(panel.channelKey), panel, input.content);
   }

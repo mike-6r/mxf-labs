@@ -52,6 +52,27 @@ export type SetupContentResponse = {
     name: string;
     shortDescription: string;
     features: string[];
+    highlightedFeatures?: string[];
+    buttons?: Array<{ label: string; href: string; style?: string }>;
+    media?: Record<string, unknown>;
+    display?: Record<string, unknown>;
+    discord?: {
+      enabled?: boolean;
+      title?: string;
+      subtitle?: string;
+      description?: string;
+      bannerImage?: string;
+      artworkImage?: string;
+      thumbnailImage?: string;
+      accentColor?: string;
+      channelKey?: string;
+      visibility?: string;
+      roleRequirement?: string;
+      features?: string[];
+      buttons?: Array<{ label: string; href: string; style?: string }>;
+    };
+    category?: string;
+    icon?: string;
     price: string;
     defaultActivationLimit: number;
     status: string;

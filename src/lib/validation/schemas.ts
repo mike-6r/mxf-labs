@@ -45,6 +45,22 @@ const productButtonSchema = z.object({
   style: z.enum(["primary", "secondary", "ghost"]).default("secondary"),
 });
 
+const productDiscordSchema = z.object({
+  enabled: z.boolean().default(true),
+  title: z.string().trim().max(120).default(""),
+  subtitle: z.string().trim().max(140).default(""),
+  description: z.string().trim().max(500).default(""),
+  bannerImage: productMediaPathSchema,
+  artworkImage: productMediaPathSchema,
+  thumbnailImage: productMediaPathSchema,
+  accentColor: z.string().trim().max(40).default(""),
+  channelKey: z.string().trim().max(80).default(""),
+  visibility: z.enum(["public", "customers", "staff", "hidden"]).default("public"),
+  roleRequirement: z.string().trim().max(120).default(""),
+  features: listSchema.default([]),
+  buttons: z.array(productButtonSchema).default([]),
+});
+
 const productSectionTitlesSchema = z.preprocess((value) => {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
   return Object.fromEntries(
@@ -93,6 +109,21 @@ const productDisplaySchema = z.object({
   detailSectionTitles: productSectionTitlesSchema,
   featureCategories: z.array(productFeatureCategorySchema).default([]),
   featurePaginationLimit: z.coerce.number().int().min(1).max(30).default(8),
+  discord: productDiscordSchema.default({
+    enabled: true,
+    title: "",
+    subtitle: "",
+    description: "",
+    bannerImage: "",
+    artworkImage: "",
+    thumbnailImage: "",
+    accentColor: "",
+    channelKey: "",
+    visibility: "public",
+    roleRequirement: "",
+    features: [],
+    buttons: [],
+  }),
 });
 
 const productSeoSchema = z.object({
@@ -148,6 +179,21 @@ export const productSchema = z.object({
     detailSectionTitles: {},
     featureCategories: [],
     featurePaginationLimit: 8,
+    discord: {
+      enabled: true,
+      title: "",
+      subtitle: "",
+      description: "",
+      bannerImage: "",
+      artworkImage: "",
+      thumbnailImage: "",
+      accentColor: "",
+      channelKey: "",
+      visibility: "public",
+      roleRequirement: "",
+      features: [],
+      buttons: [],
+    },
   }),
   buttons: z.array(productButtonSchema).default([]),
   seo: productSeoSchema.default({ title: "", description: "", image: "" }),

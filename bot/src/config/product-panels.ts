@@ -6,23 +6,37 @@ export type ProductPanelConfig = {
   slug: string;
   channelKey: string;
   name: string;
+  subtitle?: string;
   summary: string;
-  audience: string;
   features: string[];
   price: string;
-  licenseType: string;
-  activationLimit: number;
   status: string;
-  version: string;
   docsPath: string;
   changelogPath: string;
   purchasePath: string;
   supportPath: string;
+  category?: string;
+  accentColor?: number;
+  bannerImage?: string;
+  thumbnailImage?: string;
+  buttons?: Array<{ label: string; href: string }>;
+  audience?: string;
+  licenseType?: string;
+  activationLimit?: number;
+  version?: string;
 };
 
 function siteUrl(path: string) {
+  if (/^https?:\/\//i.test(path)) return path;
   const baseUrl = botEnv.apiBaseUrl || "https://mxf-labs.com";
   return `${baseUrl.replace(/\/$/, "")}${path}`;
+}
+
+function mediaUrl(path?: string | null) {
+  if (!path) return undefined;
+  if (/^https?:\/\//i.test(path)) return path;
+  if (path.startsWith("/")) return siteUrl(path);
+  return undefined;
 }
 
 export const productPanels: ProductPanelConfig[] = [
@@ -97,42 +111,41 @@ export const productPanels: ProductPanelConfig[] = [
 ];
 
 export function productPanelEmbed(panel: ProductPanelConfig) {
-  return new EmbedBuilder()
-    .setColor(MXF_COLORS.primary)
+  const embed = new EmbedBuilder()
+    .setColor(panel.accentColor || MXF_COLORS.primary)
     .setTitle(panel.name)
-    .setDescription(panel.summary)
+    .setDescription([panel.subtitle, panel.summary].filter(Boolean).join("\n\n"))
     .addFields(
-      { name: "Who It Is For", value: panel.audience },
-      { name: "Key Features", value: panel.features.map((feature) => `- ${feature}`).join("\n") },
       { name: "Price", value: panel.price, inline: true },
-      { name: "License Type", value: panel.licenseType, inline: true },
-      { name: "Activation Limit", value: String(panel.activationLimit), inline: true },
       { name: "Status", value: panel.status, inline: true },
-      { name: "Version", value: panel.version, inline: true },
     )
-    .setTimestamp(new Date())
-    .setFooter({ text: "MxF Labs Product Panel" });
+    .setFooter({ text: "MxF Labs" });
+
+  if (panel.features.length) {
+    embed.addFields({ name: "Highlights", value: panel.features.slice(0, 4).map((feature) => `- ${feature}`).join("\n") });
+  }
+  const image = mediaUrl(panel.bannerImage);
+  const thumbnail = mediaUrl(panel.thumbnailImage);
+  if (image) embed.setImage(image);
+  if (thumbnail) embed.setThumbnail(thumbnail);
+  return embed;
 }
 
 export function productPanelButtons(panel: ProductPanelConfig) {
-  if (["Coming Soon", "In Development", "Planned", "Active Development"].includes(panel.status)) {
-    return [
-      new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder().setLabel("Product Page").setStyle(ButtonStyle.Link).setURL(siteUrl(`/products/${panel.slug}`)),
-        new ButtonBuilder().setLabel("Docs").setStyle(ButtonStyle.Link).setURL(siteUrl(panel.docsPath)),
-        new ButtonBuilder().setLabel("Support").setStyle(ButtonStyle.Link).setURL(siteUrl(panel.supportPath)),
-        new ButtonBuilder().setLabel("Notify Me").setStyle(ButtonStyle.Link).setURL(siteUrl(panel.purchasePath)),
-      ),
-    ];
-  }
+  const configured = panel.buttons?.length
+    ? panel.buttons
+    : [
+        { label: "View Product", href: `/products/${panel.slug}` },
+        { label: "Documentation", href: panel.docsPath },
+        { label: "Support", href: panel.supportPath },
+        { label: ["Coming Soon", "In Development", "Planned", "Active Development"].includes(panel.status) ? "Waitlist" : "Purchase", href: panel.purchasePath },
+      ];
 
   return [
     new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder().setLabel("Showcase").setStyle(ButtonStyle.Link).setURL(siteUrl(`/products/${panel.slug}`)),
-      new ButtonBuilder().setLabel("Documentation").setStyle(ButtonStyle.Link).setURL(siteUrl(panel.docsPath)),
-      new ButtonBuilder().setLabel("Purchase").setStyle(ButtonStyle.Link).setURL(siteUrl(panel.purchasePath)),
-      new ButtonBuilder().setLabel("Support").setStyle(ButtonStyle.Link).setURL(siteUrl(panel.supportPath)),
-      new ButtonBuilder().setLabel("Changelog").setStyle(ButtonStyle.Link).setURL(siteUrl(panel.changelogPath)),
+      ...configured.slice(0, 5).map((button) =>
+        new ButtonBuilder().setLabel(button.label).setStyle(ButtonStyle.Link).setURL(siteUrl(button.href)),
+      ),
     ),
   ];
 }
