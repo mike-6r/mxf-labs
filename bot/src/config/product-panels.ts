@@ -1,0 +1,148 @@
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
+import { botEnv } from "./env";
+import { MXF_COLORS } from "../utils/embeds";
+
+export type ProductPanelConfig = {
+  slug: string;
+  channelKey: string;
+  name: string;
+  summary: string;
+  audience: string;
+  features: string[];
+  price: string;
+  licenseType: string;
+  activationLimit: number;
+  status: string;
+  version: string;
+  docsPath: string;
+  changelogPath: string;
+  purchasePath: string;
+  supportPath: string;
+};
+
+function siteUrl(path: string) {
+  const baseUrl = botEnv.apiBaseUrl || "https://mxf-labs.com";
+  return `${baseUrl.replace(/\/$/, "")}${path}`;
+}
+
+export const productPanels: ProductPanelConfig[] = [
+  {
+    slug: "mxf-factions",
+    channelKey: "mxfFactions",
+    name: "MxF Factions",
+    summary: "The Ultimate Competitive Factions Platform for serious Minecraft servers.",
+    audience: "Server owners who want competitive factions gameplay, premium GUIs, analytics, war tooling, outposts, seasons, and long-term operations control.",
+    features: ["Operations Center", "War Center", "Outposts", "Analytics and intelligence", "Seasons", "Premium GUI experience"],
+    price: "$20",
+    licenseType: "Lifetime",
+    activationLimit: 3,
+    status: "In Development",
+    version: "1.0.0-dev",
+    docsPath: "/docs?query=MxF%20Factions",
+    changelogPath: "/changelog",
+    purchasePath: "/support?product=mxf-factions&intent=notify",
+    supportPath: "/support",
+  },
+  {
+    slug: "mxf-prisons",
+    channelKey: "mxfPrisons",
+    name: "MxF Prisons",
+    summary: "A planned premium prison platform for mining progression, prestige economies, events, gangs, and seasonal competition.",
+    audience: "Minecraft server owners planning rank, prestige, rebirth, tokens, mine automation, and high-performance mining loops.",
+    features: ["Auto Reset Mines", "Rank Progression", "Prestige", "Tokens", "Pickaxe Enchantments", "Leaderboards"],
+    price: "$20",
+    licenseType: "Lifetime",
+    activationLimit: 3,
+    status: "Planned",
+    version: "Roadmap",
+    docsPath: "/docs?product=mxf-prisons",
+    changelogPath: "/changelog",
+    purchasePath: "/support?product=mxf-prisons&intent=roadmap",
+    supportPath: "/support",
+  },
+  {
+    slug: "mxf-skyblock",
+    channelKey: "mxfSkyblock",
+    name: "MxF Skyblock",
+    summary: "A planned modern Skyblock platform for island growth, minions, missions, automation, economy, and seasonal leaderboards.",
+    audience: "Server owners planning island progression, economy, automation, co-op play, missions, and seasonal competition.",
+    features: ["Island Creation", "Island Upgrades", "Missions", "Minions", "Generators", "Leaderboards"],
+    price: "$20",
+    licenseType: "Lifetime",
+    activationLimit: 3,
+    status: "Planned",
+    version: "Roadmap",
+    docsPath: "/docs?product=mxf-skyblock",
+    changelogPath: "/changelog",
+    purchasePath: "/support?product=mxf-skyblock&intent=roadmap",
+    supportPath: "/support",
+  },
+  {
+    slug: "mxf-aio-bot",
+    channelKey: "mxfAioBot",
+    name: "MxF AIO Bot",
+    summary: "A free modular all-in-one Discord platform for tickets, applications, moderation, verification, automation, analytics, and web dashboard integration.",
+    audience: "Communities and customers who need a connected Discord operating system for support and product workflows.",
+    features: ["Tickets", "Applications", "Moderation", "Verification", "AutoMod", "Web Dashboard"],
+    price: "Free",
+    licenseType: "Free",
+    activationLimit: 1,
+    status: "Active Development",
+    version: "0.1.0",
+    docsPath: "/docs?product=mxf-aio-bot",
+    changelogPath: "/changelog",
+    purchasePath: "/support?product=mxf-aio-bot",
+    supportPath: "/support",
+  },
+];
+
+export function productPanelEmbed(panel: ProductPanelConfig) {
+  return new EmbedBuilder()
+    .setColor(MXF_COLORS.primary)
+    .setTitle(panel.name)
+    .setDescription(panel.summary)
+    .addFields(
+      { name: "Who It Is For", value: panel.audience },
+      { name: "Key Features", value: panel.features.map((feature) => `- ${feature}`).join("\n") },
+      { name: "Price", value: panel.price, inline: true },
+      { name: "License Type", value: panel.licenseType, inline: true },
+      { name: "Activation Limit", value: String(panel.activationLimit), inline: true },
+      { name: "Status", value: panel.status, inline: true },
+      { name: "Version", value: panel.version, inline: true },
+    )
+    .setTimestamp(new Date())
+    .setFooter({ text: "MxF Labs Product Panel" });
+}
+
+export function productPanelButtons(panel: ProductPanelConfig) {
+  if (["Coming Soon", "In Development", "Planned", "Active Development"].includes(panel.status)) {
+    return [
+      new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder().setLabel("Product Page").setStyle(ButtonStyle.Link).setURL(siteUrl(`/products/${panel.slug}`)),
+        new ButtonBuilder().setLabel("Docs").setStyle(ButtonStyle.Link).setURL(siteUrl(panel.docsPath)),
+        new ButtonBuilder().setLabel("Support").setStyle(ButtonStyle.Link).setURL(siteUrl(panel.supportPath)),
+        new ButtonBuilder().setLabel("Notify Me").setStyle(ButtonStyle.Link).setURL(siteUrl(panel.purchasePath)),
+      ),
+    ];
+  }
+
+  return [
+    new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder().setLabel("Showcase").setStyle(ButtonStyle.Link).setURL(siteUrl(`/products/${panel.slug}`)),
+      new ButtonBuilder().setLabel("Documentation").setStyle(ButtonStyle.Link).setURL(siteUrl(panel.docsPath)),
+      new ButtonBuilder().setLabel("Purchase").setStyle(ButtonStyle.Link).setURL(siteUrl(panel.purchasePath)),
+      new ButtonBuilder().setLabel("Support").setStyle(ButtonStyle.Link).setURL(siteUrl(panel.supportPath)),
+      new ButtonBuilder().setLabel("Changelog").setStyle(ButtonStyle.Link).setURL(siteUrl(panel.changelogPath)),
+    ),
+  ];
+}
+
+export function productPanelBySlug(slugOrName: string) {
+  const normalized = slugOrName
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-|-$/g, "");
+  return productPanels.find((panel) => panel.slug === normalized || panel.name.toLowerCase() === slugOrName.trim().toLowerCase());
+}

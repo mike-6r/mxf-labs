@@ -1,0 +1,812 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id              String          @id @default(cuid())
+  email           String          @unique
+  name            String          @default("MxF Admin")
+  passwordHash    String
+  role            String          @default("OWNER")
+  permissionsJson String          @default("[]")
+  isActive        Boolean         @default(true)
+  sessions        AdminSession[]
+  assignedTickets SupportTicket[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model AdminSession {
+  id          String    @id @default(cuid())
+  tokenHash   String    @unique
+  adminUserId String
+  adminUser   AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+}
+
+model Product {
+  id                      String                   @id @default(cuid())
+  name                    String
+  slug                    String                   @unique
+  shortDescription        String
+  fullDescription         String                   @default("")
+  featuresJson            String                   @default("[]")
+  highlightedFeaturesJson String                   @default("[]")
+  tagsJson                String                   @default("[]")
+  featureIconsJson        String                   @default("[]")
+  techStackJson           String                   @default("[]")
+  faqJson                 String                   @default("[]")
+  roadmapJson             String                   @default("[]")
+  screenshotsJson         String                   @default("[]")
+  licenseRulesJson        String                   @default("[]")
+  mediaJson               String                   @default("{}")
+  displayJson             String                   @default("{}")
+  buttonsJson             String                   @default("[]")
+  seoJson                 String                   @default("{}")
+  price                   String                   @default("Contact for pricing")
+  priceCents              Int                      @default(0)
+  currency                String                   @default("USD")
+  defaultActivationLimit  Int                      @default(3)
+  category                String                   @default("Product")
+  version                 String                   @default("0.1.0")
+  changelogJson           String                   @default("[]")
+  documentationLink       String?
+  supportLink             String?
+  purchaseButtonText      String                   @default("Learn More")
+  icon                    String                   @default("PackageCheck")
+  visible                 Boolean                  @default(true)
+  status                  String                   @default("Coming Soon")
+  orders                  Order[]
+  licenses                License[]
+  supportTickets          SupportTicket[]
+  discordServers          DiscordServer[]
+  documentation           DocumentationArticle[]
+  changelogEntries        ChangelogEntry[]
+  releases                ProductRelease[]
+  downloads               ProductDownload[]
+  licenseValidations      LicenseValidation[]
+  productViews            ProductView[]
+  suspiciousFlags         SuspiciousActivityFlag[]
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+}
+
+model Project {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  category        String
+  description     String
+  techStackJson   String   @default("[]")
+  status          String   @default("Concept")
+  previewLink     String?
+  repositoryLabel String?
+  caseStudy       String   @default("")
+  featured        Boolean  @default(false)
+  visible         Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Announcement {
+  id         String   @id @default(cuid())
+  title      String
+  body       String
+  type       String   @default("General")
+  visibility String   @default("Public")
+  pinned     Boolean  @default(false)
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model SupportTicket {
+  id               String              @id @default(cuid())
+  ticketNumber     String              @unique
+  customerId       String?
+  customer         Customer?           @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  assignedAdminId  String?
+  assignedAdmin    AdminUser?          @relation(fields: [assignedAdminId], references: [id], onDelete: SetNull)
+  name             String
+  email            String
+  discordUsername  String?
+  relatedProductId String?
+  relatedProduct   Product?            @relation(fields: [relatedProductId], references: [id], onDelete: SetNull)
+  relatedLicenseId String?
+  relatedLicense   License?            @relation(fields: [relatedLicenseId], references: [id], onDelete: SetNull)
+  priority         String              @default("Normal")
+  status           String              @default("Open")
+  subject          String
+  message          String
+  attachmentName   String?
+  attachmentsJson  String              @default("[]")
+  internalNotes    String              @default("")
+  notes            SupportTicketNote[]
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+}
+
+model SupportTicketNote {
+  id        String        @id @default(cuid())
+  ticketId  String
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author    String        @default("Admin")
+  body      String
+  internal  Boolean       @default(true)
+  createdAt DateTime      @default(now())
+}
+
+model ContactSubmission {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  service     String
+  budget      String
+  description String
+  status      String   @default("Unread")
+  notes       String   @default("")
+  leadStage   String   @default("New")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Customer {
+  id                  String                   @id @default(cuid())
+  name                String
+  email               String                   @unique
+  discordId           String?                  @unique
+  discordUsername     String?
+  discordGlobalName   String?
+  discordAvatar       String?
+  discordEmail        String?
+  discordLinkedAt     DateTime?
+  discordLastSyncedAt DateTime?
+  discordSyncStatus   String                   @default("Not Linked")
+  notes               String                   @default("")
+  sessions            CustomerSession[]
+  orders              Order[]
+  invoices            Invoice[]
+  licenses            License[]
+  supportTickets      SupportTicket[]
+  discordServers      DiscordServer[]
+  downloads           DownloadEvent[]
+  downloadTokens      DownloadToken[]
+  notifications       CustomerNotification[]
+  activityLogs        CustomerActivity[]
+  loginEvents         CustomerLoginEvent[]
+  paymentEvents       PaymentEvent[]
+  suspiciousFlags     SuspiciousActivityFlag[]
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+}
+
+model CustomerSession {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+}
+
+model Order {
+  id               String         @id @default(cuid())
+  customerId       String?
+  customer         Customer?      @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  productId        String?
+  product          Product?       @relation(fields: [productId], references: [id], onDelete: SetNull)
+  status           String         @default("Pending")
+  amountCents      Int            @default(0)
+  taxCents         Int            @default(0)
+  currency         String         @default("USD")
+  provider         String         @default("Manual")
+  providerOrderId  String?
+  purchaseIntentId String?
+  checkoutUrl      String?
+  couponCode       String?
+  discountCents    Int            @default(0)
+  notes            String         @default("")
+  paymentEvents    PaymentEvent[]
+  refunds          Refund[]
+  invoice          Invoice?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model License {
+  id                  String                   @id @default(cuid())
+  key                 String                   @unique
+  productId           String?
+  product             Product?                 @relation(fields: [productId], references: [id], onDelete: SetNull)
+  customerId          String?
+  customer            Customer?                @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  status              String                   @default("Active")
+  licenseType         String                   @default("Lifetime")
+  expirationDate      DateTime?
+  blacklisted         Boolean                  @default(false)
+  blacklistedAt       DateTime?
+  transferCount       Int                      @default(0)
+  resetCount          Int                      @default(0)
+  lastTransferredAt   DateTime?
+  lastResetAt         DateTime?
+  minimumVersion      String?
+  allowedVersionsJson String                   @default("[]")
+  maxActivations      Int                      @default(1)
+  currentActivations  Int                      @default(0)
+  lastValidatedAt     DateTime?
+  notes               String                   @default("")
+  activations         LicenseActivation[]
+  validations         LicenseValidation[]
+  supportTickets      SupportTicket[]
+  discordServers      DiscordServer[]
+  suspiciousFlags     SuspiciousActivityFlag[]
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+}
+
+model LicenseActivation {
+  id              String   @id @default(cuid())
+  licenseId       String
+  license         License  @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+  deviceId        String
+  instanceId      String
+  discordId       String?
+  ipAddress       String?
+  country         String?
+  productVersion  String?
+  status          String   @default("Active")
+  activationCount Int      @default(1)
+  firstSeenAt     DateTime @default(now())
+  lastSeenAt      DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([licenseId, deviceId, instanceId])
+}
+
+model LicenseValidation {
+  id             String   @id @default(cuid())
+  licenseId      String?
+  license        License? @relation(fields: [licenseId], references: [id], onDelete: SetNull)
+  productId      String?
+  product        Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  key            String
+  result         String
+  reason         String
+  deviceId       String?
+  instanceId     String?
+  discordId      String?
+  ipAddress      String?
+  country        String?
+  productVersion String?
+  createdAt      DateTime @default(now())
+}
+
+model DiscordServer {
+  id               String    @id @default(cuid())
+  serverId         String    @unique
+  serverName       String
+  ownerDiscordId   String
+  linkedCustomerId String?
+  linkedCustomer   Customer? @relation(fields: [linkedCustomerId], references: [id], onDelete: SetNull)
+  linkedLicenseId  String?
+  linkedLicense    License?  @relation(fields: [linkedLicenseId], references: [id], onDelete: SetNull)
+  productId        String?
+  product          Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  lastSyncedAt     DateTime?
+}
+
+model PaymentEvent {
+  id               String    @id @default(cuid())
+  provider         String
+  providerEventId  String?
+  eventType        String
+  processingStatus String    @default("Received")
+  orderId          String?
+  order            Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  customerId       String?
+  customer         Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  payloadJson      String    @default("{}")
+  createdAt        DateTime  @default(now())
+  processedAt      DateTime?
+
+  @@unique([provider, providerEventId])
+}
+
+model Refund {
+  id               String   @id @default(cuid())
+  orderId          String
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider         String
+  providerRefundId String?
+  amountCents      Int      @default(0)
+  status           String   @default("Pending")
+  reason           String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Coupon {
+  id             String    @id @default(cuid())
+  code           String    @unique
+  description    String    @default("")
+  discountType   String    @default("Percent")
+  discountValue  Int       @default(0)
+  active         Boolean   @default(true)
+  maxRedemptions Int?
+  redeemedCount  Int       @default(0)
+  expiresAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model ProductRelease {
+  id          String            @id @default(cuid())
+  productId   String
+  product     Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  version     String
+  title       String
+  notes       String            @default("")
+  releaseType String            @default("Release")
+  status      String            @default("Draft")
+  isLatest    Boolean           @default(false)
+  publishedAt DateTime?
+  downloads   ProductDownload[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@unique([productId, version])
+}
+
+model ProductDownload {
+  id              String          @id @default(cuid())
+  productId       String
+  product         Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  releaseId       String?
+  release         ProductRelease? @relation(fields: [releaseId], references: [id], onDelete: SetNull)
+  filename        String
+  fileType        String          @default("Other")
+  storageKey      String          @unique
+  fileSize        Int             @default(0)
+  checksum        String?
+  version         String
+  visible         Boolean         @default(true)
+  requiresLicense Boolean         @default(true)
+  tokens          DownloadToken[]
+  downloadEvents  DownloadEvent[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model DownloadEvent {
+  id         String           @id @default(cuid())
+  customerId String?
+  customer   Customer?        @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  downloadId String?
+  download   ProductDownload? @relation(fields: [downloadId], references: [id], onDelete: SetNull)
+  tokenId    String?
+  token      DownloadToken?   @relation(fields: [tokenId], references: [id], onDelete: SetNull)
+  ipAddress  String?
+  userAgent  String?
+  status     String           @default("Allowed")
+  createdAt  DateTime         @default(now())
+}
+
+model DownloadToken {
+  id             String          @id @default(cuid())
+  tokenHash      String          @unique
+  customerId     String?
+  customer       Customer?       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  downloadId     String
+  download       ProductDownload @relation(fields: [downloadId], references: [id], onDelete: Cascade)
+  ipAddress      String?
+  userAgent      String?
+  expiresAt      DateTime
+  usedAt         DateTime?
+  createdAt      DateTime        @default(now())
+  downloadEvents DownloadEvent[]
+}
+
+model DocumentationArticle {
+  id             String   @id @default(cuid())
+  title          String
+  slug           String   @unique
+  category       String   @default("Guide")
+  excerpt        String   @default("")
+  bodyMarkdown   String   @default("")
+  version        String   @default("1.0.0")
+  productId      String?
+  productVersion String?
+  product        Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  visible        Boolean  @default(true)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model ChangelogEntry {
+  id             String   @id @default(cuid())
+  title          String
+  slug           String   @unique
+  type           String   @default("Update")
+  body           String   @default("")
+  productId      String?
+  product        Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  releaseVersion String?
+  publishedAt    DateTime @default(now())
+  visible        Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model CustomerNotification {
+  id         String    @id @default(cuid())
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  title      String
+  body       String
+  type       String    @default("General")
+  readAt     DateTime?
+  createdAt  DateTime  @default(now())
+}
+
+model CustomerActivity {
+  id         String    @id @default(cuid())
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String
+  entityId   String?
+  metadata   String    @default("{}")
+  createdAt  DateTime  @default(now())
+}
+
+model CustomerLoginEvent {
+  id         String    @id @default(cuid())
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  provider   String    @default("Discord")
+  ipAddress  String?
+  userAgent  String?
+  country    String?
+  status     String    @default("Success")
+  createdAt  DateTime  @default(now())
+}
+
+model ProductView {
+  id        String   @id @default(cuid())
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  source    String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
+
+model SuspiciousActivityFlag {
+  id         String    @id @default(cuid())
+  severity   String    @default("Review")
+  reason     String
+  status     String    @default("Open")
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  licenseId  String?
+  license    License?  @relation(fields: [licenseId], references: [id], onDelete: SetNull)
+  productId  String?
+  product    Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+  metadata   String    @default("{}")
+  reviewedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model PlatformSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String   @default("")
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+}
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  actorEmail String?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   String   @default("{}")
+  createdAt  DateTime @default(now())
+}
+
+model Invoice {
+  id            String    @id @default(cuid())
+  invoiceNumber String    @unique
+  orderId       String    @unique
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  customerId    String?
+  customer      Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  amountCents   Int       @default(0)
+  taxCents      Int       @default(0)
+  totalCents    Int       @default(0)
+  currency      String    @default("USD")
+  status        String    @default("Paid")
+  hostedUrl     String?
+  pdfUrl        String?
+  paidAt        DateTime?
+  dueAt         DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model EmailDelivery {
+  id                String    @id @default(cuid())
+  template          String
+  toEmail           String
+  subject           String
+  status            String    @default("Queued")
+  providerMessageId String?
+  error             String?
+  metadata          String    @default("{}")
+  sentAt            DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  description String   @default("")
+  enabled     Boolean  @default(false)
+  scope       String   @default("Global")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model BotGuildConfig {
+  id                       String    @id @default(cuid())
+  guildId                  String    @unique
+  guildName                String    @default("")
+  setupMode                String    @default("Not Configured")
+  ownerId                  String?
+  logChannelId             String?
+  modLogChannelId          String?
+  ticketCategoryId         String?
+  ticketPanelChannelId     String?
+  supportRoleIdsJson       String    @default("[]")
+  adminRoleIdsJson         String    @default("[]")
+  customerRoleId           String?
+  verifiedCustomerRoleId   String?
+  premiumSupportRoleId     String?
+  betaTesterRoleId         String?
+  productRoleMapJson       String    @default("{}")
+  logChannelIdsJson        String    @default("{}")
+  announcementChannelId    String?
+  giveawayChannelId        String?
+  suggestionChannelId      String?
+  welcomeChannelId         String?
+  automodEnabled           Boolean   @default(true)
+  automodConfigJson        String    @default("{}")
+  ticketConfigJson         String    @default("{}")
+  licensingConfigJson      String    @default("{}")
+  botCreatedRoleIdsJson    String    @default("[]")
+  botCreatedChannelIdsJson String    @default("[]")
+  setupPlanJson            String    @default("{}")
+  websiteSyncStatus        String    @default("Not Synced")
+  lastSyncedAt             DateTime?
+  setupCompleted           Boolean   @default(false)
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+}
+
+model BotModerationCase {
+  id              String   @id @default(cuid())
+  caseNumber      String   @unique
+  guildId         String
+  moderatorId     String
+  targetId        String
+  action          String
+  reason          String   @default("No reason provided")
+  durationSeconds Int?
+  evidenceJson    String   @default("[]")
+  status          String   @default("Open")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([guildId, targetId])
+}
+
+model BotWarning {
+  id          String   @id @default(cuid())
+  guildId     String
+  userId      String
+  moderatorId String
+  reason      String   @default("No reason provided")
+  caseId      String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([guildId, userId])
+}
+
+model BotTicket {
+  id                String                @id @default(cuid())
+  ticketNumber      String                @unique
+  guildId           String
+  channelId         String?
+  requesterId       String
+  assignedStaffId   String?
+  websiteTicketId   String?
+  customerDiscordId String?
+  productSlug       String?
+  licenseKey        String?
+  type              String                @default("General Support")
+  priority          String                @default("Normal")
+  status            String                @default("Open")
+  subject           String                @default("Support Request")
+  closeReason       String?
+  messages          BotTicketMessage[]
+  transcripts       BotTicketTranscript[]
+  openedAt          DateTime              @default(now())
+  closedAt          DateTime?
+  updatedAt         DateTime              @updatedAt
+
+  @@index([guildId, requesterId])
+  @@index([status, priority])
+}
+
+model BotTicketMessage {
+  id             String    @id @default(cuid())
+  ticketId       String
+  ticket         BotTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId       String
+  content        String
+  attachmentJson String    @default("[]")
+  internal       Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+}
+
+model BotTicketTranscript {
+  id          String    @id @default(cuid())
+  ticketId    String
+  ticket      BotTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  generatedBy String
+  storageKey  String?
+  body        String    @default("")
+  createdAt   DateTime  @default(now())
+}
+
+model BotGiveaway {
+  id                 String             @id @default(cuid())
+  guildId            String
+  channelId          String?
+  messageId          String?            @unique
+  createdById        String
+  prize              String
+  status             String             @default("Active")
+  winnerCount        Int                @default(1)
+  endsAt             DateTime
+  requirementsJson   String             @default("{}")
+  winnersJson        String             @default("[]")
+  websiteProductSlug String?
+  entries            BotGiveawayEntry[]
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([guildId, status])
+}
+
+model BotGiveawayEntry {
+  id         String      @id @default(cuid())
+  giveawayId String
+  giveaway   BotGiveaway @relation(fields: [giveawayId], references: [id], onDelete: Cascade)
+  userId     String
+  createdAt  DateTime    @default(now())
+
+  @@unique([giveawayId, userId])
+}
+
+model BotSuggestion {
+  id               String   @id @default(cuid())
+  guildId          String
+  channelId        String?
+  messageId        String?  @unique
+  authorId         String
+  title            String
+  body             String
+  productCategory  String   @default("General")
+  status           String   @default("Pending")
+  staffNote        String?
+  upvotes          Int      @default(0)
+  downvotes        Int      @default(0)
+  websiteRoadmapId String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([guildId, status])
+}
+
+model BotLog {
+  id           String   @id @default(cuid())
+  guildId      String?
+  actorId      String?
+  action       String
+  area         String
+  targetId     String?
+  severity     String   @default("Info")
+  metadataJson String   @default("{}")
+  createdAt    DateTime @default(now())
+
+  @@index([guildId, area])
+  @@index([createdAt])
+}
+
+model BotSyncQueue {
+  id          String    @id @default(cuid())
+  guildId     String?
+  eventType   String
+  payloadJson String    @default("{}")
+  status      String    @default("Queued")
+  attempts    Int       @default(0)
+  lastError   String?
+  runAfter    DateTime  @default(now())
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status, runAfter])
+}
+
+model BotCachedCustomer {
+  id                String   @id @default(cuid())
+  discordId         String   @unique
+  email             String?
+  name              String?
+  ownedProductsJson String   @default("[]")
+  licensesJson      String   @default("[]")
+  rawJson           String   @default("{}")
+  lastSyncedAt      DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model BotCachedLicense {
+  id              String   @id @default(cuid())
+  licenseKey      String   @unique
+  discordId       String?
+  productSlug     String?
+  status          String   @default("Unknown")
+  activationCount Int      @default(0)
+  maxActivations  Int      @default(1)
+  rawJson         String   @default("{}")
+  lastSyncedAt    DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model BotHeartbeat {
+  id               String    @id @default(cuid())
+  botId            String    @default("mxf-labs-bot")
+  status           String    @default("Unknown")
+  guildCount       Int       @default(0)
+  commandCount     Int       @default(0)
+  latencyMs        Int       @default(0)
+  websiteApiStatus String    @default("Unknown")
+  licenseApiStatus String    @default("Unknown")
+  lastSyncAt       DateTime?
+  version          String?
+  metadataJson     String    @default("{}")
+  createdAt        DateTime  @default(now())
+
+  @@index([botId, createdAt])
+}

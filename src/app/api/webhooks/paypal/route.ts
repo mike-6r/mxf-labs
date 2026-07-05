@@ -1,0 +1,51 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/db/prisma";
+import { fulfillPaidOrder } from "@/lib/payments/fulfillment";
+import { verifyPayPalWebhook } from "@/lib/payments/paypal";
+
+export async function POST(request: Request) {
+  const body = await request.json().catch(() => null);
+
+  if (!body) {
+    return NextResponse.json({ ok: false, message: "Invalid PayPal webhook." }, { status: 400 });
+  }
+
+  const verified = await verifyPayPalWebhook({ headers: request.headers, body });
+
+  if (!verified) {
+    return NextResponse.json({ ok: false, message: "Invalid PayPal signature." }, { status: 401 });
+  }
+
+  const event = body as {
+    id?: string;
+    event_type?: string;
+    resource?: { id?: string; supplementary_data?: { related_ids?: { order_id?: string } } };
+  };
+  const providerOrderId = event.resource?.supplementary_data?.related_ids?.order_id || event.resource?.id;
+  const order = providerOrderId
+    ? await prisma.order.findFirst({ where: { provider: "PayPal", providerOrderId } })
+    : null;
+
+  const paymentEvent = await prisma.paymentEvent.upsert({
+    where: { provider_providerEventId: { provider: "PayPal", providerEventId: event.id || crypto.randomUUID() } },
+    update: { payloadJson: JSON.stringify(body), eventType: event.event_type || "paypal.event" },
+    create: {
+      provider: "PayPal",
+      providerEventId: event.id || crypto.randomUUID(),
+      eventType: event.event_type || "paypal.event",
+      payloadJson: JSON.stringify(body),
+      orderId: order?.id,
+    },
+  });
+
+  if (order && ["PAYMENT.CAPTURE.COMPLETED", "CHECKOUT.ORDER.APPROVED"].includes(event.event_type || "")) {
+    await prisma.order.update({ where: { id: order.id }, data: { status: "Paid" } });
+    await fulfillPaidOrder(order.id);
+    await prisma.paymentEvent.update({
+      where: { id: paymentEvent.id },
+      data: { processingStatus: "Processed", processedAt: new Date() },
+    });
+  }
+
+  return NextResponse.json({ ok: true });
+}
