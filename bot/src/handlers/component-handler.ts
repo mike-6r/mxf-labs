@@ -28,9 +28,9 @@ import {
   type TicketPriority,
   type TicketTypeKey,
 } from "../modules/tickets";
-import { voteSuggestion } from "../modules/suggestions";
+import { createSuggestion, voteSuggestion } from "../modules/suggestions";
 import type { BotServices } from "../types/context";
-import { keyValueFields, mxfEmbed, statusEmbed } from "../utils/embeds";
+import { keyValueFields, mxfEmbed, statusEmbed, suggestionVoteComponents } from "../utils/embeds";
 import { setupConfirmComponents, setupWizardComponents } from "../utils/setup-components";
 import { prisma } from "../services/prisma";
 
@@ -231,6 +231,43 @@ async function handleAccountVerify(interaction: ButtonInteraction, services: Bot
   await interaction.editReply({ embeds: [statusEmbed("MxF Account Linked", "Your Discord account was synced. Product roles and ticket context can now update from website ownership data.")] });
 }
 
+async function togglePingRole(interaction: ButtonInteraction, roleKey?: string) {
+  if (!interaction.guild) {
+    await interaction.reply({ embeds: [statusEmbed("Server Required", "Ping roles can only be toggled inside the MxF Labs server.", "error")], flags: [MessageFlags.Ephemeral] });
+    return;
+  }
+
+  const roleNames: Record<string, string> = {
+    announcementPing: "Announcement Ping",
+    updatePing: "Update Ping",
+    giveawayAccess: "Giveaway Ping",
+  };
+  const roleName = roleNames[roleKey || ""];
+  const role = roleName ? interaction.guild.roles.cache.find((item) => item.name.toLowerCase() === roleName.toLowerCase()) : null;
+  if (!role) {
+    await interaction.reply({ embeds: [statusEmbed("Ping Role Missing", "Run `/setup repair target:roles` so the ping roles exist, then try again.", "warn")], flags: [MessageFlags.Ephemeral] });
+    return;
+  }
+
+  const member = await interaction.guild.members.fetch(interaction.user.id).catch(() => null);
+  if (!member) {
+    await interaction.reply({ embeds: [statusEmbed("Member Not Found", "I could not load your server member profile.", "warn")], flags: [MessageFlags.Ephemeral] });
+    return;
+  }
+
+  const removing = member.roles.cache.has(role.id);
+  if (removing) {
+    await member.roles.remove(role, "MxF Labs ping role toggle");
+  } else {
+    await member.roles.add(role, "MxF Labs ping role toggle");
+  }
+
+  await interaction.reply({
+    embeds: [statusEmbed(removing ? "Ping Disabled" : "Ping Enabled", `${role.name} was ${removing ? "removed from" : "added to"} your account.`)],
+    flags: [MessageFlags.Ephemeral],
+  });
+}
+
 export async function handleButtonInteraction(interaction: ButtonInteraction, services: BotServices) {
   const parts = interaction.customId.split(":");
   const [area, action, id] = parts;
@@ -307,14 +344,38 @@ export async function handleButtonInteraction(interaction: ButtonInteraction, se
       }
     }
 
-    if (area === "account" && action === "verify") {
+    if (area === "rules" && action === "accept") {
+      await interaction.reply({ embeds: [statusEmbed("Rules Accepted", "You are ready to use the MxF Labs Discord. Link your account to unlock customer access and product roles.")], flags: [MessageFlags.Ephemeral] });
+      return;
+    }
+
+    if (area === "account" && (action === "verify" || action === "sync-roles")) {
       await handleAccountVerify(interaction, services);
+      return;
+    }
+
+    if (area === "ping" && action === "toggle") {
+      await togglePingRole(interaction, id);
       return;
     }
 
     if (area === "giveaway" && action === "enter" && id) {
       await enterGiveaway(id, interaction.user.id);
       await interaction.reply({ embeds: [statusEmbed("Giveaway Entered", "Your entry was recorded.")], flags: [MessageFlags.Ephemeral] });
+      return;
+    }
+
+    if (area === "suggestion" && action === "submit") {
+      await interaction.showModal(
+        new ModalBuilder()
+          .setCustomId("suggestion:modal:new")
+          .setTitle("Submit Suggestion")
+          .addComponents(
+            inputRow(shortInput("title", "Suggestion title", true, "Improve product docs")),
+            inputRow(shortInput("category", "Category", false, "Factions, bot, website, support")),
+            inputRow(paragraphInput("body", "Suggestion", true, "What should MxF Labs add, improve, or change?")),
+          ),
+      );
       return;
     }
 
@@ -434,6 +495,38 @@ export async function handleModalSubmitInteraction(interaction: ModalSubmitInter
   const [area, action, id] = interaction.customId.split(":");
 
   try {
+    if (area === "suggestion" && action === "modal") {
+      if (!interaction.guild) {
+        await interaction.reply({ embeds: [statusEmbed("Server Required", "Suggestions must be submitted inside the MxF Labs server.", "error")], flags: [MessageFlags.Ephemeral] });
+        return;
+      }
+
+      await interaction.deferReply({ ephemeral: true });
+      const suggestion = await createSuggestion({
+        guildId: interaction.guild.id,
+        channelId: interaction.channelId || undefined,
+        authorId: interaction.user.id,
+        title: modalValue(interaction, "title") || "MxF Labs suggestion",
+        body: modalValue(interaction, "body") || "No suggestion body provided.",
+        productCategory: modalValue(interaction, "category") || "General",
+      });
+
+      if (interaction.channel?.isTextBased() && "send" in interaction.channel) {
+        await interaction.channel.send({
+          embeds: [
+            mxfEmbed({ title: suggestion.title, description: suggestion.body }).addFields(
+              { name: "Category", value: suggestion.productCategory || "General", inline: true },
+              { name: "Status", value: suggestion.status, inline: true },
+            ),
+          ],
+          components: suggestionVoteComponents(suggestion.id),
+        }).catch(() => null);
+      }
+
+      await interaction.editReply({ embeds: [statusEmbed("Suggestion Submitted", "Your suggestion was posted for review.")] });
+      return;
+    }
+
     if (area !== "ticket") return;
 
     if (action === "modal") {

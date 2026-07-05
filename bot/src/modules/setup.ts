@@ -37,7 +37,7 @@ type SetupChannel = {
   name: string;
   displayName?: string;
   category: string;
-  kind: "public" | "announcement" | "product" | "support" | "staff" | "log";
+  kind: "public" | "announcement" | "product" | "support" | "customer" | "staff" | "log";
   modes: SetupMode[];
   productSlug?: string;
   logKey?: string;
@@ -46,9 +46,11 @@ type SetupChannel = {
 type SetupCategory = {
   key: string;
   name: string;
-  kind: "public" | "support" | "product" | "staff" | "log";
+  kind: "public" | "support" | "product" | "customer" | "staff" | "log";
   modes: SetupMode[];
 };
+
+export type SetupRepairTarget = "all" | "roles" | "channels";
 
 export const REQUIRED_SETUP_PERMISSIONS = [
   { label: "Manage Roles", flag: PermissionFlagsBits.ManageRoles },
@@ -131,11 +133,11 @@ export const SETUP_CHANNELS: SetupChannel[] = [
 
 const PRODUCTION_SETUP_ROLES: SetupRole[] = [
   { key: "owner", name: "MxF Owner", color: 0xff6262, group: "staff", modes: BASIC },
-  { key: "admin", name: "Admin", color: 0xff8a8a, group: "staff", modes: BASIC },
-  { key: "developer", name: "Developer", color: 0x7dd3fc, group: "staff", modes: STANDARD },
-  { key: "support", name: "Support", color: 0x86efac, group: "staff", modes: BASIC },
-  { key: "moderator", name: "Moderator", color: 0xa78bfa, group: "staff", modes: STANDARD },
-  { key: "customer", name: "Customer", color: 0xf7b955, group: "customer", modes: BASIC },
+  { key: "admin", name: "MxF Admin", color: 0xff8a8a, group: "staff", modes: BASIC },
+  { key: "developer", name: "MxF Developer", color: 0x7dd3fc, group: "staff", modes: STANDARD },
+  { key: "support", name: "MxF Support", color: 0x86efac, group: "staff", modes: BASIC },
+  { key: "moderator", name: "MxF Moderator", color: 0xa78bfa, group: "staff", modes: STANDARD },
+  { key: "customer", name: "MxF Customer", color: 0xf7b955, group: "customer", modes: BASIC },
   { key: "verifiedCustomer", name: "Verified Customer", color: 0x5eead4, group: "customer", modes: BASIC },
   { key: "premiumSupport", name: "Premium Support", color: 0xfacc15, group: "customer", modes: STANDARD },
   { key: "betaTester", name: "Beta Tester", color: 0xa78bfa, group: "customer", modes: FULL },
@@ -153,7 +155,9 @@ const PRODUCTION_SETUP_CATEGORIES: SetupCategory[] = [
   { key: "community", name: "COMMUNITY", kind: "public", modes: STANDARD },
   { key: "products", name: "PRODUCTS", kind: "product", modes: STANDARD },
   { key: "support", name: "SUPPORT", kind: "support", modes: BASIC },
+  { key: "customerArea", name: "CUSTOMER AREA", kind: "customer", modes: STANDARD },
   { key: "staff", name: "STAFF", kind: "staff", modes: STANDARD },
+  { key: "logs", name: "LOGS", kind: "log", modes: STANDARD },
   { key: "archivedTickets", name: "ARCHIVED TICKETS", kind: "staff", modes: STANDARD },
 ];
 
@@ -175,14 +179,23 @@ const PRODUCTION_SETUP_CHANNELS: SetupChannel[] = [
   { key: "createTicket", name: "create-ticket", category: "support", kind: "support", modes: BASIC },
   { key: "supportInfo", name: "support-info", category: "support", kind: "support", modes: BASIC },
   { key: "customerVerify", name: "customer-verify", category: "support", kind: "support", modes: BASIC },
+  { key: "customerChat", name: "customer-chat", category: "customerArea", kind: "customer", modes: STANDARD },
+  { key: "downloadsInfo", name: "downloads-info", category: "customerArea", kind: "customer", modes: STANDARD },
+  { key: "licenseHelp", name: "license-help", category: "customerArea", kind: "customer", modes: STANDARD },
   { key: "staffChat", name: "staff-chat", category: "staff", kind: "staff", modes: STANDARD },
+  { key: "staffDashboard", name: "staff-dashboard", category: "staff", kind: "staff", modes: STANDARD },
   { key: "ticketLogs", name: "ticket-logs", category: "staff", kind: "staff", logKey: "ticket", modes: STANDARD },
-  { key: "moderationLogs", name: "moderation-logs", category: "staff", kind: "staff", logKey: "moderation", modes: STANDARD },
   { key: "licenseLogs", name: "license-logs", category: "staff", kind: "staff", logKey: "license", modes: STANDARD },
   { key: "paymentLogs", name: "payment-logs", category: "staff", kind: "staff", logKey: "payment", modes: STANDARD },
-  { key: "syncLogs", name: "sync-logs", category: "staff", kind: "staff", logKey: "sync", modes: STANDARD },
   { key: "suspiciousActivity", name: "suspicious-activity", category: "staff", kind: "staff", logKey: "suspicious", modes: STANDARD },
-  { key: "archiveIndex", name: "ticket-archive-index", category: "archivedTickets", kind: "staff", logKey: "archive", modes: STANDARD },
+  { key: "auditLogs", name: "audit-logs", category: "logs", kind: "log", logKey: "audit", modes: STANDARD },
+  { key: "automodLogs", name: "automod-logs", category: "logs", kind: "log", logKey: "automod", modes: STANDARD },
+  { key: "moderationLogs", name: "moderation-logs", category: "logs", kind: "log", logKey: "moderation", modes: STANDARD },
+  { key: "memberLogs", name: "member-logs", category: "logs", kind: "log", logKey: "member", modes: STANDARD },
+  { key: "messageLogs", name: "message-logs", category: "logs", kind: "log", logKey: "message", modes: STANDARD },
+  { key: "roleSyncLogs", name: "role-sync-logs", category: "logs", kind: "log", logKey: "roleSync", modes: STANDARD },
+  { key: "websiteSyncLogs", name: "website-sync-logs", category: "logs", kind: "log", logKey: "websiteSync", modes: STANDARD },
+  { key: "archiveIndex", name: "closed-ticket-logs", category: "archivedTickets", kind: "staff", logKey: "archive", modes: STANDARD },
 ];
 
 SETUP_ROLES.splice(0, SETUP_ROLES.length, ...PRODUCTION_SETUP_ROLES);
@@ -305,15 +318,30 @@ function adminRoleIds(roles: Map<string, Role | string>) {
     .filter(Boolean) as string[];
 }
 
+function roleId(roles: Map<string, Role | string>, key: string) {
+  const role = roles.get(key);
+  return typeof role === "string" ? role : role?.id;
+}
+
+function customerRoleIds(roles: Map<string, Role | string>) {
+  return ["customer", "verifiedCustomer", "premiumSupport", "betaTester"]
+    .map((key) => roleId(roles, key))
+    .filter(Boolean) as string[];
+}
+
+function productRoleIds(roles: Map<string, Role | string>) {
+  return SETUP_ROLES.filter((role) => role.productSlug)
+    .map((role) => roleId(roles, role.key))
+    .filter(Boolean) as string[];
+}
+
 function overwritesForChannel(guild: Guild, channel: SetupChannel, roles: Map<string, Role | string>): OverwriteResolvable[] {
   const everyone = guild.roles.everyone.id;
   const staffIds = staffRoleIds(roles);
   const adminIds = adminRoleIds(roles);
   const productRole = SETUP_ROLES.find((role) => role.productSlug === channel.productSlug);
-  const productRoleId = productRole ? roles.get(productRole.key) : null;
-  const resolvedProductRoleId = typeof productRoleId === "string" ? productRoleId : productRoleId?.id;
-  const customerRole = roles.get("customer");
-  const customerRoleId = typeof customerRole === "string" ? customerRole : customerRole?.id;
+  const resolvedProductRoleId = productRole ? roleId(roles, productRole.key) : undefined;
+  const customerIds = customerRoleIds(roles);
 
   if (channel.kind === "staff" || channel.kind === "log") {
     return [
@@ -323,10 +351,18 @@ function overwritesForChannel(guild: Guild, channel: SetupChannel, roles: Map<st
     ];
   }
 
+  if (channel.kind === "customer") {
+    return [
+      { id: everyone, deny: [PermissionFlagsBits.ViewChannel] },
+      ...customerIds.map((id) => ({ id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] })),
+      ...productRoleIds(roles).map((id) => ({ id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] })),
+      ...staffIds.map((id) => ({ id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] })),
+    ];
+  }
+
   if (channel.kind === "product") {
     return [
       { id: everyone, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] },
-      ...(customerRoleId ? [{ id: customerRoleId, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] }] : []),
       ...(resolvedProductRoleId ? [{ id: resolvedProductRoleId, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] }] : []),
       ...staffIds.map((id) => ({ id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] })),
     ];
@@ -467,7 +503,51 @@ function productShopComponents() {
           .setStyle(ButtonStyle.Link)
           .setURL(`${site}/products/${panel.slug}`),
       ),
-      new ButtonBuilder().setLabel("Support").setStyle(ButtonStyle.Link).setURL(`${site}/support`),
+      new ButtonBuilder().setLabel("Website").setStyle(ButtonStyle.Link).setURL(site),
+    ),
+  ];
+}
+
+function welcomeComponents() {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.MXF_API_BASE_URL || "https://mxf-labs.com";
+  const site = baseUrl.replace(/\/$/, "");
+  return [
+    new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder().setLabel("View Products").setStyle(ButtonStyle.Link).setURL(`${site}/products`),
+      new ButtonBuilder().setCustomId("account:verify").setLabel("Link Account").setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId("ticket:create:general").setLabel("Open Ticket").setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setLabel("Read Docs").setStyle(ButtonStyle.Link).setURL(`${site}/docs`),
+    ),
+  ];
+}
+
+function rulesComponents() {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.MXF_API_BASE_URL || "https://mxf-labs.com";
+  const site = baseUrl.replace(/\/$/, "");
+  return [
+    new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder().setCustomId("rules:accept").setLabel("Accept Rules").setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setLabel("Terms").setStyle(ButtonStyle.Link).setURL(`${site}/terms`),
+      new ButtonBuilder().setLabel("Privacy").setStyle(ButtonStyle.Link).setURL(`${site}/privacy`),
+    ),
+  ];
+}
+
+function suggestionComponents() {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.MXF_API_BASE_URL || "https://mxf-labs.com";
+  const site = baseUrl.replace(/\/$/, "");
+  return [
+    new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder().setCustomId("suggestion:submit").setLabel("Submit Suggestion").setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setLabel("View Roadmap").setStyle(ButtonStyle.Link).setURL(`${site}/products`),
+    ),
+  ];
+}
+
+function giveawayPanelComponents() {
+  return [
+    new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder().setCustomId("ping:toggle:giveawayAccess").setLabel("Toggle Giveaway Ping").setStyle(ButtonStyle.Secondary),
     ),
   ];
 }
@@ -477,10 +557,10 @@ function customerVerifyComponents() {
   const site = baseUrl.replace(/\/$/, "");
   return [
     new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder().setCustomId("account:verify").setLabel("Verify Customer").setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId("account:verify").setLabel("Link Account").setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId("account:sync-roles").setLabel("Claim Roles").setStyle(ButtonStyle.Primary),
       new ButtonBuilder().setLabel("Customer Portal").setStyle(ButtonStyle.Link).setURL(`${site}/portal`),
       new ButtonBuilder().setLabel("Licenses").setStyle(ButtonStyle.Link).setURL(`${site}/portal/licenses`),
-      new ButtonBuilder().setCustomId("ticket:create:license").setLabel("License Help").setStyle(ButtonStyle.Secondary),
     ),
   ];
 }
@@ -499,14 +579,32 @@ async function seedPremiumSetupEmbeds(input: {
     return fetched?.isTextBased() ? (fetched as TextChannel) : null;
   };
 
-  await sendSetupEmbedOnce(await channel("welcome"), "Welcome To MxF Labs", input.content.welcomeEmbed, {
-    Setup: input.mode,
-    Support: "Use #create-ticket",
-  });
+  await sendSetupEmbedOnce(
+    await channel("welcome"),
+    "Welcome To MxF Labs",
+    [
+      input.content.welcomeEmbed,
+      "MxF Labs builds commercial Minecraft products, Discord tooling, licensing infrastructure, and custom software for serious server operators.",
+      "Start with the product catalog, link your account, then open a private ticket if you need help.",
+    ].join("\n\n"),
+    {
+      Setup: input.mode,
+      Products: "Factions, Prisons, Skyblock, AIO Bot",
+    },
+    welcomeComponents(),
+  );
   await sendSetupEmbedOnce(
     await channel("rules"),
     "MxF Labs Rules",
-    "Keep support private, do not share license keys, do not post payment details, keep product feedback constructive, and use the correct ticket path for account or billing issues.",
+    [
+      "1. Keep support, licensing, and payment details inside private tickets.",
+      "2. Do not share license keys, customer files, private downloads, or account data.",
+      "3. Keep product feedback specific, respectful, and useful.",
+      "4. Use the correct ticket path for account, billing, bug, or custom work.",
+      "5. Staff decisions protect customers, products, and the MxF Labs ecosystem.",
+    ].join("\n"),
+    {},
+    rulesComponents(),
   );
   await sendSetupEmbedOnce(await channel("announcements"), "MxF Labs Announcements", "Official announcements, launch notes, maintenance windows, and customer-facing updates appear here.");
   await sendSetupEmbedOnce(
@@ -518,9 +616,9 @@ async function seedPremiumSetupEmbeds(input: {
   );
   await sendSetupEmbedOnce(await channel("changelog"), "Platform Changelog", "Clean release summaries for website, bot, licensing, and support-system changes.");
   await sendSetupEmbedOnce(await channel("general"), "MxF Labs General", "Customer discussion, product questions, and release chatter belong here. Use support tickets for private billing/license issues.");
-  await sendSetupEmbedOnce(await channel("suggestions"), "Suggestions Panel", input.content.suggestionEmbed);
+  await sendSetupEmbedOnce(await channel("suggestions"), "Suggestions Panel", input.content.suggestionEmbed, {}, suggestionComponents());
   await sendSetupEmbedOnce(await channel("polls"), "Polls Panel", "Community polls, product direction votes, and release-priority feedback can be posted here by staff.");
-  await sendSetupEmbedOnce(await channel("giveaways"), "Giveaway Panel", input.content.giveawayEmbed);
+  await sendSetupEmbedOnce(await channel("giveaways"), "Giveaway Panel", input.content.giveawayEmbed, {}, giveawayPanelComponents());
   await sendSetupEmbedOnce(await channel("supportInfo"), "Support Information", input.content.supportPanel, {
     ResponseTarget: "24-48 hours",
     TicketPanel: "#create-ticket",
@@ -546,17 +644,26 @@ async function seedPremiumSetupEmbeds(input: {
     {},
     faqComponents(),
   );
+  await sendSetupEmbedOnce(await channel("customerChat"), "Customer Chat", "Verified customers can discuss products, releases, configuration questions, and server operations here without exposing private account details.");
+  await sendSetupEmbedOnce(await channel("downloadsInfo"), "Downloads Information", "Downloads are delivered through the customer portal with signed temporary links. Never repost paid files or private builds.");
+  await sendSetupEmbedOnce(await channel("licenseHelp"), "License Help", "Use this area for general licensing guidance. Open a private ticket before sharing license keys, server IPs, HWIDs, or purchase details.", {}, faqComponents());
   for (const panel of productPanels) {
     await sendProductPanelOnce(await channel(panel.channelKey), panel, input.content);
   }
   await sendSetupEmbedOnce(await channel("staffChat"), "Staff Operations", "Coordinate support, moderation, license reviews, product releases, and customer escalations here.");
+  await sendSetupEmbedOnce(await channel("staffDashboard"), "Staff Dashboard", "Operational shortcuts for ticket flow, license reviews, payment checks, suspicious activity, website sync, and launch readiness.");
   await sendSetupEmbedOnce(await channel("ticketLogs"), "Ticket Logs", "Ticket creation, claims, transcripts, close events, and sync failures are logged here.");
-  await sendSetupEmbedOnce(await channel("moderationLogs"), "Moderation Logs", "Moderation cases, warnings, automod actions, and permission-sensitive events are tracked here.");
   await sendSetupEmbedOnce(await channel("licenseLogs"), "License Logs", "License create, lookup, reset, suspend, revoke, transfer, and sync actions are logged here with masked keys.");
-  await sendSetupEmbedOnce(await channel("syncLogs"), "Sync Logs", "Website, ownership, product role, and queue sync events appear here.");
   await sendSetupEmbedOnce(await channel("paymentLogs"), "Payment Logs", "Payment, manual order, refund, and checkout lifecycle events can be routed here.");
   await sendSetupEmbedOnce(await channel("suspiciousActivity"), "Suspicious Activity", "License sharing, unusual validations, account mismatch, and fraud-review flags are routed here.");
-  await sendSetupEmbedOnce(await channel("archiveIndex"), "Archived Tickets", "Closed tickets and transcript references belong here for staff review and customer history lookup.");
+  await sendSetupEmbedOnce(await channel("auditLogs"), "Audit Logs", "High-signal administrative changes and setup actions appear here.");
+  await sendSetupEmbedOnce(await channel("automodLogs"), "AutoMod Logs", "Automod triggers, blocked terms, spam checks, and review notes appear here.");
+  await sendSetupEmbedOnce(await channel("moderationLogs"), "Moderation Logs", "Moderation cases, warnings, locks, unlocks, and member safety actions are tracked here.");
+  await sendSetupEmbedOnce(await channel("memberLogs"), "Member Logs", "Member joins, leaves, onboarding status, account link events, and customer sync outcomes appear here.");
+  await sendSetupEmbedOnce(await channel("messageLogs"), "Message Logs", "Message moderation events and staff-reviewed content actions appear here.");
+  await sendSetupEmbedOnce(await channel("roleSyncLogs"), "Role Sync Logs", "Product ownership, customer verification, and ping-role sync events appear here.");
+  await sendSetupEmbedOnce(await channel("websiteSyncLogs"), "Website Sync Logs", "Website API sync, queued events, retry state, and outage recovery notes appear here.");
+  await sendSetupEmbedOnce(await channel("archiveIndex"), "Archived Tickets", "Closed ticket transcripts and log references belong here for staff review and customer history lookup.");
 }
 
 export async function applySetup(input: { guild: Guild; actorId: string; mode: SetupMode; website: WebsiteApiClient }) {
@@ -591,12 +698,13 @@ export async function applySetup(input: { guild: Guild; actorId: string; mode: S
   const categoryMap = new Map<string, string>();
   for (const categoryDefinition of setupCategoryDefinitions(input.mode)) {
     const existing = findCategory(input.guild, categoryDefinition);
+    const protectedCategory = categoryDefinition.kind === "customer" || categoryDefinition.kind === "staff" || categoryDefinition.kind === "log";
     if (existing) {
       categoryMap.set(categoryDefinition.key, existing.id);
-      if (categoryDefinition.kind === "staff" || categoryDefinition.kind === "log") {
+      if (protectedCategory) {
         await applyPermissionOverwrites(
           existing,
-          overwritesForChannel(input.guild, { key: categoryDefinition.key, name: categoryDefinition.name, category: categoryDefinition.key, kind: "staff", modes: input.mode === "full" ? FULL : STANDARD }, roleMap),
+          overwritesForChannel(input.guild, { key: categoryDefinition.key, name: categoryDefinition.name, category: categoryDefinition.key, kind: categoryDefinition.kind, modes: [input.mode] }, roleMap),
           reason,
         );
       }
@@ -608,8 +716,8 @@ export async function applySetup(input: { guild: Guild; actorId: string; mode: S
       type: ChannelType.GuildCategory,
       reason,
     };
-    if (categoryDefinition.kind === "staff" || categoryDefinition.kind === "log") {
-      categoryOptions.permissionOverwrites = overwritesForChannel(input.guild, { key: categoryDefinition.key, name: categoryDefinition.name, category: categoryDefinition.key, kind: "staff", modes: input.mode === "full" ? FULL : STANDARD }, roleMap);
+    if (protectedCategory) {
+      categoryOptions.permissionOverwrites = overwritesForChannel(input.guild, { key: categoryDefinition.key, name: categoryDefinition.name, category: categoryDefinition.key, kind: categoryDefinition.kind, modes: [input.mode] }, roleMap);
     }
     const category = await input.guild.channels.create(categoryOptions);
     categoryMap.set(categoryDefinition.key, category.id);
@@ -691,7 +799,7 @@ export async function applySetup(input: { guild: Guild; actorId: string; mode: S
     setupMode: input.mode,
     createdRoles,
     createdChannels,
-    ticketCategoryId: categoryMap.get("tickets") || categoryMap.get("support") || null,
+    ticketCategoryId: categoryMap.get("support") || null,
     ticketPanelChannelId: ticketPanelChannelId || null,
     logChannelIds,
     productRoleIds: productRoleMap,
@@ -711,9 +819,9 @@ export async function applySetup(input: { guild: Guild; actorId: string; mode: S
       setupMode: input.mode,
       ownerId: input.guild.ownerId,
       setupCompleted: true,
-      ticketCategoryId: categoryMap.get("tickets") || categoryMap.get("support") || null,
+      ticketCategoryId: categoryMap.get("support") || null,
       ticketPanelChannelId: ticketPanelChannelId || null,
-      logChannelId: channelMap.get("syncLogs") || channelMap.get("licenseLogs") || null,
+      logChannelId: channelMap.get("websiteSyncLogs") || channelMap.get("auditLogs") || channelMap.get("licenseLogs") || null,
       modLogChannelId: channelMap.get("moderationLogs") || channelMap.get("automodLogs") || null,
       suggestionChannelId: channelMap.get("suggestions") || null,
       giveawayChannelId: channelMap.get("giveaways") || null,
@@ -739,9 +847,9 @@ export async function applySetup(input: { guild: Guild; actorId: string; mode: S
       setupMode: input.mode,
       ownerId: input.guild.ownerId,
       setupCompleted: true,
-      ticketCategoryId: categoryMap.get("tickets") || categoryMap.get("support") || null,
+      ticketCategoryId: categoryMap.get("support") || null,
       ticketPanelChannelId: ticketPanelChannelId || null,
-      logChannelId: channelMap.get("syncLogs") || channelMap.get("licenseLogs") || null,
+      logChannelId: channelMap.get("websiteSyncLogs") || channelMap.get("auditLogs") || channelMap.get("licenseLogs") || null,
       modLogChannelId: channelMap.get("moderationLogs") || channelMap.get("automodLogs") || null,
       suggestionChannelId: channelMap.get("suggestions") || null,
       giveawayChannelId: channelMap.get("giveaways") || null,
@@ -789,7 +897,7 @@ export async function applySetup(input: { guild: Guild; actorId: string; mode: S
   return { ok: true as const, plan, config, createdRoles, createdChannels, websiteSync: websiteSync.ok ? "Synced" : "Queued" };
 }
 
-export async function repairSetup(input: { guild: Guild; actorId: string; mode: SetupMode; website: WebsiteApiClient }) {
+export async function repairSetup(input: { guild: Guild; actorId: string; mode: SetupMode; website: WebsiteApiClient; target?: SetupRepairTarget }) {
   return applySetup(input);
 }
 

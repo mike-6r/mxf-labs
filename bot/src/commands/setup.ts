@@ -117,7 +117,23 @@ export const setupCommands: CommandModule[] = [
           ),
       )
       .addSubcommand((command) => command.setName("status").setDescription("Show setup health and missing resources."))
-      .addSubcommand((command) => modeOption(command.setName("repair").setDescription("Repair missing roles, channels, panels, permissions, and website sync.")))
+      .addSubcommand((command) =>
+        modeOption(
+          command
+            .setName("repair")
+            .setDescription("Repair missing roles, channels, panels, permissions, and website sync.")
+            .addStringOption((option) =>
+              option
+                .setName("target")
+                .setDescription("Repair scope.")
+                .addChoices(
+                  { name: "All", value: "all" },
+                  { name: "Roles", value: "roles" },
+                  { name: "Channels", value: "channels" },
+                ),
+            ),
+        ),
+      )
       .addSubcommand((command) => modeOption(command.setName("refresh-content").setDescription("Refresh premium setup embeds, FAQ, and product panels.")))
       .addSubcommand((command) => modeOption(command.setName("refresh-panels").setDescription("Refresh premium product, ticket, FAQ, rules, and verify panels.")))
       .addSubcommand((command) => command.setName("sync-website").setDescription("Push setup config to the website."))
@@ -313,7 +329,8 @@ export const setupCommands: CommandModule[] = [
 
       if (subcommand === "repair") {
         await interaction.deferReply({ ephemeral: true });
-        const result = await repairSetup({ guild: interaction.guild, actorId: interaction.user.id, mode, website: services.website });
+        const target = (interaction.options.getString("target") || "all") as "all" | "roles" | "channels";
+        const result = await repairSetup({ guild: interaction.guild, actorId: interaction.user.id, mode, website: services.website, target });
         if (!result.ok) {
           await interaction.editReply({ embeds: [planEmbed(result.plan).setTitle("Repair Blocked")] });
           return;
@@ -323,6 +340,7 @@ export const setupCommands: CommandModule[] = [
             statusEmbed("Setup Repair Complete", "Repair completed without duplicating existing resources.").addFields(
               keyValueFields({
                 Mode: mode,
+                Target: target,
                 RolesCreated: result.createdRoles.length,
                 ChannelsCreated: result.createdChannels.length,
                 WebsiteSync: result.websiteSync,
