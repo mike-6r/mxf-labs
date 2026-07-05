@@ -11,3 +11,17 @@ export function safeRelativeRedirectTarget(value: string | null | undefined, fal
     return fallback;
   }
 }
+
+export function canonicalSiteUrl(requestUrl: string) {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+
+  if (configured) {
+    try {
+      return new URL(configured).origin;
+    } catch {
+      return new URL(requestUrl).origin;
+    }
+  }
+
+  return new URL(requestUrl).origin;
+}

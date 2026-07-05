@@ -3,13 +3,14 @@ import { NextResponse } from "next/server";
 import { createCustomerSession, setCustomerSessionCookie } from "@/lib/auth/customer";
 import { discordAvatarUrl, exchangeDiscordCode, fetchDiscordProfile } from "@/lib/auth/discord";
 import { DISCORD_OAUTH_STATE_COOKIE, verifyOAuthStateValue } from "@/lib/auth/session";
-import { safeRelativeRedirectTarget } from "@/lib/auth/redirect";
+import { canonicalSiteUrl, safeRelativeRedirectTarget } from "@/lib/auth/redirect";
 import { logCustomerActivity } from "@/lib/db/customer-activity";
 import { prisma } from "@/lib/db/prisma";
 import { sendTemplateEmail } from "@/lib/email/resend";
 import { requestIp } from "@/lib/request/ip";
 
 export async function GET(request: Request) {
+  const siteUrl = canonicalSiteUrl(request.url);
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
@@ -18,7 +19,7 @@ export async function GET(request: Request) {
   const statePayload = await verifyOAuthStateValue(state);
 
   if (!code || !state || !storedState || storedState !== state || !statePayload) {
-    return NextResponse.redirect(new URL("/portal?status=discord_state_invalid", request.url));
+    return NextResponse.redirect(new URL("/portal?status=discord_state_invalid", siteUrl));
   }
 
   try {
@@ -86,11 +87,11 @@ export async function GET(request: Request) {
     }
 
     const sessionValue = await createCustomerSession(customer);
-    const redirect = NextResponse.redirect(new URL(safeRelativeRedirectTarget(statePayload.returnTo, "/portal"), request.url));
+    const redirect = NextResponse.redirect(new URL(safeRelativeRedirectTarget(statePayload.returnTo, "/portal"), siteUrl));
     setCustomerSessionCookie(redirect, sessionValue);
     redirect.cookies.delete(DISCORD_OAUTH_STATE_COOKIE);
     return redirect;
   } catch {
-    return NextResponse.redirect(new URL("/portal?status=discord_oauth_failed", request.url));
+    return NextResponse.redirect(new URL("/portal?status=discord_oauth_failed", siteUrl));
   }
 }
