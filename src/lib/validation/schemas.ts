@@ -298,6 +298,43 @@ export const orderCreateSchema = z.object({
 
 export const orderUpdateSchema = orderCreateSchema.partial();
 
+export const documentationArticleSchema = z.object({
+  title: z.string().trim().min(2).max(160),
+  slug: slugSchema,
+  category: z.string().trim().min(1).max(80).default("Guide"),
+  excerpt: z.string().trim().max(600).default(""),
+  bodyMarkdown: z.string().max(50_000).default(""),
+  version: z.string().trim().min(1).max(40).default("1.0.0"),
+  productId: z.string().optional().or(z.literal("")),
+  productVersion: z.string().trim().max(80).optional().or(z.literal("")),
+  visible: z.boolean().default(true),
+  sortOrder: z.coerce.number().int().min(0).max(9999).default(0),
+});
+
+export const productReleaseSchema = z.object({
+  productId: z.string().min(1),
+  version: z.string().trim().min(1).max(80),
+  title: z.string().trim().min(2).max(160),
+  notes: z.string().max(20_000).default(""),
+  releaseType: z.enum(["Release", "Beta", "Patch", "Preview", "Hotfix", "Internal"]).default("Release"),
+  status: z.enum(["Draft", "Published", "Archived", "Private"]).default("Draft"),
+  isLatest: z.boolean().default(false),
+  publishedAt: z.string().optional().or(z.literal("")),
+});
+
+export const productDownloadSchema = z.object({
+  productId: z.string().min(1),
+  releaseId: z.string().optional().or(z.literal("")),
+  filename: z.string().trim().min(1).max(220),
+  fileType: z.enum(["JAR", "ZIP", "PDF", "JSON", "TXT", "Other"]).default("Other"),
+  storageKey: z.string().trim().min(1).max(500),
+  fileSize: z.coerce.number().int().min(0).max(5_000_000_000).default(0),
+  checksum: z.string().trim().max(180).optional().or(z.literal("")),
+  version: z.string().trim().min(1).max(80),
+  visible: z.boolean().default(true),
+  requiresLicense: z.boolean().default(true),
+});
+
 export const licenseValidationSchema = z.object({
   key: z.string().min(8).max(120),
   productSlug: z.string().optional(),
