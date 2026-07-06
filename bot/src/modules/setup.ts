@@ -61,6 +61,7 @@ type SetupEmbedVisual = {
 };
 
 export type SetupRepairTarget = "all" | "roles" | "channels";
+export type SetupResetOption = "config" | "channels" | "roles" | "panels" | "full";
 
 export const REQUIRED_SETUP_PERMISSIONS = [
   { label: "Manage Roles", flag: PermissionFlagsBits.ManageRoles },
@@ -1085,33 +1086,171 @@ export async function syncSetupRoles(input: { guild: Guild; website: WebsiteApiC
   return { checked, plannedAdds, plannedRemoves };
 }
 
-export async function resetSetup(input: { guild: Guild; actorId: string; option: "config" | "channels" | "roles" | "full" }) {
+function uniqueById<T extends { id: string }>(items: Array<T | null | undefined>) {
+  return [...new Map(items.filter(Boolean).map((item) => [item!.id, item!] as const)).values()];
+}
+
+function setupPanelTitles() {
+  return new Set([
+    "Welcome To MxF Labs",
+    "MxF Labs Rules",
+    "MxF Labs Announcements",
+    "MxF Labs Product Shop",
+    "Platform Changelog",
+    "MxF Labs General",
+    "Suggestions Panel",
+    "Polls Panel",
+    "Giveaway Panel",
+    "Support Information",
+    "Customer Verify Panel",
+    "MxF Labs Support",
+    "MxF Labs FAQ",
+    "Customer Chat",
+    "Downloads Information",
+    "License Help",
+    "Staff Operations",
+    "Staff Dashboard",
+    "Ticket Logs",
+    "License Logs",
+    "Payment Logs",
+    "Suspicious Activity",
+    "Audit Logs",
+    "AutoMod Logs",
+    "Moderation Logs",
+    "Member Logs",
+    "Message Logs",
+    "Role Sync Logs",
+    "Website Sync Logs",
+    "Archived Tickets",
+    ...productPanels.map((panel) => panel.name),
+  ]);
+}
+
+function setupChannelMatchesDefinition(channel: TextChannel, definition: SetupChannel, categories: SetupCategory[]) {
+  const channelNameMatches = normalizeSetupChannelName(channel.name) === normalizeSetupChannelName(definition.name);
+  if (!channelNameMatches) return false;
+
+  const parentName = channel.parent ? channel.parent.name.toLowerCase() : "";
+  const expectedCategory = categories.find((category) => category.key === definition.category);
+  const inExpectedCategory = Boolean(expectedCategory && parentName === expectedCategory.name.toLowerCase());
+  const setupTopic = (channel.topic || "").toLowerCase().includes("mxf labs") && (channel.topic || "").toLowerCase().includes("setup");
+
+  return inExpectedCategory || setupTopic;
+}
+
+async function collectSetupTextChannels(guild: Guild, trackedChannelIds: string[]) {
+  const definitions = setupChannelDefinitions("full");
+  const categories = setupCategoryDefinitions("full");
+  const tracked = await Promise.all(
+    trackedChannelIds.map(async (channelId) => {
+      const channel = await guild.channels.fetch(channelId).catch(() => null);
+      return channel?.type === ChannelType.GuildText ? (channel as TextChannel) : null;
+    }),
+  );
+  const named = definitions
+    .map((definition) =>
+      guild.channels.cache.find(
+        (channel) =>
+          channel.type === ChannelType.GuildText &&
+          setupChannelMatchesDefinition(channel as TextChannel, definition, categories),
+      ) as TextChannel | undefined,
+    )
+    .filter(Boolean) as TextChannel[];
+
+  return uniqueById([...tracked, ...named]);
+}
+
+function collectSetupCategories(guild: Guild, textChannels: TextChannel[], trackedChannelIds: string[]) {
+  const definitions = setupCategoryDefinitions("full");
+  const tracked = trackedChannelIds
+    .map((channelId) => guild.channels.cache.get(channelId))
+    .filter((channel): channel is CategoryChannel => channel?.type === ChannelType.GuildCategory);
+  const named = definitions
+    .map((definition) => findCategory(guild, definition))
+    .filter((category): category is CategoryChannel => Boolean(category))
+    .filter((category) => textChannels.some((channel) => channel.parentId === category.id) || category.name.startsWith("MXF ") || ["CUSTOMERS", "STAFF", "LOGS", "ARCHIVED", "PRODUCTS"].includes(category.name));
+
+  return uniqueById([...tracked, ...named]);
+}
+
+async function purgeSetupPanels(guild: Guild, trackedChannelIds: string[]) {
+  const titles = setupPanelTitles();
+  const channels = await collectSetupTextChannels(guild, trackedChannelIds);
+  let deletedPanels = 0;
+
+  for (const channel of channels) {
+    const messages = await channel.messages.fetch({ limit: 50 }).catch(() => null);
+    if (!messages) continue;
+    for (const message of messages.values()) {
+      const botAuthored = message.author.id === guild.client.user?.id;
+      if (!botAuthored) continue;
+      const brandedEmbed = message.embeds.some((embed) => {
+        const footer = embed.footer?.text || "";
+        return Boolean((embed.title && titles.has(embed.title)) || footer.includes("MxF Labs") || footer.includes("Product Panel"));
+      });
+      if (!brandedEmbed && !message.components.length) continue;
+      const deleted = await message.delete().then(() => true).catch(() => false);
+      if (deleted) deletedPanels += 1;
+    }
+  }
+
+  return deletedPanels;
+}
+
+async function deleteSetupChannels(guild: Guild, actorId: string, trackedChannelIds: string[]) {
+  const textChannels = await collectSetupTextChannels(guild, trackedChannelIds);
+  const categories = collectSetupCategories(guild, textChannels, trackedChannelIds);
+  let deletedChannels = 0;
+
+  for (const channel of textChannels) {
+    const deleted = await channel.delete(`MxF Labs setup reset by ${actorId}`).then(() => true).catch(() => false);
+    if (deleted) deletedChannels += 1;
+  }
+
+  for (const category of categories) {
+    const deleted = await category.delete(`MxF Labs setup reset by ${actorId}`).then(() => true).catch(() => false);
+    if (deleted) deletedChannels += 1;
+  }
+
+  return deletedChannels;
+}
+
+async function deleteSetupRoles(guild: Guild, actorId: string, trackedRoleIds: string[]) {
+  const roleNames = new Set(setupRoleDefinitions("full").map((role) => role.name.toLowerCase()));
+  const tracked = await Promise.all(trackedRoleIds.map((roleId) => guild.roles.fetch(roleId).catch(() => null)));
+  const named = guild.roles.cache.filter((role) => roleNames.has(role.name.toLowerCase())).map((role) => role);
+  const roles = uniqueById([...tracked, ...named]);
+  let deletedRoles = 0;
+
+  for (const role of roles) {
+    if (role.managed || !role.editable) continue;
+    const deleted = await role.delete(`MxF Labs setup reset by ${actorId}`).then(() => true).catch(() => false);
+    if (deleted) deletedRoles += 1;
+  }
+
+  return deletedRoles;
+}
+
+export async function resetSetup(input: { guild: Guild; actorId: string; option: SetupResetOption }) {
   const config = await prisma.botGuildConfig.findUnique({ where: { guildId: input.guild.id } });
-  if (!config) return { deletedChannels: 0, deletedRoles: 0, configReset: false };
+  if (!config) return { deletedChannels: 0, deletedRoles: 0, deletedPanels: 0, configReset: false };
 
   const trackedChannelIds = parseJson<string[]>(config.botCreatedChannelIdsJson, []);
   const trackedRoleIds = parseJson<string[]>(config.botCreatedRoleIdsJson, []);
   let deletedChannels = 0;
   let deletedRoles = 0;
+  let deletedPanels = 0;
+
+  if (input.option === "panels" || input.option === "channels" || input.option === "full") {
+    deletedPanels = await purgeSetupPanels(input.guild, trackedChannelIds);
+  }
 
   if (input.option === "channels" || input.option === "full") {
-    for (const channelId of trackedChannelIds) {
-      const channel = await input.guild.channels.fetch(channelId).catch(() => null);
-      if (channel) {
-        await channel.delete(`MxF Labs setup reset by ${input.actorId}`).catch(() => null);
-        deletedChannels += 1;
-      }
-    }
+    deletedChannels = await deleteSetupChannels(input.guild, input.actorId, trackedChannelIds);
   }
 
   if (input.option === "roles" || input.option === "full") {
-    for (const roleId of trackedRoleIds) {
-      const role = await input.guild.roles.fetch(roleId).catch(() => null);
-      if (role) {
-        await role.delete(`MxF Labs setup reset by ${input.actorId}`).catch(() => null);
-        deletedRoles += 1;
-      }
-    }
+    deletedRoles = await deleteSetupRoles(input.guild, input.actorId, trackedRoleIds);
   }
 
   await prisma.botGuildConfig.update({
@@ -1131,8 +1270,8 @@ export async function resetSetup(input: { guild: Guild; actorId: string; option:
       adminRoleIdsJson: "[]",
       productRoleMapJson: "{}",
       logChannelIdsJson: "{}",
-      botCreatedRoleIdsJson: input.option === "channels" ? config.botCreatedRoleIdsJson : "[]",
-      botCreatedChannelIdsJson: input.option === "roles" ? config.botCreatedChannelIdsJson : "[]",
+      botCreatedRoleIdsJson: input.option === "channels" || input.option === "panels" ? config.botCreatedRoleIdsJson : "[]",
+      botCreatedChannelIdsJson: input.option === "roles" || input.option === "panels" ? config.botCreatedChannelIdsJson : "[]",
       setupPlanJson: "{}",
       websiteSyncStatus: "Reset",
       lastSyncedAt: null,
@@ -1146,9 +1285,9 @@ export async function resetSetup(input: { guild: Guild; actorId: string; option:
       action: "reset setup wizard state",
       area: "Setup",
       severity: "Warning",
-      metadataJson: toJson({ option: input.option, deletedChannels, deletedRoles }),
+      metadataJson: toJson({ option: input.option, deletedChannels, deletedRoles, deletedPanels }),
     },
   });
 
-  return { deletedChannels, deletedRoles, configReset: true };
+  return { deletedChannels, deletedRoles, deletedPanels, configReset: true };
 }

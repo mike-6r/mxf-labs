@@ -12,6 +12,7 @@ import {
   refreshSetupContent,
   repairSetup,
   resetSetup,
+  type SetupResetOption,
   syncSetupRoles,
   syncSetupWebsite,
 } from "../modules/setup";
@@ -110,6 +111,7 @@ export const setupCommands: CommandModule[] = [
               .setRequired(true)
               .addChoices(
                 { name: "Config Only", value: "config" },
+                { name: "Delete Bot Setup Panels", value: "panels" },
                 { name: "Delete Bot-Created Channels", value: "channels" },
                 { name: "Delete Bot-Created Roles", value: "roles" },
                 { name: "Full Reset", value: "full" },
@@ -222,7 +224,7 @@ export const setupCommands: CommandModule[] = [
 
       if (subcommand === "reset") {
         const confirm = interaction.options.getString("confirm", true);
-        const option = interaction.options.getString("option", true) as "config" | "channels" | "roles" | "full";
+        const option = interaction.options.getString("option", true) as SetupResetOption;
         if (confirm !== "RESET") {
           await reply(interaction, { embeds: [statusEmbed("Confirmation Required", "Run `/setup reset confirm:RESET` to reset tracked setup state.", "warn")] }, { private: true });
           return;
@@ -232,9 +234,10 @@ export const setupCommands: CommandModule[] = [
           interaction,
           {
             embeds: [
-              statusEmbed("Setup Reset Complete", "Only tracked bot-created resources were eligible for deletion.").addFields(
+              statusEmbed("Setup Reset Complete", "Tracked resources and known MxF setup resources were cleaned up where the bot had permission.").addFields(
                 keyValueFields({
                   Option: option,
+                  DeletedPanels: result.deletedPanels,
                   DeletedChannels: result.deletedChannels,
                   DeletedRoles: result.deletedRoles,
                   ConfigReset: result.configReset ? "Yes" : "No",
