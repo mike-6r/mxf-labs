@@ -113,7 +113,7 @@ function warning(id: string, label: string, detail: string, severity: SecretRota
 }
 
 export async function getProductionReadiness() {
-  const [setup, contentMode, settings, demoCounts, products] = await Promise.all([
+  const [setup, contentMode, settings, demoCounts, products, twoFactorEnabledCount] = await Promise.all([
     getSetupStatus(),
     getContentMode(),
     getSettings(["legal.terms", "legal.privacy", "legal.refunds"]),
@@ -134,6 +134,12 @@ export async function getProductionReadiness() {
         },
       },
       orderBy: { updatedAt: "desc" },
+    }),
+    prisma.platformSetting.count({
+      where: {
+        key: { startsWith: "security.admin_2fa." },
+        value: { contains: "\"enabled\":true" },
+      },
     }),
   ]);
 
@@ -298,6 +304,9 @@ export async function getProductionReadiness() {
       : null,
     missingWebhookValues.length
       ? warning("webhook-values", "Webhook config missing", `${missingWebhookValues.join(", ")} still need production provider values.`)
+      : null,
+    twoFactorEnabledCount === 0
+      ? warning("admin-2fa", "Admin 2FA is not enabled", "Enable two-factor authentication from /admin/settings before launch.", "critical")
       : null,
   ].filter((item): item is SecretRotationWarning => Boolean(item));
 

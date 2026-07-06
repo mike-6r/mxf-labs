@@ -91,6 +91,7 @@ Before launch:
 8. Replace legal placeholder copy with final reviewed terms, privacy, and refund policy.
 9. Set `IONOS_DEPLOY_TARGET=vps` after choosing an IONOS VPS/Cloud server.
 10. Confirm `LOCAL_STORAGE_ROOT` is outside `/public` and outside the web server document root.
+11. Enable admin two-factor authentication from `/admin/settings` and store recovery codes offline.
 
 ## Production Verification
 

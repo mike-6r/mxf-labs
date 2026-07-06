@@ -15,6 +15,11 @@ Versioned API:
 - `POST /api/v1/licenses/activate`
 - `POST /api/v1/licenses/heartbeat`
 
+Admin security:
+
+- `GET /api/admin/security/2fa`
+- `POST /api/admin/security/2fa`
+
 Runtime licensing:
 
 - `POST /api/licenses/validate`

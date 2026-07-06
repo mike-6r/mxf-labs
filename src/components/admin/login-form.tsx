@@ -9,6 +9,7 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [twoFactorRequired, setTwoFactorRequired] = useState(false);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -22,13 +23,21 @@ export function LoginForm() {
       body: JSON.stringify({
         email: form.get("email"),
         password: form.get("password"),
+        twoFactorCode: form.get("twoFactorCode"),
       }),
     });
+    const result = await response.json().catch(() => null);
 
     setLoading(false);
 
-    if (!response.ok) {
-      setError("Invalid admin credentials.");
+    if (result?.twoFactorRequired) {
+      setTwoFactorRequired(true);
+      setError(response.ok ? "Enter your authenticator or recovery code." : result.message || "Invalid two-factor code.");
+      return;
+    }
+
+    if (!response.ok || !result?.ok) {
+      setError(result?.message || "Invalid admin credentials.");
       return;
     }
 
@@ -67,6 +76,18 @@ export function LoginForm() {
           className="h-12 rounded-md border border-white/10 bg-black/24 px-4 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#ff6262]/60"
         />
       </label>
+      {twoFactorRequired ? (
+        <label className="grid gap-2">
+          <span className="text-sm font-semibold text-white">Two-factor code</span>
+          <input
+            name="twoFactorCode"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            placeholder="123456 or recovery code"
+            className="h-12 rounded-md border border-white/10 bg-black/24 px-4 text-sm text-white outline-none transition placeholder:text-white/32 focus:border-[#ff6262]/60"
+          />
+        </label>
+      ) : null}
       <button
         type="submit"
         disabled={loading}
