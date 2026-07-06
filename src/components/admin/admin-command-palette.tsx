@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const commands = [
-  { label: "Dashboard", href: "/admin" },
-  { label: "Launch Wizard", href: "/admin/launch-wizard" },
+  { label: "Dashboard", href: "/admin/dashboard" },
+  { label: "Launch", href: "/admin/launch" },
   { label: "Customize", href: "/admin/customize" },
   { label: "Products", href: "/admin/products" },
   { label: "Projects", href: "/admin/projects" },
@@ -19,6 +19,7 @@ const commands = [
   { label: "Discord", href: "/admin/discord" },
   { label: "Emails", href: "/admin/emails" },
   { label: "Payments", href: "/admin/payments" },
+  { label: "Legal", href: "/admin/legal" },
   { label: "Downloads", href: "/admin/downloads" },
   { label: "Logs", href: "/admin/logs" },
   { label: "Audit Trail", href: "/admin/audit" },

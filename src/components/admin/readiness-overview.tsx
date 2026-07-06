@@ -33,8 +33,8 @@ export function ReadinessOverview({
           <p className="font-mono text-xs uppercase tracking-[0.18em] text-[#ff6262]">Readiness</p>
           <h2 className="mt-2 text-xl font-semibold text-white">{title}</h2>
         </div>
-        <Link href="/admin/launch-wizard" className="inline-flex min-h-10 w-fit items-center rounded-md border border-white/10 bg-white/[0.04] px-3 text-sm font-semibold text-white/68 transition hover:border-[#ff6262]/35 hover:text-white">
-          Open launch wizard
+        <Link href="/admin/launch" className="inline-flex min-h-10 w-fit items-center rounded-md border border-white/10 bg-white/[0.04] px-3 text-sm font-semibold text-white/68 transition hover:border-[#ff6262]/35 hover:text-white">
+          Open launch
         </Link>
       </div>
 

@@ -126,15 +126,23 @@ const sections: Array<{ id: string; title: string; description: string; fields: 
 export function CustomizeManager({
   settings,
   products,
+  initialSection,
+  allowedSections,
 }: {
   settings: Record<string, string>;
   products: ProductOption[];
+  initialSection?: string;
+  allowedSections?: string[];
 }) {
-  const [active, setActive] = useState(sections[0].id);
+  const visibleSections = useMemo(
+    () => (allowedSections?.length ? sections.filter((section) => allowedSections.includes(section.id)) : sections),
+    [allowedSections],
+  );
+  const [active, setActive] = useState(initialSection && visibleSections.some((section) => section.id === initialSection) ? initialSection : visibleSections[0]?.id || sections[0].id);
   const [values, setValues] = useState(settings);
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [dirty, setDirty] = useState(false);
-  const activeSection = sections.find((section) => section.id === active) || sections[0];
+  const activeSection = visibleSections.find((section) => section.id === active) || visibleSections[0] || sections[0];
 
   const productOptions = useMemo(
     () => products.map((product) => ({ label: product.name, value: product.slug })),
@@ -175,7 +183,7 @@ export function CustomizeManager({
     <div className="grid gap-6 xl:grid-cols-[16rem_1fr]">
       <aside className="surface h-fit rounded-lg p-3 xl:sticky xl:top-28">
         <div className="grid gap-1">
-          {sections.map((section) => (
+          {visibleSections.map((section) => (
             <button
               key={section.id}
               type="button"

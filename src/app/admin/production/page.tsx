@@ -26,10 +26,10 @@ export default async function AdminProductionPage() {
   const [production, readiness] = await Promise.all([getProductionReadiness(), getLaunchReadiness()]);
 
   const goLiveRequired = [
-    { label: "Brand complete", ready: readiness.areas.find((area) => area.id === "brand")?.status === "Complete", href: "/admin/launch-wizard" },
-    { label: "Homepage complete", ready: readiness.areas.find((area) => area.id === "homepage")?.status === "Complete", href: "/admin/launch-wizard" },
+    { label: "Brand complete", ready: readiness.areas.find((area) => area.id === "brand")?.status === "Complete", href: "/admin/launch" },
+    { label: "Homepage complete", ready: readiness.areas.find((area) => area.id === "homepage")?.status === "Complete", href: "/admin/launch" },
     { label: "At least one product published", ready: readiness.areas.find((area) => area.id === "products")?.status === "Complete", href: "/admin/products" },
-    { label: "Legal pages complete", ready: readiness.areas.find((area) => area.id === "legal")?.status === "Complete", href: "/admin/launch-wizard" },
+    { label: "Legal pages complete", ready: readiness.areas.find((area) => area.id === "legal")?.status === "Complete", href: "/admin/legal" },
     { label: "Payment provider configured", ready: readiness.areas.find((area) => area.id === "payments")?.status === "Complete", href: "/admin/production" },
     { label: "Email provider configured", ready: production.env.find((item) => item.key === "RESEND_API_KEY")?.status === "configured", href: "/admin/production" },
     { label: "Discord OAuth configured", ready: production.setup.statuses.find((item) => item.id === "discord-oauth")?.level === "ready", href: "/admin/production" },
@@ -39,7 +39,7 @@ export default async function AdminProductionPage() {
     { label: "Downloads tested", ready: readiness.areas.find((area) => area.id === "downloads")?.status === "Complete", href: "/admin/downloads" },
     { label: "License validation tested", ready: production.setup.statuses.find((item) => item.id === "license-api")?.level === "ready", href: "/admin/licenses" },
     { label: "Support tested", ready: production.setup.counts.orders > 0 || production.setup.counts.activeLicenses > 0, href: "/admin/support" },
-    { label: "Secrets rotated", ready: readiness.secretsRotated, href: "/admin/launch-wizard" },
+    { label: "Secrets rotated", ready: readiness.secretsRotated, href: "/admin/launch" },
     { label: "CONTENT_MODE=production", ready: production.contentMode === "production", href: "/admin/production" },
   ];
 

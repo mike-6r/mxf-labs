@@ -45,7 +45,7 @@ export default async function AdminDashboardPage() {
   const checklist = [
     { label: "Brand configured", ready: true, href: "/admin/customize" },
     { label: "Products published", ready: productsPublished > 0, href: "/admin/products" },
-    { label: "Legal pages completed", ready: readiness.areas.find((item) => item.id === "legal")?.status === "Complete", href: "/admin/launch-wizard" },
+    { label: "Legal pages completed", ready: readiness.areas.find((item) => item.id === "legal")?.status === "Complete", href: "/admin/legal" },
     { label: "Payments configured", ready: setup.statuses.some((item) => ["stripe", "paypal"].includes(item.id) && item.level === "ready"), href: "/admin/setup-status" },
     { label: "Discord connected", ready: setup.statuses.some((item) => item.id === "discord-oauth" && item.level === "ready"), href: "/admin/discord" },
     { label: "Email configured", ready: setup.statuses.some((item) => item.id === "resend" && item.level === "ready"), href: "/admin/emails" },
