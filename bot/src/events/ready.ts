@@ -2,6 +2,7 @@ import type { Client } from "discord.js";
 import { commands } from "../commands";
 import { botEnv } from "../config/env";
 import { sendHeartbeat } from "../services/heartbeat";
+import { startBotPresence } from "../services/presence";
 import { processSyncQueue } from "../services/sync-queue";
 import type { BotServices } from "../types/context";
 
@@ -13,6 +14,7 @@ export async function onReady(client: Client, services: BotServices) {
   });
 
   await sendHeartbeat({ client, website: services.website, commandCount: commands.length, status: "Online" });
+  startBotPresence(client, services.logger);
 
   setInterval(() => {
     sendHeartbeat({ client, website: services.website, commandCount: commands.length, status: "Online" }).catch((error) => {

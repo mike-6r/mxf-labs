@@ -9,6 +9,7 @@ import { buildRoleSyncPlan } from "../src/modules/role-sync";
 import { normalizeSetupChannelName, normalizeSetupMode, SETUP_CATEGORIES, SETUP_CHANNELS, SETUP_ROLES, setupChannelDefinitions, setupRoleDefinitions } from "../src/modules/setup";
 import { createSuggestion, updateSuggestionStatus } from "../src/modules/suggestions";
 import { closeTicket, createTicket, maskLicenseKey, ticketTypeFromKey } from "../src/modules/tickets";
+import { parsePresenceActivities } from "../src/services/presence";
 import { prisma } from "../src/services/prisma";
 import { WebsiteApiClient } from "../src/services/website-api";
 
@@ -65,6 +66,7 @@ async function main() {
   assert.equal(normalizeSetupChannelName("\u{1F4CC}\u30FBwelcome"), "welcome", "emoji setup channel names should normalize");
   assert.equal(ticketTypeFromKey("license"), "License Support", "ticket type keys should map to readable types");
   assert.equal(maskLicenseKey("ABCD-1234-EFGH"), "ABCD...EFGH", "license keys should be masked for embeds");
+  assert.deepEqual(parsePresenceActivities("watching:mxf-labs.com|playing:MxF Factions").map((activity) => activity.name), ["mxf-labs.com", "MxF Factions"], "presence activities should parse from env format");
   assert.ok(setupRoleDefinitions("basic").length < setupRoleDefinitions("full").length, "full setup should create more roles than basic");
   assert.ok(setupChannelDefinitions("basic").length < setupChannelDefinitions("full").length, "full setup should create more channels than basic");
 

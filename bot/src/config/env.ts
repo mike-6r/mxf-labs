@@ -32,6 +32,10 @@ export const botEnv = {
   localMode: asBoolean(process.env.BOT_LOCAL_MODE, true),
   registerCommandsOnStart: asBoolean(process.env.BOT_REGISTER_COMMANDS_ON_START, false),
   heartbeatIntervalSeconds: asNumber(process.env.BOT_HEARTBEAT_INTERVAL_SECONDS, 60),
+  presenceEnabled: asBoolean(process.env.BOT_PRESENCE_ENABLED, true),
+  presenceIntervalSeconds: asNumber(process.env.BOT_PRESENCE_INTERVAL_SECONDS, 45),
+  presenceStatus: clean(process.env.BOT_PRESENCE_STATUS, "online"),
+  presenceActivities: clean(process.env.BOT_PRESENCE_ACTIVITIES),
   ownerIds: clean(process.env.BOT_OWNER_IDS)
     .split(",")
     .map((item) => item.trim())
