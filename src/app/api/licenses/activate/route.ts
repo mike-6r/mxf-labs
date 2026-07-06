@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { evaluateLicense, evaluateSuspiciousActivity, recordLicenseValidation } from "@/lib/license/server";
+import { createLicenseRuntimeResponse, evaluateLicense, evaluateSuspiciousActivity, recordLicenseValidation } from "@/lib/license/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { requestIp } from "@/lib/request/ip";
 import { licenseActivationSchema } from "@/lib/validation/schemas";
@@ -57,7 +57,15 @@ export async function POST(request: Request) {
   });
 
   if (!evaluation.valid || !evaluation.license) {
-    return NextResponse.json({ ok: true, activated: false, reason: evaluation.reason });
+    return NextResponse.json({
+      ...createLicenseRuntimeResponse({
+        evaluation,
+        key: parsed.data.key,
+        deviceId: parsed.data.deviceId,
+        instanceId: parsed.data.instanceId,
+      }),
+      activated: false,
+    });
   }
 
   const activation = await prisma.licenseActivation.upsert({
@@ -98,5 +106,21 @@ export async function POST(request: Request) {
     data: { currentActivations, lastValidatedAt: new Date() },
   });
 
-  return NextResponse.json({ ok: true, activated: true, activationId: activation.id, reason: "valid" });
+  return NextResponse.json({
+    ...createLicenseRuntimeResponse({
+      evaluation: {
+        ...evaluation,
+        license: {
+          ...evaluation.license,
+          currentActivations,
+        },
+      },
+      key: parsed.data.key,
+      deviceId: parsed.data.deviceId,
+      instanceId: parsed.data.instanceId,
+      activationId: activation.id,
+    }),
+    activated: true,
+    activationId: activation.id,
+  });
 }

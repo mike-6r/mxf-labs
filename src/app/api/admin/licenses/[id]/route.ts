@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth/admin";
 import { logActivity } from "@/lib/db/activity";
 import { prisma } from "@/lib/db/prisma";
+import { normalizeAllowedVersionsInput } from "@/lib/license/generate";
 import { licenseUpdateSchema } from "@/lib/validation/schemas";
 
 type Params = { params: Promise<{ id: string }> };
@@ -21,8 +22,17 @@ export async function PATCH(request: Request, { params }: Params) {
   const license = await prisma.license.update({
     where: { id },
     data: {
-      ...parsed.data,
+      status: parsed.data.status,
+      licenseType: parsed.data.licenseType,
+      expirationDate: parsed.data.expirationDate === undefined ? undefined : parsed.data.expirationDate ? new Date(parsed.data.expirationDate) : null,
+      minimumVersion: parsed.data.minimumVersion === undefined ? undefined : parsed.data.minimumVersion || null,
+      allowedVersionsJson:
+        parsed.data.allowedVersionsJson === undefined ? undefined : normalizeAllowedVersionsInput(parsed.data.allowedVersionsJson),
+      maxActivations: parsed.data.maxActivations,
+      currentActivations: parsed.data.currentActivations,
+      notes: parsed.data.notes,
       blacklistedAt: parsed.data.blacklisted === undefined ? undefined : parsed.data.blacklisted ? new Date() : null,
+      blacklisted: parsed.data.blacklisted,
     },
     include: { customer: true, product: true },
   });

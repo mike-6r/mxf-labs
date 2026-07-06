@@ -40,6 +40,38 @@ export function versionMeetsMinimum(version?: string | null, minimumVersion?: st
   return true;
 }
 
+export function parseAllowedVersions(value?: string | null) {
+  if (!value) return [];
+
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) {
+      return parsed.map((item) => String(item).trim()).filter(Boolean);
+    }
+  } catch {
+    return value
+      .split(/[\n,]/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+export function normalizeAllowedVersionsInput(value?: string | null) {
+  return JSON.stringify(parseAllowedVersions(value));
+}
+
+export function versionIsAllowed(version?: string | null, allowedVersionsJson?: string | null) {
+  const allowedVersions = parseAllowedVersions(allowedVersionsJson);
+
+  if (!allowedVersions.length || !version) {
+    return true;
+  }
+
+  return allowedVersions.includes("*") || allowedVersions.includes(version);
+}
+
 export function normalizeLicenseReason({
   exists,
   productMatches,

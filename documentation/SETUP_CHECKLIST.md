@@ -68,6 +68,15 @@ This checklist shows every value needed for production readiness. Put these valu
 | Storage provider | `STORAGE_PROVIDER` | Download storage provider selection | `local` |
 | Local storage root | `LOCAL_STORAGE_ROOT` | Private product file root | `storage/products`; production `/var/www/mxf-labs/storage/products` |
 
+## Licensing Runtime
+
+| Value | `.env` key | Powers | Local/default behavior |
+| --- | --- | --- | --- |
+| License signing secret | `LICENSE_SIGNING_SECRET` | Signed short-lived license lease tokens returned by activation, validation, and heartbeat | Falls back to `AUTH_SECRET` |
+| License heartbeat seconds | `LICENSE_HEARTBEAT_SECONDS` | Recommended client heartbeat interval returned in runtime policy | `300` |
+| License lease TTL | `LICENSE_LEASE_TTL_SECONDS` | How long each signed runtime lease remains fresh | `900` |
+| Offline grace seconds | `LICENSE_OFFLINE_GRACE_SECONDS` | Max client-side grace window after the API becomes unreachable | `21600` |
+
 ## Production Switches
 
 Before launch:

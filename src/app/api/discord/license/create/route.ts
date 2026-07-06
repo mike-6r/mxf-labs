@@ -130,6 +130,7 @@ export async function POST(request: Request) {
       status: "Active",
       licenseType,
       expirationDate: expiresAt,
+      minimumVersion: product.version || null,
       maxActivations: activationLimit,
       notes: [
         "Created by Discord command.",

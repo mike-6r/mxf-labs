@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { getBooleanSetting, getNumberSetting } from "@/lib/db/settings";
-import { isLicenseUsable, normalizeLicenseReason, versionMeetsMinimum } from "@/lib/license/generate";
+import { isLicenseUsable, normalizeLicenseReason, parseAllowedVersions, versionIsAllowed, versionMeetsMinimum } from "@/lib/license/generate";
+import { createLicenseLease, licenseKeyFingerprint, licenseReasonCode, licenseReasonMessage, maskLicenseKey, runtimeLicensePolicy } from "@/lib/license/lease";
 
 export async function evaluateLicense({
   key,
@@ -53,7 +54,7 @@ export async function evaluateLicense({
   );
   const discordMismatch = Boolean(discordId && license.customer?.discordId && discordId !== license.customer.discordId);
   const activationAllowed = Boolean(matchingActivation) || license.activations.length < license.maxActivations;
-  const versionAllowed = versionMeetsMinimum(productVersion, license.minimumVersion);
+  const versionAllowed = versionMeetsMinimum(productVersion, license.minimumVersion) && versionIsAllowed(productVersion, license.allowedVersionsJson);
   const reason = normalizeLicenseReason({
     exists: true,
     productMatches,
@@ -78,6 +79,103 @@ export async function evaluateLicense({
     hwidConflict,
     ipConflict,
     discordMismatch,
+  };
+}
+
+export function createLicenseRuntimeResponse({
+  evaluation,
+  key,
+  deviceId,
+  instanceId,
+  activationId,
+}: {
+  evaluation: Awaited<ReturnType<typeof evaluateLicense>>;
+  key: string;
+  deviceId?: string | null;
+  instanceId?: string | null;
+  activationId?: string | null;
+}) {
+  const license = evaluation.license;
+  const policy = runtimeLicensePolicy();
+  const lease = license
+    ? createLicenseLease({
+        licenseId: license.id,
+        key,
+        valid: evaluation.valid,
+        reason: evaluation.reason,
+        status: license.status,
+        licenseType: license.licenseType,
+        productId: license.productId,
+        productSlug: license.product?.slug,
+        customerId: license.customerId,
+        activationId,
+        deviceId,
+        instanceId,
+        currentActivations: license.currentActivations,
+        maxActivations: license.maxActivations,
+      })
+    : null;
+
+  return {
+    ok: true,
+    valid: evaluation.valid,
+    code: licenseReasonCode(evaluation.reason),
+    reason: evaluation.reason,
+    message: licenseReasonMessage(evaluation.reason),
+    serverTime: new Date().toISOString(),
+    status: license?.status,
+    product: license?.product?.slug,
+    customer: license?.customer?.email,
+    license: license
+      ? {
+          id: license.id,
+          keyMasked: maskLicenseKey(license.key),
+          keyFingerprint: licenseKeyFingerprint(license.key),
+          status: license.status,
+          type: license.licenseType,
+          expiresAt: license.expirationDate,
+          blacklisted: license.blacklisted,
+          minimumVersion: license.minimumVersion,
+          allowedVersions: parseAllowedVersions(license.allowedVersionsJson),
+        }
+      : null,
+    productInfo: license?.product
+      ? {
+          id: license.product.id,
+          slug: license.product.slug,
+          name: license.product.name,
+          version: license.product.version,
+        }
+      : null,
+    customerInfo: license?.customer
+      ? {
+          id: license.customer.id,
+          email: license.customer.email,
+          discordId: license.customer.discordId,
+        }
+      : null,
+    activation: {
+      id: activationId || null,
+      deviceId: deviceId || null,
+      instanceId: instanceId || null,
+      allowed: evaluation.activationAllowed,
+      productMatches: evaluation.productMatches,
+      versionAllowed: evaluation.versionAllowed,
+    },
+    activations: {
+      current: license?.currentActivations || 0,
+      max: license?.maxActivations || 0,
+    },
+    policy,
+    lease: lease
+      ? {
+          token: lease.token,
+          issuedAt: lease.issuedAt,
+          expiresAt: lease.expiresAt,
+          ttlSeconds: lease.ttlSeconds,
+          offlineGraceSeconds: lease.offlineGraceSeconds,
+        }
+      : null,
   };
 }
 

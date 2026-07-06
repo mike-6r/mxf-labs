@@ -90,6 +90,9 @@ type LicenseItem = {
   status: string;
   blacklisted: boolean;
   licenseType: string;
+  expirationDate: string | Date | null;
+  minimumVersion: string | null;
+  allowedVersionsJson: string;
   maxActivations: number;
   currentActivations: number;
   notes: string;
@@ -788,8 +791,11 @@ export function LicenseManager({
       body: JSON.stringify({
         productId: form.get("productId"),
         customerId: form.get("customerId"),
+        licenseType: form.get("licenseType"),
         maxActivations: form.get("maxActivations"),
         expirationDate: form.get("expirationDate"),
+        minimumVersion: form.get("minimumVersion"),
+        allowedVersionsJson: form.get("allowedVersionsJson"),
         notes: form.get("notes"),
       }),
     });
@@ -805,6 +811,9 @@ export function LicenseManager({
         status: form.status.value,
         blacklisted: form.blacklisted.checked,
         licenseType: form.licenseType.value,
+        expirationDate: form.expirationDate.value,
+        minimumVersion: form.minimumVersion.value,
+        allowedVersionsJson: form.allowedVersionsJson.value,
         maxActivations: form.maxActivations.value,
         currentActivations: form.currentActivations.value,
         notes: form.notes.value,
@@ -827,8 +836,11 @@ export function LicenseManager({
         <div className="grid gap-4 md:grid-cols-2">
           <OptionSelect label="Product" name="productId" options={products} />
           <OptionSelect label="Customer" name="customerId" options={customers} />
+          <SelectField label="License type" name="licenseType" defaultValue="Lifetime" options={["Permanent", "Monthly", "Yearly", "Lifetime", "Trial", "Custom"]} />
           <Field label="Max activations" name="maxActivations" defaultValue="1" />
           <Field label="Expiration date" name="expirationDate" />
+          <Field label="Minimum version" name="minimumVersion" />
+          <TextArea label="Allowed versions" name="allowedVersionsJson" />
           <TextArea label="Notes" name="notes" />
         </div>
         <div className="mt-5">
@@ -854,12 +866,19 @@ export function LicenseManager({
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <SelectField label="Status" name="status" defaultValue={license.status} options={licenseStatuses} />
             <SelectField label="License type" name="licenseType" defaultValue={license.licenseType || "Lifetime"} options={["Permanent", "Monthly", "Yearly", "Lifetime", "Trial", "Custom"]} />
+            <Field
+              label="Expiration date"
+              name="expirationDate"
+              defaultValue={license.expirationDate ? new Date(license.expirationDate).toISOString().slice(0, 10) : ""}
+            />
+            <Field label="Minimum version" name="minimumVersion" defaultValue={license.minimumVersion || ""} />
             <Field label="Max activations" name="maxActivations" defaultValue={String(license.maxActivations)} />
             <Field label="Current activations" name="currentActivations" defaultValue={String(license.currentActivations)} />
             <label className="flex items-center gap-3 rounded-md border border-white/10 bg-black/24 px-3 py-3 text-sm text-white/70">
               <input name="blacklisted" type="checkbox" defaultChecked={license.blacklisted} />
               Blacklisted
             </label>
+            <TextArea label="Allowed versions" name="allowedVersionsJson" defaultValue={jsonListToText(license.allowedVersionsJson)} />
             <TextArea label="Notes" name="notes" defaultValue={license.notes} />
           </div>
           <div className="mt-5 flex flex-wrap gap-3">

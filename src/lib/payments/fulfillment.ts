@@ -41,6 +41,7 @@ export async function fulfillPaidOrder(orderId: string) {
         productId: order.productId,
         status: "Active",
         licenseType: defaultLicenseType || "Lifetime",
+        minimumVersion: order.product?.version || null,
         maxActivations: order.product?.defaultActivationLimit || 3,
         notes: `Generated from order ${order.id}`,
       },

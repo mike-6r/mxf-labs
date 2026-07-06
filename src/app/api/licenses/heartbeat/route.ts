@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { evaluateLicense, evaluateSuspiciousActivity, recordLicenseValidation } from "@/lib/license/server";
+import { createLicenseRuntimeResponse, evaluateLicense, evaluateSuspiciousActivity, recordLicenseValidation } from "@/lib/license/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { requestIp } from "@/lib/request/ip";
 import { licenseActivationSchema } from "@/lib/validation/schemas";
@@ -57,8 +57,26 @@ export async function POST(request: Request) {
   });
 
   if (!evaluation.valid || !evaluation.license) {
-    return NextResponse.json({ ok: true, alive: false, reason: evaluation.reason });
+    return NextResponse.json({
+      ...createLicenseRuntimeResponse({
+        evaluation,
+        key: parsed.data.key,
+        deviceId: parsed.data.deviceId,
+        instanceId: parsed.data.instanceId,
+      }),
+      alive: false,
+    });
   }
+
+  const activation = await prisma.licenseActivation.findFirst({
+    where: {
+      licenseId: evaluation.license.id,
+      deviceId: parsed.data.deviceId,
+      instanceId: parsed.data.instanceId,
+      status: "Active",
+    },
+    select: { id: true },
+  });
 
   await prisma.licenseActivation.updateMany({
     where: {
@@ -78,5 +96,14 @@ export async function POST(request: Request) {
 
   await prisma.license.update({ where: { id: evaluation.license.id }, data: { lastValidatedAt: new Date() } });
 
-  return NextResponse.json({ ok: true, alive: true, reason: "valid" });
+  return NextResponse.json({
+    ...createLicenseRuntimeResponse({
+      evaluation,
+      key: parsed.data.key,
+      deviceId: parsed.data.deviceId,
+      instanceId: parsed.data.instanceId,
+      activationId: activation?.id,
+    }),
+    alive: true,
+  });
 }

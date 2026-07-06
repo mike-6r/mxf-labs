@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { evaluateLicense, evaluateSuspiciousActivity, recordLicenseValidation } from "@/lib/license/server";
+import { createLicenseRuntimeResponse, evaluateLicense, evaluateSuspiciousActivity, recordLicenseValidation } from "@/lib/license/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { requestIp } from "@/lib/request/ip";
 import { licenseValidationSchema } from "@/lib/validation/schemas";
@@ -61,16 +61,13 @@ export async function POST(request: Request) {
     });
   }
 
-  return NextResponse.json({
-    ok: true,
-    valid: evaluation.valid,
-    status: evaluation.license?.status,
-    product: evaluation.license?.product?.slug,
-    customer: evaluation.license?.customer?.email,
-    activations: {
-      current: evaluation.license?.currentActivations || 0,
-      max: evaluation.license?.maxActivations || 0,
-    },
-    reason: evaluation.reason,
-  });
+  return NextResponse.json(
+    createLicenseRuntimeResponse({
+      evaluation,
+      key: parsed.data.key,
+      deviceId: parsed.data.deviceId,
+      instanceId: parsed.data.instanceId || parsed.data.activationId,
+      activationId: parsed.data.activationId,
+    }),
+  );
 }
