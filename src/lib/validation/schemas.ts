@@ -215,13 +215,13 @@ export const productSchema = z.object({
 export const projectSchema = z.object({
   title: z.string().min(2).max(120),
   slug: slugSchema,
-  category: z.enum(["Website", "Discord Bot", "Minecraft Plugin", "Web Panel", "API", "Product"]),
+  category: z.string().trim().min(1).max(80),
   description: z.string().min(8).max(260),
   techStack: listSchema,
   status: z.string().min(1).max(80).default("Concept"),
   previewLink: z.string().url().optional().or(z.literal("")),
   repositoryLabel: z.string().max(120).optional().or(z.literal("")),
-  caseStudy: z.string().max(5000).default(""),
+  caseStudy: z.string().max(50_000).default(""),
   featured: z.boolean().default(false),
   visible: z.boolean().default(true),
 });

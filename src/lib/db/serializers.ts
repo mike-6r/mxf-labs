@@ -50,6 +50,32 @@ export type ProductSeo = {
   image?: string;
 };
 
+export type ProjectPresentation = {
+  layoutStyle: "flagship" | "compact" | "case-study" | "private" | "product";
+  cardStyle: "spotlight" | "minimal" | "timeline" | "technical";
+  heroStyle: "split" | "editorial" | "technical" | "minimal";
+  accentColor: string;
+  iconName: string;
+  badgeText: string;
+  visualTitle: string;
+  summary: string;
+  challenge: string;
+  solution: string;
+  outcome: string;
+  highlights: string[];
+  metrics: Array<{ label: string; value: string; caption?: string }>;
+  process: Array<{ title: string; description: string }>;
+  galleryImages: string[];
+  galleryCaptions: string[];
+  primaryCtaLabel: string;
+  primaryCtaHref: string;
+  secondaryCtaLabel: string;
+  secondaryCtaHref: string;
+  showMockup: boolean;
+  showMetrics: boolean;
+  showGallery: boolean;
+};
+
 export function parseJsonArray(value: string | null | undefined): string[] {
   if (!value) {
     return [];
@@ -232,6 +258,94 @@ function normalizeButtons(value: string): ProductButton[] {
   }
 }
 
+function normalizeMetricList(value: unknown) {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+      const record = item as Record<string, unknown>;
+      const label = String(record.label || "").trim();
+      const metricValue = String(record.value || "").trim();
+      const caption = String(record.caption || "").trim();
+
+      return label && metricValue ? { label, value: metricValue, caption } : null;
+    })
+    .filter((item): item is { label: string; value: string; caption: string } => Boolean(item));
+}
+
+function normalizeProcessList(value: unknown) {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+      const record = item as Record<string, unknown>;
+      const title = String(record.title || "").trim();
+      const description = String(record.description || "").trim();
+
+      return title && description ? { title, description } : null;
+    })
+    .filter((item): item is { title: string; description: string } => Boolean(item));
+}
+
+function normalizeProjectPresentation(project: Project): ProjectPresentation {
+  const fallback: ProjectPresentation = {
+    layoutStyle: project.featured ? "flagship" : "compact",
+    cardStyle: project.featured ? "spotlight" : "minimal",
+    heroStyle: "split",
+    accentColor: "#ff6262",
+    iconName: "Boxes",
+    badgeText: project.featured ? "Featured build" : project.status,
+    visualTitle: project.title,
+    summary: project.caseStudy || project.description,
+    challenge: "",
+    solution: "",
+    outcome: "",
+    highlights: [],
+    metrics: [],
+    process: [],
+    galleryImages: [],
+    galleryCaptions: [],
+    primaryCtaLabel: "Request Similar Build",
+    primaryCtaHref: `/contact?project=${project.slug}`,
+    secondaryCtaLabel: "Browse More",
+    secondaryCtaHref: "/projects",
+    showMockup: true,
+    showMetrics: true,
+    showGallery: true,
+  };
+
+  const presentation = parseJsonObject<ProjectPresentation>(project.caseStudy, fallback);
+
+  return {
+    ...presentation,
+    layoutStyle: ["flagship", "compact", "case-study", "private", "product"].includes(presentation.layoutStyle) ? presentation.layoutStyle : fallback.layoutStyle,
+    cardStyle: ["spotlight", "minimal", "timeline", "technical"].includes(presentation.cardStyle) ? presentation.cardStyle : fallback.cardStyle,
+    heroStyle: ["split", "editorial", "technical", "minimal"].includes(presentation.heroStyle) ? presentation.heroStyle : fallback.heroStyle,
+    accentColor: String(presentation.accentColor || fallback.accentColor).trim(),
+    iconName: String(presentation.iconName || fallback.iconName).trim(),
+    badgeText: String(presentation.badgeText || fallback.badgeText).trim(),
+    visualTitle: String(presentation.visualTitle || project.title).trim(),
+    summary: String(presentation.summary || fallback.summary).trim(),
+    challenge: String(presentation.challenge || "").trim(),
+    solution: String(presentation.solution || "").trim(),
+    outcome: String(presentation.outcome || "").trim(),
+    highlights: normalizeStringList(presentation.highlights),
+    metrics: normalizeMetricList(presentation.metrics),
+    process: normalizeProcessList(presentation.process),
+    galleryImages: normalizeStringList(presentation.galleryImages),
+    galleryCaptions: normalizeStringList(presentation.galleryCaptions),
+    primaryCtaLabel: String(presentation.primaryCtaLabel || fallback.primaryCtaLabel).trim(),
+    primaryCtaHref: String(presentation.primaryCtaHref || fallback.primaryCtaHref).trim(),
+    secondaryCtaLabel: String(presentation.secondaryCtaLabel || fallback.secondaryCtaLabel).trim(),
+    secondaryCtaHref: String(presentation.secondaryCtaHref || fallback.secondaryCtaHref).trim(),
+    showMockup: presentation.showMockup !== false,
+    showMetrics: presentation.showMetrics !== false,
+    showGallery: presentation.showGallery !== false,
+  };
+}
+
 export function serializeProduct(product: Product) {
   const display = normalizeDisplay(product.displayJson);
 
@@ -270,17 +384,22 @@ export function serializeProduct(product: Product) {
 }
 
 export function serializeProject(project: Project) {
+  const presentation = normalizeProjectPresentation(project);
+
   return {
     slug: project.slug,
     name: project.title,
     category: projectCategoryToPublic(project.category),
+    rawCategory: project.category,
     description: project.description,
     stack: parseJsonArray(project.techStackJson),
     status: project.status,
-    caseStudy: project.caseStudy,
+    caseStudy: presentation.summary,
     featured: project.featured,
     previewLink: project.previewLink,
     repositoryLabel: project.repositoryLabel,
     accent: statusToAccent(project.status),
+    accentColor: presentation.accentColor,
+    presentation,
   };
 }

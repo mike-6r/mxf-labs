@@ -152,7 +152,8 @@ export type ProjectCategory =
   | "Discord Bots"
   | "Minecraft Plugins"
   | "Web Panels"
-  | "Products";
+  | "Products"
+  | string;
 
 export const projectCategories: ProjectCategory[] = [
   "Websites",
@@ -166,14 +167,41 @@ export type Project = {
   slug: string;
   name: string;
   category: ProjectCategory;
+  rawCategory?: string;
   description: string;
   stack: string[];
   status: string;
   accent: Accent;
+  accentColor?: string;
   caseStudy?: string;
   featured?: boolean;
   previewLink?: string | null;
   repositoryLabel?: string | null;
+  presentation?: {
+    layoutStyle?: string;
+    cardStyle?: string;
+    heroStyle?: string;
+    accentColor?: string;
+    iconName?: string;
+    badgeText?: string;
+    visualTitle?: string;
+    summary?: string;
+    challenge?: string;
+    solution?: string;
+    outcome?: string;
+    highlights?: string[];
+    metrics?: Array<{ label: string; value: string; caption?: string }>;
+    process?: Array<{ title: string; description: string }>;
+    galleryImages?: string[];
+    galleryCaptions?: string[];
+    primaryCtaLabel?: string;
+    primaryCtaHref?: string;
+    secondaryCtaLabel?: string;
+    secondaryCtaHref?: string;
+    showMockup?: boolean;
+    showMetrics?: boolean;
+    showGallery?: boolean;
+  };
 };
 
 export const projects: Project[] = [];
