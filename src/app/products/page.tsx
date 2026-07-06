@@ -31,6 +31,8 @@ export default async function ProductsPage() {
   const minecraftProducts = products.filter((product) => matches(product, "minecraft") && !featuredSlugs.has(product.slug));
   const discordProducts = products.filter((product) => matches(product, "discord") && !featuredSlugs.has(product.slug));
   const infrastructureProducts = products.filter((product) => (matches(product, "infrastructure") || matches(product, "api")) && !featuredSlugs.has(product.slug));
+  const groupedSlugs = new Set([...featuredSlugs, ...minecraftProducts.map((product) => product.slug), ...discordProducts.map((product) => product.slug), ...infrastructureProducts.map((product) => product.slug)]);
+  const otherProducts = products.filter((product) => !groupedSlugs.has(product.slug));
   const customerProducts = products.filter((product) => !matches(product, "infrastructure") && !matches(product, "api"));
 
   return (
@@ -45,6 +47,7 @@ export default async function ProductsPage() {
                 hasMinecraft={minecraftProducts.length > 0}
                 hasDiscord={discordProducts.length > 0}
                 hasInfrastructure={infrastructureProducts.length > 0}
+                hasOther={otherProducts.length > 0}
               />
               {featuredProducts.length ? <FeaturedProducts products={featuredProducts} /> : null}
               <ProductFamilySection
@@ -64,6 +67,14 @@ export default async function ProductsPage() {
                 icon={<Bot className="h-5 w-5 text-[#ffb0b0]" aria-hidden="true" />}
               />
               <InfrastructureSection products={infrastructureProducts} />
+              <ProductFamilySection
+                id="other"
+                eyebrow="More Products"
+                title="Admin-created products with their own storefront treatment."
+                description="Products that do not belong to Minecraft, Discord, or infrastructure still render publicly when their admin record is visible."
+                products={otherProducts}
+                icon={<PackageCheck className="h-5 w-5 text-[#ffb0b0]" aria-hidden="true" />}
+              />
               <BuyingConfidence products={customerProducts} infrastructureCount={infrastructureProducts.length} />
             </>
           ) : (
@@ -185,17 +196,20 @@ function StorefrontNav({
   hasMinecraft,
   hasDiscord,
   hasInfrastructure,
+  hasOther,
 }: {
   hasFeatured: boolean;
   hasMinecraft: boolean;
   hasDiscord: boolean;
   hasInfrastructure: boolean;
+  hasOther: boolean;
 }) {
   const links = [
     ["Featured", "#featured", hasFeatured],
     ["Minecraft", "#minecraft", hasMinecraft],
     ["Discord", "#discord", hasDiscord],
     ["Infrastructure", "#infrastructure", hasInfrastructure],
+    ["More", "#other", hasOther],
   ].filter((item) => item[2]);
 
   if (!links.length) return null;

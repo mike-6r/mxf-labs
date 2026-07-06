@@ -21,11 +21,7 @@ export async function getPublicProducts() {
     orderBy: { updatedAt: "desc" },
   });
 
-  const visibleProducts = mode === "demo"
-    ? products
-    : products.filter((product) => isPublicReadyText(product.name, product.shortDescription, product.fullDescription));
-
-  return visibleProducts
+  return products
     .sort((a, b) => Number(b.slug === featuredSlug) - Number(a.slug === featuredSlug))
     .map(serializeProduct);
 }
@@ -42,7 +38,6 @@ export async function getPublicProduct(slug: string) {
   });
 
   if (!product) return null;
-  if (mode !== "demo" && !isPublicReadyText(product.name, product.shortDescription, product.fullDescription)) return null;
   return serializeProduct(product);
 }
 

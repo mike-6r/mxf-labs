@@ -384,7 +384,7 @@ function valuesFromProduct(product?: ProductItem): Values {
     category: product?.category || "Product",
     shortDescription: product?.shortDescription || "",
     status: product?.status || "Coming Soon",
-    visible: product?.visible ?? false,
+    visible: product?.visible ?? true,
     price: product?.price || "Contact for pricing",
     priceCents: String(product?.priceCents ?? 0),
     currency: product?.currency || "USD",
@@ -711,7 +711,7 @@ function ProductEditor({
     setUploadStatus(result.message || "Upload failed.");
   }
 
-  async function save(kind: "draft" | "publish") {
+  async function save(kind: "save" | "publish") {
     const readiness = readinessForValues(
       { ...values, ...(kind === "publish" ? { visible: true, status: "Published" } : {}) },
       product?._count,
@@ -724,7 +724,7 @@ function ProductEditor({
     }
 
     setStatus("saving");
-    const override = kind === "publish" ? { visible: true, status: "Published" } : { visible: false, status: isLiveProductStatus(values.status) ? "Draft" : values.status };
+    const override = kind === "publish" ? { visible: true, status: "Published" } : {};
     const response = await fetch(product ? `/api/admin/products/${product.id}` : "/api/admin/products", {
       method: product ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
@@ -748,9 +748,9 @@ function ProductEditor({
               <h2 className="mt-2 text-xl font-semibold text-white">{values.name || "Untitled product"}</h2>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={() => save("draft")} disabled={status === "saving"} className="inline-flex min-h-10 items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 text-sm font-semibold text-white/70 transition hover:border-[#ff6262]/35 hover:text-white disabled:opacity-60">
+              <button type="button" onClick={() => save("save")} disabled={status === "saving"} className="inline-flex min-h-10 items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 text-sm font-semibold text-white/70 transition hover:border-[#ff6262]/35 hover:text-white disabled:opacity-60">
                 <Save className="h-4 w-4" aria-hidden="true" />
-                Save Draft
+                Save Product
               </button>
               <button type="button" onClick={() => save("publish")} disabled={status === "saving"} className="button-shine inline-flex min-h-10 items-center gap-2 rounded-md bg-white px-3 text-sm font-semibold text-black disabled:opacity-60">
                 {status === "saved" ? <Check className="relative z-10 h-4 w-4" aria-hidden="true" /> : <Send className="relative z-10 h-4 w-4" aria-hidden="true" />}
