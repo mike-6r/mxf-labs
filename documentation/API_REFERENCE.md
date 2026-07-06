@@ -2,6 +2,7 @@
 
 Versioned API:
 
+- `GET /api/health`
 - `GET /api/v1/auth`
 - `GET /api/v1/customers`
 - `GET /api/v1/products`

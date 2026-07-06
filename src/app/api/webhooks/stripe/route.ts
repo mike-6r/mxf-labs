@@ -20,17 +20,28 @@ export async function POST(request: Request) {
     data?: { object?: { id?: string; client_reference_id?: string; metadata?: Record<string, string> } };
   };
   const orderId = event.data?.object?.metadata?.orderId || event.data?.object?.client_reference_id;
-  const paymentEvent = await prisma.paymentEvent.upsert({
+  const existingEvent = await prisma.paymentEvent.findUnique({
     where: { provider_providerEventId: { provider: "Stripe", providerEventId: event.id } },
-    update: { payloadJson: rawBody, eventType: event.type },
-    create: {
+  });
+
+  if (existingEvent?.processingStatus === "Processed") {
+    return NextResponse.json({ ok: true, duplicate: true });
+  }
+
+  const paymentEvent = existingEvent
+    ? await prisma.paymentEvent.update({
+        where: { id: existingEvent.id },
+        data: { payloadJson: rawBody, eventType: event.type, orderId },
+      })
+    : await prisma.paymentEvent.create({
+        data: {
       provider: "Stripe",
       providerEventId: event.id,
       eventType: event.type,
       payloadJson: rawBody,
       orderId,
-    },
-  });
+        },
+      });
 
   if (event.type === "checkout.session.completed" && orderId) {
     await prisma.order.update({

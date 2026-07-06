@@ -102,9 +102,11 @@ npm run db:generate:postgres
 npm run db:migrate
 npm run build
 npm run deploy:check
+curl -fsS https://mxf-labs.com/api/health
 ```
 
 `npm run production:check` intentionally fails if localhost URLs, SQLite, mock providers, default secrets, or missing provider credentials are still configured.
+`/api/health` returns machine-readable database, storage, bot heartbeat, and configuration status for uptime monitoring.
 
 ## Local Workflow Tests
 
