@@ -469,13 +469,13 @@ function discordAsset(path: string) {
 
 function discordVisuals() {
   return {
-    mark: discordAsset("/discord/mxf-mark.svg"),
-    welcome: discordAsset("/discord/panel-welcome.svg"),
-    rules: discordAsset("/discord/panel-rules.svg"),
-    tickets: discordAsset("/discord/panel-tickets.svg"),
-    products: discordAsset("/discord/panel-products.svg"),
-    verify: discordAsset("/discord/panel-verify.svg"),
-    community: discordAsset("/discord/panel-community.svg"),
+    mark: discordAsset("/discord/mxf-mark.png"),
+    welcome: discordAsset("/discord/panel-welcome.png"),
+    rules: discordAsset("/discord/panel-rules.png"),
+    tickets: discordAsset("/discord/panel-tickets.png"),
+    products: discordAsset("/discord/panel-products.png"),
+    verify: discordAsset("/discord/panel-verify.png"),
+    community: discordAsset("/discord/panel-community.png"),
   };
 }
 
@@ -536,7 +536,7 @@ async function sendProductPanelOnce(channel: TextChannel | null | undefined, pan
   };
   const existingMessage = existing?.find((message) =>
     message.author.id === channel.client.user?.id &&
-    message.embeds.some((embed) => embed.title === nextPanel.name || (["MxF Labs Product Panel", "MxF Labs"].includes(embed.footer?.text || "") && embed.title === panel.name)),
+    message.embeds.some((embed) => embed.title === nextPanel.name || (["MxF Labs Product Panel", "MxF Labs", "MxF Labs | Software studio"].includes(embed.footer?.text || "") && embed.title === panel.name)),
   );
 
   if (existingMessage) {

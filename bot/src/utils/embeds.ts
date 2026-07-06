@@ -31,7 +31,7 @@ export function mxfEmbed(options: {
   const embed = new EmbedBuilder()
     .setColor(options.color ?? MXF_COLORS.primary)
     .setTitle(options.title)
-    .setFooter({ text: options.footer || "MxF Labs | Software Platform" });
+    .setFooter({ text: options.footer || "MxF Labs | Software studio" });
 
   if (options.description) embed.setDescription(options.description);
   if (options.image) embed.setImage(options.image);

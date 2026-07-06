@@ -1,18 +1,55 @@
 <svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="1200" height="300" rx="28" fill="#09090B"/>
-  <path d="M0 0h1200v300H0z" fill="url(#bg)"/>
-  <path d="M88 76h248v148H88zM364 76h176v148H364zM568 76h544v148H568z" stroke="#F7B955" stroke-opacity=".28" stroke-width="2"/>
-  <path d="M122 190h180M122 154h126M122 118h202" stroke="#fff" stroke-opacity=".2" stroke-width="12" stroke-linecap="round"/>
-  <path d="M424 112l38-26 38 26v54l-38 26-38-26v-54Z" fill="#F7B955" fill-opacity=".22"/>
-  <path d="M442 112h40v80h-40z" fill="#F7B955"/>
-  <path d="M620 190h420M620 154h296M620 118h370" stroke="#F7B955" stroke-opacity=".32" stroke-width="12" stroke-linecap="round"/>
-  <text x="88" y="260" fill="#F7F7F8" font-family="Arial, sans-serif" font-size="28" font-weight="800">MxF Prisons</text>
-  <text x="318" y="260" fill="#FFD79A" font-family="Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="4">MINES / PRESTIGE / TOKENS</text>
+  <rect width="1200" height="300" rx="28" fill="#05070A"/>
+  <rect width="1200" height="300" rx="28" fill="url(#mesh)"/>
+  <rect width="1200" height="300" rx="28" fill="url(#grid)" opacity=".72"/>
+  <rect width="1200" height="300" rx="28" fill="url(#noise)" opacity=".65"/>
+  <circle cx="1010" cy="20" r="180" fill="#F7B955" opacity=".12"/>
+  <circle cx="102" cy="286" r="180" fill="#F7B955" opacity=".07"/>
+  <path d="M78 58H1122" stroke="#FFFFFF" stroke-opacity=".08"/>
+  <path d="M78 242H1122" stroke="#FFFFFF" stroke-opacity=".08"/>
+  <rect x="70" y="62" width="1060" height="172" rx="18" fill="#0B0E13" fill-opacity=".70" stroke="#FFFFFF" stroke-opacity=".10" filter="url(#softShadow)"/>
+  <path d="M90 62h220" stroke="#F7B955" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M78 150h1" stroke="url(#sheen)" stroke-width="164"/>
+  
+    <g transform="translate(104 98) scale(2.6875)">
+      <rect width="32" height="32" rx="6" fill="#FFFFFF" fill-opacity=".055" stroke="#FFFFFF" stroke-opacity=".12"/>
+      <path d="M6 23V9h4.1L16 17.1 21.9 9H26v14h-4.3v-7.2L16 23l-5.7-7.2V23H6Z" fill="#FFFFFF"/>
+      <path d="M5 5h22v2H5V5Zm0 20h22v2H5v-2Z" fill="#F7B955"/>
+      <path d="M3 9h2v14H3V9Zm24 0h2v14h-2V9Z" fill="#FF9F7A"/>
+    </g>
+  <text x="216" y="112" fill="#F7B955" font-family="Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="4">PLANNED PLATFORM</text>
+  <text x="216" y="154" fill="#F5FBFF" font-family="Arial, sans-serif" font-size="34" font-weight="700" letter-spacing="-.3">MxF Prisons</text>
+  <text x="216" y="184" fill="#94A3AD" font-family="Arial, sans-serif" font-size="18" font-weight="500">Mines, prestige loops, tokens, events, gangs, and seasonal progression.</text>
+  
+  
+    <g opacity=".95">
+      <rect x="764" y="92" width="286" height="116" rx="16" fill="#FFFFFF" fill-opacity=".04" stroke="#FFFFFF" stroke-opacity=".10"/>
+      <path d="M798 128h188M798 158h132M798 188h212" stroke="#FFFFFF" stroke-opacity=".16" stroke-width="10" stroke-linecap="round"/>
+      <circle cx="1016" cy="116" r="42" fill="#F7B955" opacity=".14"/>
+      <text x="994" y="133" fill="#F7B955" font-family="Arial, sans-serif" font-size="42" font-weight="800">P</text>
+    </g>
+  <text x="88" y="268" fill="#FFD8D8" fill-opacity=".78" font-family="Arial, sans-serif" font-size="12" font-weight="700" letter-spacing="4">MXF PRISONS / MINES / PRESTIGE</text>
+  
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="300" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#1D1408"/>
-      <stop offset=".55" stop-color="#101115"/>
-      <stop offset="1" stop-color="#2A1E0B"/>
+    <linearGradient id="mesh" x1="0" y1="0" x2="1200" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#17090C"/>
+      <stop offset=".46" stop-color="#080B10"/>
+      <stop offset="1" stop-color="#15100A"/>
     </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset=".52" stop-color="#FFFFFF" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-40%" width="140%" height="180%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="28" stdDeviation="32" flood-color="#000000" flood-opacity=".38"/>
+    </filter>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0H0V64" fill="none" stroke="#FFFFFF" stroke-opacity=".055" stroke-width="1"/>
+    </pattern>
+    <pattern id="noise" width="34" height="34" patternUnits="userSpaceOnUse">
+      <circle cx="4" cy="5" r=".65" fill="#FFFFFF" opacity=".12"/>
+      <circle cx="21" cy="19" r=".7" fill="#FF6262" opacity=".12"/>
+    </pattern>
   </defs>
 </svg>

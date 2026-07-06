@@ -1,14 +1,33 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="96" fill="#0A0A0C"/>
-  <rect x="24" y="24" width="464" height="464" rx="78" fill="url(#g)" fill-opacity="0.18"/>
-  <path d="M122 348V164h58l76 92 76-92h58v184h-58V250l-76 90-76-90v98h-58Z" fill="#F7F7F8"/>
-  <path d="M121 390h270" stroke="#FF6262" stroke-width="22" stroke-linecap="round"/>
-  <path d="M88 88h336v336H88V88Z" stroke="#FFFFFF" stroke-opacity="0.14" stroke-width="6"/>
+  <rect width="512" height="512" rx="104" fill="#05070A"/>
+  <rect width="512" height="512" rx="104" fill="url(#mesh)"/>
+  <rect width="512" height="512" rx="104" fill="url(#grid)" opacity=".7"/>
+  <circle cx="386" cy="86" r="130" fill="#FF6262" opacity=".16"/>
+  <rect x="104" y="104" width="304" height="304" rx="52" fill="#FFFFFF" fill-opacity=".055" stroke="#FFFFFF" stroke-opacity=".13"/>
+  <path d="M150 344V168h54l52 73 52-73h54v176h-56v-86l-50 64-50-64v86h-56Z" fill="#FFFFFF"/>
+  <path d="M126 126h260v22H126v-22Zm0 238h260v22H126v-22Z" fill="#FF6262"/>
+  <path d="M92 170h22v172H92V170Zm306 0h22v172h-22V170Z" fill="#FF9F7A"/>
+  
   <defs>
-    <linearGradient id="g" x1="54" y1="32" x2="479" y2="474" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FF6262"/>
-      <stop offset="0.5" stop-color="#15161B"/>
-      <stop offset="1" stop-color="#7A1D27"/>
+    <linearGradient id="mesh" x1="0" y1="0" x2="1200" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#17090C"/>
+      <stop offset=".46" stop-color="#080B10"/>
+      <stop offset="1" stop-color="#15100A"/>
     </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset=".52" stop-color="#FFFFFF" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-40%" width="140%" height="180%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="28" stdDeviation="32" flood-color="#000000" flood-opacity=".38"/>
+    </filter>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0H0V64" fill="none" stroke="#FFFFFF" stroke-opacity=".055" stroke-width="1"/>
+    </pattern>
+    <pattern id="noise" width="34" height="34" patternUnits="userSpaceOnUse">
+      <circle cx="4" cy="5" r=".65" fill="#FFFFFF" opacity=".12"/>
+      <circle cx="21" cy="19" r=".7" fill="#FF6262" opacity=".12"/>
+    </pattern>
   </defs>
 </svg>

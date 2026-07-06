@@ -1,9 +1,61 @@
 <svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="1200" height="300" rx="28" fill="#0A0A0C"/>
-  <path d="M72 72h1056v156H72V72Z" fill="#fff" fill-opacity=".045" stroke="#fff" stroke-opacity=".1"/>
-  <path d="M164 112h292M164 150h220M164 188h330" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-opacity=".2"/>
-  <path d="M760 92h250a42 42 0 0 1 42 42v52a42 42 0 0 1-42 42H760a42 42 0 0 1-42-42v-52a42 42 0 0 1 42-42Z" fill="#FF6262" fill-opacity=".15"/>
-  <path d="M794 124h180M794 160h120M794 196h158" stroke="#FFB4B4" stroke-width="11" stroke-linecap="round"/>
-  <path d="M664 76v168" stroke="#FF6262" stroke-width="6" stroke-linecap="round"/>
-  <text x="96" y="265" fill="#FF8D8D" font-family="Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="5">SUPPORT / ROUTED TICKETS</text>
+  <rect width="1200" height="300" rx="28" fill="#05070A"/>
+  <rect width="1200" height="300" rx="28" fill="url(#mesh)"/>
+  <rect width="1200" height="300" rx="28" fill="url(#grid)" opacity=".72"/>
+  <rect width="1200" height="300" rx="28" fill="url(#noise)" opacity=".65"/>
+  <circle cx="1010" cy="20" r="180" fill="#FF6262" opacity=".12"/>
+  <circle cx="102" cy="286" r="180" fill="#F7B955" opacity=".07"/>
+  <path d="M78 58H1122" stroke="#FFFFFF" stroke-opacity=".08"/>
+  <path d="M78 242H1122" stroke="#FFFFFF" stroke-opacity=".08"/>
+  <rect x="70" y="62" width="1060" height="172" rx="18" fill="#0B0E13" fill-opacity=".70" stroke="#FFFFFF" stroke-opacity=".10" filter="url(#softShadow)"/>
+  <path d="M90 62h220" stroke="#FF6262" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M78 150h1" stroke="url(#sheen)" stroke-width="164"/>
+  
+    <g transform="translate(104 98) scale(2.6875)">
+      <rect width="32" height="32" rx="6" fill="#FFFFFF" fill-opacity=".055" stroke="#FFFFFF" stroke-opacity=".12"/>
+      <path d="M6 23V9h4.1L16 17.1 21.9 9H26v14h-4.3v-7.2L16 23l-5.7-7.2V23H6Z" fill="#FFFFFF"/>
+      <path d="M5 5h22v2H5V5Zm0 20h22v2H5v-2Z" fill="#FF6262"/>
+      <path d="M3 9h2v14H3V9Zm24 0h2v14h-2V9Z" fill="#FF9F7A"/>
+    </g>
+  <text x="216" y="112" fill="#FF6262" font-family="Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="4">ROUTED SUPPORT</text>
+  <text x="216" y="154" fill="#F5FBFF" font-family="Arial, sans-serif" font-size="34" font-weight="700" letter-spacing="-.3">Open The Right Ticket</text>
+  <text x="216" y="184" fill="#94A3AD" font-family="Arial, sans-serif" font-size="18" font-weight="500">Choose a path, share the right context, and get routed faster.</text>
+  
+  <g>
+      <rect x="780" y="100" width="280" height="28" rx="7" fill="#FFFFFF" fill-opacity=".045" stroke="#FFFFFF" stroke-opacity=".08"/>
+      <circle cx="798" cy="114" r="4" fill="#FF6262"/>
+      <text x="814" y="119" fill="#F5FBFF" fill-opacity=".72" font-family="Arial, sans-serif" font-size="13" font-weight="700">Product help</text>
+    </g><g>
+      <rect x="780" y="142" width="280" height="28" rx="7" fill="#FFFFFF" fill-opacity=".045" stroke="#FFFFFF" stroke-opacity=".08"/>
+      <circle cx="798" cy="156" r="4" fill="#FF6262"/>
+      <text x="814" y="161" fill="#F5FBFF" fill-opacity=".72" font-family="Arial, sans-serif" font-size="13" font-weight="700">License review</text>
+    </g><g>
+      <rect x="780" y="184" width="280" height="28" rx="7" fill="#FFFFFF" fill-opacity=".045" stroke="#FFFFFF" stroke-opacity=".08"/>
+      <circle cx="798" cy="198" r="4" fill="#FF6262"/>
+      <text x="814" y="203" fill="#F5FBFF" fill-opacity=".72" font-family="Arial, sans-serif" font-size="13" font-weight="700">Custom work</text>
+    </g>
+  <text x="88" y="268" fill="#FFD8D8" fill-opacity=".78" font-family="Arial, sans-serif" font-size="12" font-weight="700" letter-spacing="4">MXF LABS / SOFTWARE STUDIO</text>
+  
+  <defs>
+    <linearGradient id="mesh" x1="0" y1="0" x2="1200" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#17090C"/>
+      <stop offset=".46" stop-color="#080B10"/>
+      <stop offset="1" stop-color="#15100A"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset=".52" stop-color="#FFFFFF" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-40%" width="140%" height="180%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="28" stdDeviation="32" flood-color="#000000" flood-opacity=".38"/>
+    </filter>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0H0V64" fill="none" stroke="#FFFFFF" stroke-opacity=".055" stroke-width="1"/>
+    </pattern>
+    <pattern id="noise" width="34" height="34" patternUnits="userSpaceOnUse">
+      <circle cx="4" cy="5" r=".65" fill="#FFFFFF" opacity=".12"/>
+      <circle cx="21" cy="19" r=".7" fill="#FF6262" opacity=".12"/>
+    </pattern>
+  </defs>
 </svg>

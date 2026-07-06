@@ -55,8 +55,8 @@ export const productPanels: ProductPanelConfig[] = [
     version: "1.0.0-dev",
     category: "Minecraft",
     accentColor: 0xff6262,
-    bannerImage: "/discord/product-factions.svg",
-    thumbnailImage: "/discord/mxf-mark.svg",
+    bannerImage: "/discord/product-factions.png",
+    thumbnailImage: "/discord/mxf-mark.png",
     docsPath: "/docs?query=MxF%20Factions",
     changelogPath: "/changelog",
     purchasePath: "/support?product=mxf-factions&intent=notify",
@@ -77,8 +77,8 @@ export const productPanels: ProductPanelConfig[] = [
     version: "Roadmap",
     category: "Minecraft",
     accentColor: 0xf7b955,
-    bannerImage: "/discord/product-prisons.svg",
-    thumbnailImage: "/discord/mxf-mark.svg",
+    bannerImage: "/discord/product-prisons.png",
+    thumbnailImage: "/discord/mxf-mark.png",
     docsPath: "/docs?product=mxf-prisons",
     changelogPath: "/changelog",
     purchasePath: "/support?product=mxf-prisons&intent=roadmap",
@@ -99,8 +99,8 @@ export const productPanels: ProductPanelConfig[] = [
     version: "Roadmap",
     category: "Minecraft",
     accentColor: 0x86efac,
-    bannerImage: "/discord/product-skyblock.svg",
-    thumbnailImage: "/discord/mxf-mark.svg",
+    bannerImage: "/discord/product-skyblock.png",
+    thumbnailImage: "/discord/mxf-mark.png",
     docsPath: "/docs?product=mxf-skyblock",
     changelogPath: "/changelog",
     purchasePath: "/support?product=mxf-skyblock&intent=roadmap",
@@ -121,8 +121,8 @@ export const productPanels: ProductPanelConfig[] = [
     version: "0.1.0",
     category: "Discord",
     accentColor: 0x7dd3fc,
-    bannerImage: "/discord/product-aio-bot.svg",
-    thumbnailImage: "/discord/mxf-mark.svg",
+    bannerImage: "/discord/product-aio-bot.png",
+    thumbnailImage: "/discord/mxf-mark.png",
     docsPath: "/docs?product=mxf-aio-bot",
     changelogPath: "/changelog",
     purchasePath: "/support?product=mxf-aio-bot",
@@ -140,7 +140,7 @@ export function productPanelEmbed(panel: ProductPanelConfig) {
       { name: "Status", value: panel.status, inline: true },
       { name: "Category", value: panel.category || "MxF Product", inline: true },
     )
-    .setFooter({ text: "MxF Labs" });
+    .setFooter({ text: "MxF Labs | Software studio" });
 
   if (panel.features.length) {
     embed.addFields({ name: "Highlights", value: panel.features.slice(0, 4).map((feature) => `- ${feature}`).join("\n") });
