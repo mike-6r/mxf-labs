@@ -8,6 +8,7 @@ export const OAUTH_STATE_MAX_AGE_SECONDS = 60 * 10;
 export type AdminSessionPayload = {
   sub: string;
   email: string;
+  jti?: string;
   exp: number;
 };
 
@@ -114,6 +115,7 @@ export async function createAdminSessionValue({
   return createSignedValue({
     sub: adminId,
     email,
+    jti: crypto.randomUUID(),
     exp: Math.floor(Date.now() / 1000) + SESSION_MAX_AGE_SECONDS,
   });
 }

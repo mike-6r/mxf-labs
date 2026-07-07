@@ -131,6 +131,37 @@ await step("Admin same-origin guard", async () => {
   return "cross-site admin POST blocked";
 });
 
+await step("Admin session management", async () => {
+  const { response: loginResponse, json: loginJson } = await request("/api/admin/auth/login", {
+    method: "POST",
+    headers: { "x-real-ip": "203.0.113.10" },
+    body: {
+      email: process.env.ADMIN_EMAIL || "admin@mxf-labs.com",
+      password: process.env.ADMIN_PASSWORD || "ChangeMe123!",
+    },
+  });
+  const secondAdminCookie = cookieFrom(loginResponse);
+  assert(loginResponse.status === 200 && loginJson?.ok && secondAdminCookie, "Second admin session login failed.");
+
+  const { response: sessionsResponse, json: sessionsJson } = await request("/api/admin/security/sessions", {
+    headers: { cookie: adminCookie },
+  });
+  assert(sessionsResponse.status === 200 && sessionsJson?.ok && sessionsJson.sessions?.length >= 2, "Active admin sessions were not listed.");
+
+  const { response, json } = await request("/api/admin/security/sessions", {
+    method: "POST",
+    headers: { cookie: adminCookie },
+    body: { action: "revoke-others" },
+  });
+  assert(response.status === 200 && json?.ok && json.revoked >= 1, `Expected at least one revoked session, got ${JSON.stringify(json)}`);
+
+  const { response: revokedResponse } = await request("/api/admin/security/sessions", {
+    headers: { cookie: secondAdminCookie },
+  });
+  assert(revokedResponse.status === 401, `Revoked admin session should be unauthorized, got ${revokedResponse.status}`);
+  return `revoked=${json.revoked}`;
+});
+
 const product = await prisma.product.findUnique({ where: { slug: "mxf-factions" } });
 assert(product, "MxF Factions launch product missing.");
 
