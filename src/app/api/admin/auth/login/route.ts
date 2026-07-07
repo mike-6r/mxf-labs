@@ -13,6 +13,7 @@ import { logActivity } from "@/lib/db/activity";
 import { prisma } from "@/lib/db/prisma";
 import { checkRateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 import { requestIp } from "@/lib/request/ip";
+import { crossSiteAdminResponse } from "@/lib/security/admin-origin";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -21,6 +22,9 @@ const loginSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const crossSiteResponse = crossSiteAdminResponse(request.headers, request.method, new URL(request.url).origin);
+  if (crossSiteResponse) return crossSiteResponse;
+
   const ipAddress = requestIp(request);
   const rate = checkRateLimit(`admin-login:${ipAddress}`, 8);
 

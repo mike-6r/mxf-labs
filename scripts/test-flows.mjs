@@ -116,6 +116,21 @@ await step("Admin login", async () => {
   return "owner admin session created";
 });
 
+await step("Admin same-origin guard", async () => {
+  const { response, json } = await request("/api/admin/settings", {
+    method: "POST",
+    headers: { cookie: adminCookie, origin: "https://evil.example" },
+    body: {
+      key: "flow.cross_site_guard",
+      value: "blocked",
+      description: "This should never be written; the proxy should block it first.",
+    },
+  });
+
+  assert(response.status === 403 && json?.message === "Cross-site admin requests are blocked.", `Expected cross-site admin block, got ${response.status}`);
+  return "cross-site admin POST blocked";
+});
+
 const product = await prisma.product.findUnique({ where: { slug: "mxf-factions" } });
 assert(product, "MxF Factions launch product missing.");
 

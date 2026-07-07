@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_SESSION_COOKIE, verifyAdminSessionValue } from "@/lib/auth/session";
+import { crossSiteAdminResponse } from "@/lib/security/admin-origin";
 
 const publicAdminPaths = ["/admin/login", "/api/admin/auth/login"];
 
 async function adminProxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const isAdminPage = pathname.startsWith("/admin");
+  const isAdminApi = pathname.startsWith("/api/admin");
+
+  const crossSiteResponse = isAdminApi ? crossSiteAdminResponse(request.headers, request.method, request.nextUrl.origin) : null;
+  if (crossSiteResponse) return crossSiteResponse;
 
   if (publicAdminPaths.some((path) => pathname.startsWith(path))) {
     return NextResponse.next();
   }
-
-  const isAdminPage = pathname.startsWith("/admin");
-  const isAdminApi = pathname.startsWith("/api/admin");
 
   if (!isAdminPage && !isAdminApi) {
     return NextResponse.next();

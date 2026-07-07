@@ -1,9 +1,10 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { ADMIN_SESSION_COOKIE, hashSessionValue, verifyAdminSessionValue } from "@/lib/auth/session";
 import type { AdminPermission } from "@/lib/auth/rbac";
 import { canAdmin } from "@/lib/auth/rbac";
 import { prisma } from "@/lib/db/prisma";
+import { crossSiteAdminResponse } from "@/lib/security/admin-origin";
 
 export async function getCurrentAdmin() {
   const cookieStore = await cookies();
@@ -58,6 +59,14 @@ export async function requireAdmin(permission?: AdminPermission) {
 }
 
 export async function requireAdminApi(permission?: AdminPermission) {
+  const crossSiteResponse = crossSiteAdminResponse(await headers(), "POST");
+  if (crossSiteResponse) {
+    return {
+      admin: null,
+      response: crossSiteResponse,
+    };
+  }
+
   const admin = await getCurrentAdmin();
 
   if (!admin) {

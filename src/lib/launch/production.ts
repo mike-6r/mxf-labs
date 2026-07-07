@@ -375,7 +375,7 @@ export async function getProductionReadiness() {
       id: "abuse-controls",
       label: "Abuse controls",
       status: "ready",
-      detail: "Public forms, search, admin login, and license runtime APIs use shared rate limits with retry headers. Browser security headers are applied globally by Next.js.",
+      detail: "Public forms, search, admin login, and license runtime APIs use shared rate limits with retry headers. Cross-site admin mutations are blocked and browser security headers are applied globally by Next.js.",
     },
   ];
 
