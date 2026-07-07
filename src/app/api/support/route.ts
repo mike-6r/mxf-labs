@@ -3,7 +3,8 @@ import { getCurrentCustomer } from "@/lib/auth/customer";
 import { logActivity } from "@/lib/db/activity";
 import { prisma } from "@/lib/db/prisma";
 import { sendEmail, sendTemplateEmail } from "@/lib/email/resend";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitedResponse } from "@/lib/rate-limit";
+import { requestIp } from "@/lib/request/ip";
 import { escapeHtml } from "@/lib/security/html";
 import { publicSupportSchema } from "@/lib/validation/schemas";
 
@@ -13,10 +14,11 @@ async function nextTicketNumber() {
 }
 
 export async function POST(request: Request) {
-  const rate = checkRateLimit(`support:${request.headers.get("x-forwarded-for") || "local"}`, 10);
+  const ipAddress = requestIp(request);
+  const rate = checkRateLimit(`support:${ipAddress}`, 10);
 
   if (!rate.ok) {
-    return NextResponse.json({ ok: false, message: "Too many support requests." }, { status: 429 });
+    return rateLimitedResponse("Too many support requests.", rate);
   }
 
   const parsed = publicSupportSchema.safeParse(await request.json().catch(() => null));
@@ -47,7 +49,7 @@ export async function POST(request: Request) {
     action: "received support ticket",
     entityType: "SupportTicket",
     entityId: ticket.id,
-    metadata: { priority: ticket.priority, ticketNumber: ticket.ticketNumber },
+    metadata: { priority: ticket.priority, ticketNumber: ticket.ticketNumber, ipAddress },
   });
 
   await Promise.all([

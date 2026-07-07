@@ -371,6 +371,12 @@ export async function getProductionReadiness() {
       status: contentMode === "production" ? "ready" : "warning",
       detail: contentMode === "production" ? "Production content filtering is active." : "Set CONTENT_MODE=production on the live server.",
     },
+    {
+      id: "abuse-controls",
+      label: "Abuse controls",
+      status: "ready",
+      detail: "Public forms, search, admin login, and license runtime APIs use shared rate limits with retry headers. Browser security headers are applied globally by Next.js.",
+    },
   ];
 
   const requiredConfigured = env.filter((item) => item.required && item.status === "configured").length;

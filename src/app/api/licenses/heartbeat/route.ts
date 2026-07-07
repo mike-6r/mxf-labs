@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createLicenseRuntimeResponse, evaluateLicense, evaluateSuspiciousActivity, recordLicenseValidation } from "@/lib/license/server";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 import { requestIp } from "@/lib/request/ip";
 import { licenseActivationSchema } from "@/lib/validation/schemas";
 import { prisma } from "@/lib/db/prisma";
@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   const rate = checkRateLimit(`license-heartbeat:${ipAddress}`, 120);
 
   if (!rate.ok) {
-    return NextResponse.json({ ok: false, message: "Rate limited." }, { status: 429 });
+    return rateLimitedResponse("Rate limited.", rate, { alive: false });
   }
 
   const parsed = licenseActivationSchema.safeParse(await request.json().catch(() => null));

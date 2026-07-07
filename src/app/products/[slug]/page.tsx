@@ -16,6 +16,7 @@ import { getBooleanSetting } from "@/lib/db/settings";
 import { productCheckoutReady } from "@/lib/payments/readiness";
 import { publicPriceLabel } from "@/lib/pricing";
 import { productProgressColor, productProgressValue, shouldShowProductProgress } from "@/lib/products/progress";
+import { requestIp } from "@/lib/request/ip";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
@@ -76,7 +77,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
       data: {
         productId: productRecord.id,
         source: headerStore.get("referer"),
-        ipAddress: headerStore.get("x-forwarded-for")?.split(",")[0]?.trim() || null,
+        ipAddress: requestIp(headerStore),
         userAgent: headerStore.get("user-agent"),
       },
     });

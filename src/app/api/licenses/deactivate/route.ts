@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requestIp } from "@/lib/request/ip";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 import { licenseDeactivationSchema } from "@/lib/validation/schemas";
 import { prisma } from "@/lib/db/prisma";
 
@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   const rate = checkRateLimit(`license-deactivate:${ipAddress}`, 40);
 
   if (!rate.ok) {
-    return NextResponse.json({ ok: false, message: "Rate limited." }, { status: 429 });
+    return rateLimitedResponse("Rate limited.", rate, { deactivated: false });
   }
 
   const parsed = licenseDeactivationSchema.safeParse(await request.json().catch(() => null));

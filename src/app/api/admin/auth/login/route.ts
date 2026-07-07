@@ -11,7 +11,7 @@ import {
 import { getAdminTwoFactorState, verifyAdminTwoFactor } from "@/lib/auth/admin-2fa";
 import { logActivity } from "@/lib/db/activity";
 import { prisma } from "@/lib/db/prisma";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 import { requestIp } from "@/lib/request/ip";
 
 const loginSchema = z.object({
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   const rate = checkRateLimit(`admin-login:${ipAddress}`, 8);
 
   if (!rate.ok) {
-    return NextResponse.json({ ok: false, message: "Too many login attempts." }, { status: 429 });
+    return rateLimitedResponse("Too many login attempts.", rate);
   }
 
   const parsed = loginSchema.safeParse(await request.json().catch(() => null));

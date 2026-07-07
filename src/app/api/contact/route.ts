@@ -2,15 +2,17 @@ import { NextResponse } from "next/server";
 import { logActivity } from "@/lib/db/activity";
 import { prisma } from "@/lib/db/prisma";
 import { sendEmail } from "@/lib/email/resend";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitedResponse } from "@/lib/rate-limit";
+import { requestIp } from "@/lib/request/ip";
 import { escapeHtml } from "@/lib/security/html";
 import { publicContactSchema } from "@/lib/validation/schemas";
 
 export async function POST(request: Request) {
-  const rate = checkRateLimit(`contact:${request.headers.get("x-forwarded-for") || "local"}`, 12);
+  const ipAddress = requestIp(request);
+  const rate = checkRateLimit(`contact:${ipAddress}`, 12);
 
   if (!rate.ok) {
-    return NextResponse.json({ ok: false, message: "Too many requests." }, { status: 429 });
+    return rateLimitedResponse("Too many requests.", rate);
   }
 
   const parsed = publicContactSchema.safeParse(await request.json().catch(() => null));
@@ -27,7 +29,7 @@ export async function POST(request: Request) {
     action: "received contact submission",
     entityType: "ContactSubmission",
     entityId: submission.id,
-    metadata: { service: submission.service, budget: submission.budget },
+    metadata: { service: submission.service, budget: submission.budget, ipAddress },
   });
 
   await sendEmail({
