@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminApi } from "@/lib/auth/admin";
+import { auditChanges, requestAuditContext } from "@/lib/db/audit";
 import { logActivity } from "@/lib/db/activity";
 import { prisma } from "@/lib/db/prisma";
 
@@ -35,6 +36,7 @@ export async function PATCH(request: Request, { params }: Params) {
 
   const { id } = await params;
   try {
+    const before = await prisma.featureFlag.findUnique({ where: { id } });
     const flag = await prisma.featureFlag.update({
       where: { id },
       data: parsed.data,
@@ -45,7 +47,13 @@ export async function PATCH(request: Request, { params }: Params) {
       action: typeof parsed.data.enabled === "boolean" ? (parsed.data.enabled ? "enabled feature flag" : "disabled feature flag") : "updated feature flag",
       entityType: "FeatureFlag",
       entityId: flag.id,
-      metadata: { key: flag.key, scope: flag.scope, enabled: flag.enabled },
+      metadata: {
+        key: flag.key,
+        scope: flag.scope,
+        enabled: flag.enabled,
+        changes: auditChanges(before as Record<string, unknown> | null, flag as unknown as Record<string, unknown>, Object.keys(parsed.data)),
+        ...requestAuditContext(request),
+      },
     });
 
     return NextResponse.json({ ok: true, flag });
@@ -58,18 +66,19 @@ export async function PATCH(request: Request, { params }: Params) {
   }
 }
 
-export async function DELETE(_request: Request, { params }: Params) {
+export async function DELETE(request: Request, { params }: Params) {
   const { admin, response } = await requireAdminApi("feature_flags.manage");
   if (response) return response;
 
   const { id } = await params;
-  await prisma.featureFlag.delete({ where: { id } });
+  const flag = await prisma.featureFlag.delete({ where: { id } });
 
   await logActivity({
     actorEmail: admin.email,
     action: "deleted feature flag",
     entityType: "FeatureFlag",
     entityId: id,
+    metadata: { key: flag.key, scope: flag.scope, ...requestAuditContext(request) },
   });
 
   return NextResponse.json({ ok: true });

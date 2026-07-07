@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth/admin";
+import { auditChanges, requestAuditContext } from "@/lib/db/audit";
 import { logActivity } from "@/lib/db/activity";
 import { prisma } from "@/lib/db/prisma";
 import { documentationArticleSchema } from "@/lib/validation/schemas";
@@ -41,6 +42,7 @@ export async function PATCH(request: Request, { params }: Params) {
   const { id } = await params;
 
   try {
+    const before = await prisma.documentationArticle.findUnique({ where: { id } });
     const article = await prisma.documentationArticle.update({
       where: { id },
       data: toPartialArticleData(parsed.data),
@@ -52,7 +54,24 @@ export async function PATCH(request: Request, { params }: Params) {
       action: "updated documentation article",
       entityType: "DocumentationArticle",
       entityId: article.id,
-      metadata: { title: article.title, slug: article.slug, productId: article.productId },
+      metadata: {
+        title: article.title,
+        slug: article.slug,
+        productId: article.productId,
+        changes: auditChanges(before as Record<string, unknown> | null, article as unknown as Record<string, unknown>, [
+          "title",
+          "slug",
+          "category",
+          "excerpt",
+          "bodyMarkdown",
+          "version",
+          "productId",
+          "productVersion",
+          "visible",
+          "sortOrder",
+        ]),
+        ...requestAuditContext(request),
+      },
     });
 
     return NextResponse.json({ ok: true, article });
@@ -65,18 +84,19 @@ export async function PATCH(request: Request, { params }: Params) {
   }
 }
 
-export async function DELETE(_request: Request, { params }: Params) {
+export async function DELETE(request: Request, { params }: Params) {
   const { admin, response } = await requireAdminApi("documentation.manage");
   if (response) return response;
 
   const { id } = await params;
-  await prisma.documentationArticle.delete({ where: { id } });
+  const article = await prisma.documentationArticle.delete({ where: { id } });
 
   await logActivity({
     actorEmail: admin.email,
     action: "deleted documentation article",
     entityType: "DocumentationArticle",
     entityId: id,
+    metadata: { title: article.title, slug: article.slug, ...requestAuditContext(request) },
   });
 
   return NextResponse.json({ ok: true });

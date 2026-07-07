@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth/admin";
+import { auditChanges, requestAuditContext } from "@/lib/db/audit";
 import { logActivity } from "@/lib/db/activity";
 import { prisma } from "@/lib/db/prisma";
 import { productSchema } from "@/lib/validation/schemas";
@@ -64,9 +65,11 @@ export async function PATCH(request: Request, { params }: Params) {
     return NextResponse.json({ ok: false, message: "Invalid product update." }, { status: 400 });
   }
 
+  const before = await prisma.product.findUnique({ where: { id } });
+  const data = toPartialProductData(parsed.data);
   const product = await prisma.product.update({
     where: { id },
-    data: toPartialProductData(parsed.data),
+    data,
   });
 
   await logActivity({
@@ -74,13 +77,17 @@ export async function PATCH(request: Request, { params }: Params) {
     action: "updated product",
     entityType: "Product",
     entityId: product.id,
-    metadata: { name: product.name },
+    metadata: {
+      name: product.name,
+      changes: auditChanges(before as Record<string, unknown> | null, product as unknown as Record<string, unknown>, Object.keys(data)),
+      ...requestAuditContext(request),
+    },
   });
 
   return NextResponse.json({ ok: true, product });
 }
 
-export async function DELETE(_request: Request, { params }: Params) {
+export async function DELETE(request: Request, { params }: Params) {
   const { admin, response } = await requireAdminApi("products.manage");
 
   if (response) return response;
@@ -93,6 +100,7 @@ export async function DELETE(_request: Request, { params }: Params) {
     action: "deleted product",
     entityType: "Product",
     entityId: id,
+    metadata: requestAuditContext(request),
   });
 
   return NextResponse.json({ ok: true });

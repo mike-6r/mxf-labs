@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth/admin";
+import { auditChanges, requestAuditContext } from "@/lib/db/audit";
 import { logActivity } from "@/lib/db/activity";
 import { prisma } from "@/lib/db/prisma";
 import { normalizeAllowedVersionsInput } from "@/lib/license/generate";
@@ -19,6 +20,7 @@ export async function PATCH(request: Request, { params }: Params) {
   }
 
   const { id } = await params;
+  const before = await prisma.license.findUnique({ where: { id } });
   const license = await prisma.license.update({
     where: { id },
     data: {
@@ -42,13 +44,28 @@ export async function PATCH(request: Request, { params }: Params) {
     action: "updated license",
     entityType: "License",
     entityId: license.id,
-    metadata: { status: license.status },
+    metadata: {
+      status: license.status,
+      changes: auditChanges(before as Record<string, unknown> | null, license as unknown as Record<string, unknown>, [
+        "status",
+        "licenseType",
+        "expirationDate",
+        "minimumVersion",
+        "allowedVersionsJson",
+        "maxActivations",
+        "currentActivations",
+        "notes",
+        "blacklisted",
+        "blacklistedAt",
+      ]),
+      ...requestAuditContext(request),
+    },
   });
 
   return NextResponse.json({ ok: true, license });
 }
 
-export async function DELETE(_request: Request, { params }: Params) {
+export async function DELETE(request: Request, { params }: Params) {
   const { admin, response } = await requireAdminApi("licenses.manage");
 
   if (response) return response;
@@ -68,6 +85,7 @@ export async function DELETE(_request: Request, { params }: Params) {
     action: "deleted license",
     entityType: "License",
     entityId: id,
+    metadata: requestAuditContext(request),
   });
 
   return NextResponse.json({ ok: true });

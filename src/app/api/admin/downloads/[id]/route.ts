@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth/admin";
+import { auditChanges, requestAuditContext } from "@/lib/db/audit";
 import { logActivity } from "@/lib/db/activity";
 import { prisma } from "@/lib/db/prisma";
 import { createProductStorageKey, deleteLocalStorageFile, writeLocalStorageFile } from "@/lib/storage/local";
@@ -123,7 +124,7 @@ export async function PATCH(request: Request, { params }: Params) {
   if (response) return response;
 
   const { id } = await params;
-  const existing = await prisma.productDownload.findUnique({ where: { id }, select: { storageKey: true } });
+  const existing = await prisma.productDownload.findUnique({ where: { id } });
 
   if (!existing) {
     return NextResponse.json({ ok: false, message: "Download not found." }, { status: 404 });
@@ -148,7 +149,25 @@ export async function PATCH(request: Request, { params }: Params) {
       action: "updated product download",
       entityType: "ProductDownload",
       entityId: download.id,
-      metadata: { filename: download.filename, productId: download.productId, releaseId: download.releaseId },
+      metadata: {
+        filename: download.filename,
+        productId: download.productId,
+        releaseId: download.releaseId,
+        changes: auditChanges(existing as Record<string, unknown> | null, download as unknown as Record<string, unknown>, [
+          "productId",
+          "releaseId",
+          "filename",
+          "fileType",
+          "storageKey",
+          "fileSize",
+          "checksum",
+          "version",
+          "visible",
+          "requiresLicense",
+        ]),
+        fileReplaced: parsed.uploadedFile && existing.storageKey !== download.storageKey,
+        ...requestAuditContext(request),
+      },
     });
 
     return NextResponse.json({ ok: true, download });
@@ -161,7 +180,7 @@ export async function PATCH(request: Request, { params }: Params) {
   }
 }
 
-export async function DELETE(_request: Request, { params }: Params) {
+export async function DELETE(request: Request, { params }: Params) {
   const { admin, response } = await requireAdminApi("downloads.manage");
   if (response) return response;
 
@@ -180,7 +199,7 @@ export async function DELETE(_request: Request, { params }: Params) {
     action: "deleted product download",
     entityType: "ProductDownload",
     entityId: id,
-    metadata: { filename: existing.filename },
+    metadata: { filename: existing.filename, ...requestAuditContext(request) },
   });
 
   return NextResponse.json({ ok: true });
