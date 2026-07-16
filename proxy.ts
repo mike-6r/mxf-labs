@@ -4,7 +4,7 @@ import { prelaunchModeEnabled } from "@/lib/launch-mode";
 import { crossSiteAdminResponse } from "@/lib/security/admin-origin";
 
 const publicAdminPaths = ["/admin/login", "/api/admin/auth/login"];
-const prelaunchAllowedPrefixes = ["/api", "/admin", "/portal"];
+const prelaunchAllowedPrefixes = ["/api", "/admin", "/portal", "/mxf-factions"];
 
 function publicLaunchGate(request: NextRequest) {
   const { pathname } = request.nextUrl;

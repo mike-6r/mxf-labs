@@ -1,4 +1,4 @@
-import { ArrowRight, Bot, Boxes, Gauge, KeyRound, LockKeyhole, Radio, ShieldCheck, Sparkles, TerminalSquare } from "lucide-react";
+import { ArrowRight, Bot, Boxes, Gauge, KeyRound, LockKeyhole, Radio, Shield, ShieldCheck, Sparkles, TerminalSquare } from "lucide-react";
 import Link from "next/link";
 
 const signals = [
@@ -53,15 +53,22 @@ export function ComingSoonLanding() {
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
-              href="/portal"
+              href="/mxf-factions"
               className="button-shine inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-white px-5 text-sm font-semibold text-black transition hover:bg-[#fff3ef]"
+            >
+              Preview MxF Factions
+              <Shield className="relative z-10 h-4 w-4" aria-hidden="true" />
+            </Link>
+            <Link
+              href="/portal"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-white/12 bg-white/[0.04] px-5 text-sm font-semibold text-white/78 transition hover:border-[#ff6262]/45 hover:text-white"
             >
               Customer login
               <ArrowRight className="relative z-10 h-4 w-4" aria-hidden="true" />
             </Link>
             <Link
               href="/admin/login"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-white/12 bg-white/[0.04] px-5 text-sm font-semibold text-white/78 transition hover:border-[#ff6262]/45 hover:text-white"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-white/12 bg-white/[0.02] px-5 text-sm font-semibold text-white/62 transition hover:border-[#ff6262]/45 hover:text-white"
             >
               Admin console
               <LockKeyhole className="h-4 w-4" aria-hidden="true" />
