@@ -1,8 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_SESSION_COOKIE, verifyAdminSessionValue } from "@/lib/auth/session";
+import { prelaunchModeEnabled } from "@/lib/launch-mode";
 import { crossSiteAdminResponse } from "@/lib/security/admin-origin";
 
 const publicAdminPaths = ["/admin/login", "/api/admin/auth/login"];
+const prelaunchAllowedPrefixes = ["/api", "/admin", "/portal"];
+
+function publicLaunchGate(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (!prelaunchModeEnabled()) {
+    return null;
+  }
+
+  if (pathname === "/" || prelaunchAllowedPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
+    return null;
+  }
+
+  const homeUrl = new URL("/", request.url);
+  return NextResponse.redirect(homeUrl);
+}
 
 async function adminProxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -17,7 +34,7 @@ async function adminProxy(request: NextRequest) {
   }
 
   if (!isAdminPage && !isAdminApi) {
-    return NextResponse.next();
+    return publicLaunchGate(request) || NextResponse.next();
   }
 
   const session = await verifyAdminSessionValue(request.cookies.get(ADMIN_SESSION_COOKIE)?.value);
@@ -39,5 +56,7 @@ export const proxy = adminProxy;
 export const middleware = adminProxy;
 
 export const config = {
-  matcher: ["/admin", "/admin/:path*", "/api/admin/:path*"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|txt|xml)$).*)",
+  ],
 };

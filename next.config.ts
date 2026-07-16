@@ -12,6 +12,26 @@ const securityHeaders = [
   },
 ];
 
+const publicSiteIsFull = process.env.NEXT_PUBLIC_SITE_MODE === "full" || process.env.PUBLIC_SITE_MODE === "full";
+const prelaunchRedirects = [
+  "/about",
+  "/announcements",
+  "/changelog",
+  "/checkout/:path*",
+  "/contact",
+  "/docs/:path*",
+  "/documentation",
+  "/privacy",
+  "/products/:path*",
+  "/projects/:path*",
+  "/refund-policy",
+  "/refunds",
+  "/search",
+  "/services",
+  "/support",
+  "/terms",
+];
+
 if (process.env.NODE_ENV === "production") {
   securityHeaders.push({
     key: "Strict-Transport-Security",
@@ -29,6 +49,17 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
     ];
+  },
+  async redirects() {
+    if (publicSiteIsFull) {
+      return [];
+    }
+
+    return prelaunchRedirects.map((source) => ({
+      source,
+      destination: "/",
+      permanent: false,
+    }));
   },
 };
 

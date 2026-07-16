@@ -11,6 +11,7 @@ This checklist shows every value needed for production readiness. Put these valu
 | Admin password | `ADMIN_PASSWORD` | First seeded admin password | `ChangeMe123!` |
 | Session secret | `AUTH_SECRET` | Signed admin/customer sessions, OAuth state, download tokens | Required before production |
 | Public site URL | `NEXT_PUBLIC_SITE_URL` | Checkout redirects, canonical local URLs, future emails | `http://localhost:3000`; production `https://mxf-labs.com` |
+| Public site mode | `NEXT_PUBLIC_SITE_MODE`, `PUBLIC_SITE_MODE` | Controls whether visitors see the Coming Soon landing page or the full storefront | Use `coming-soon` before launch; set both to `full` when ready |
 | Content mode | `CONTENT_MODE` | Demo/clean/production content visibility | `clean` locally; `production` live |
 | Support email | `SUPPORT_EMAIL` | Support forms, footer contact, notification fallback | `support@mxf-labs.com` |
 | Sender email | `FROM_EMAIL` | Resend transactional sender | `MxF Labs <support@mxf-labs.com>` |
