@@ -9,7 +9,13 @@ export default async function AdminLicensesPage() {
   const admin = await requireAdminPage("licenses.manage");
   const [licenses, products, customers] = await Promise.all([
     prisma.license.findMany({
-      include: { customer: true, product: true },
+      include: {
+        customer: true,
+        product: true,
+        activations: { orderBy: { lastSeenAt: "desc" }, take: 5 },
+        suspiciousFlags: { where: { status: "Open" }, orderBy: { createdAt: "desc" }, take: 5 },
+        validations: { orderBy: { createdAt: "desc" }, take: 5 },
+      },
       orderBy: { createdAt: "desc" },
     }),
     prisma.product.findMany({ orderBy: { name: "asc" } }),

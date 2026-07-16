@@ -5,13 +5,21 @@ import { prisma } from "@/lib/db/prisma";
 import { generateLicenseKey, normalizeAllowedVersionsInput } from "@/lib/license/generate";
 import { licenseCreateSchema } from "@/lib/validation/schemas";
 
+const licenseInclude = {
+  customer: true,
+  product: true,
+  activations: { orderBy: { lastSeenAt: "desc" as const }, take: 5 },
+  suspiciousFlags: { where: { status: "Open" }, orderBy: { createdAt: "desc" as const }, take: 5 },
+  validations: { orderBy: { createdAt: "desc" as const }, take: 5 },
+};
+
 export async function GET() {
   const { response } = await requireAdminApi("licenses.manage");
 
   if (response) return response;
 
   const licenses = await prisma.license.findMany({
-    include: { customer: true, product: true },
+    include: licenseInclude,
     orderBy: { createdAt: "desc" },
   });
 
@@ -42,7 +50,7 @@ export async function POST(request: Request) {
       notes: parsed.data.notes || "",
       status: "Active",
     },
-    include: { customer: true, product: true },
+    include: licenseInclude,
   });
 
   await logActivity({

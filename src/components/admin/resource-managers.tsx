@@ -1,7 +1,7 @@
 "use client";
 
-import { Check, Plus, Save, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Activity, Ban, Check, KeyRound, Plus, RefreshCw, Save, Search, ShieldAlert, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { PRODUCT_STATUS_OPTIONS } from "@/lib/products/status";
 import { cn } from "@/lib/utils";
 
@@ -96,8 +96,39 @@ type LicenseItem = {
   maxActivations: number;
   currentActivations: number;
   notes: string;
+  lastValidatedAt?: string | Date | null;
+  lastResetAt?: string | Date | null;
+  resetCount?: number;
+  transferCount?: number;
+  createdAt?: string | Date;
   product?: { id: string; name: string } | null;
   customer?: { id: string; email: string; name: string } | null;
+  activations?: Array<{
+    id: string;
+    deviceId: string;
+    instanceId: string;
+    ipAddress: string | null;
+    productVersion: string | null;
+    status: string;
+    lastSeenAt: string | Date;
+  }>;
+  validations?: Array<{
+    id: string;
+    result: string;
+    reason: string;
+    deviceId: string | null;
+    instanceId: string | null;
+    ipAddress: string | null;
+    productVersion: string | null;
+    createdAt: string | Date;
+  }>;
+  suspiciousFlags?: Array<{
+    id: string;
+    severity: string;
+    reason: string;
+    status: string;
+    createdAt: string | Date;
+  }>;
 };
 
 type OrderItem = {
@@ -781,6 +812,41 @@ export function LicenseManager({
   customers: SelectOption[];
 }) {
   const [items, setItems] = useState(licenses);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [message, setMessage] = useState("");
+
+  const stats = useMemo(() => {
+    const active = items.filter((item) => item.status === "Active").length;
+    const flagged = items.filter((item) => (item.suspiciousFlags || []).length > 0 || item.blacklisted).length;
+    const saturated = items.filter((item) => item.currentActivations >= item.maxActivations).length;
+
+    return { active, flagged, saturated, total: items.length };
+  }, [items]);
+
+  const visibleItems = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+
+    return items.filter((license) => {
+      const statusMatches = statusFilter === "All" || license.status === statusFilter;
+      if (!normalized) return statusMatches;
+
+      const searchable = [
+        license.key,
+        license.status,
+        license.licenseType,
+        license.product?.name,
+        license.customer?.email,
+        license.customer?.name,
+        license.notes,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return statusMatches && searchable.includes(normalized);
+    });
+  }, [items, query, statusFilter]);
 
   async function create(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -801,6 +867,7 @@ export function LicenseManager({
     });
     const result = await response.json();
     if (result.license) setItems((current) => [result.license, ...current]);
+    setMessage(response.ok ? "License generated." : result.message || "Unable to generate license.");
   }
 
   async function update(id: string, form: HTMLFormElement) {
@@ -821,6 +888,7 @@ export function LicenseManager({
     });
     const result = await response.json();
     if (result.license) setItems((current) => current.map((item) => (item.id === id ? result.license : item)));
+    setMessage(response.ok ? "License saved." : result.message || "Unable to save license.");
   }
 
   async function remove(id: string) {
@@ -829,10 +897,32 @@ export function LicenseManager({
     if (response.ok) setItems((current) => current.filter((item) => item.id !== id));
   }
 
+  async function runAction(id: string, action: string, label: string) {
+    const note =
+      action === "append-note"
+        ? window.prompt("Add an internal note for this license.")
+        : window.prompt(`${label} reason`, "Admin review");
+
+    if (note === null) return;
+
+    const response = await fetch(`/api/admin/licenses/${id}/actions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action,
+        reason: note || label,
+        note,
+      }),
+    });
+    const result = await response.json();
+    if (result.license) setItems((current) => current.map((item) => (item.id === id ? result.license : item)));
+    setMessage(response.ok ? `${label} complete.` : result.message || `${label} failed.`);
+  }
+
   return (
     <div className="grid gap-6">
       <form onSubmit={create} className="surface rounded-lg p-5">
-        <ResourceHeader title="Create manual license" />
+        <ResourceHeader title="Create manual license" message={message} />
         <div className="grid gap-4 md:grid-cols-2">
           <OptionSelect label="Product" name="productId" options={products} />
           <OptionSelect label="Customer" name="customerId" options={customers} />
@@ -849,7 +939,51 @@ export function LicenseManager({
           </ActionButton>
         </div>
       </form>
-      {items.map((license) => (
+
+      <div className="surface rounded-lg p-5">
+        <div className="grid gap-3 md:grid-cols-4">
+          <LicenseMetric icon={<KeyRound className="h-4 w-4" />} label="Total keys" value={stats.total} />
+          <LicenseMetric icon={<Check className="h-4 w-4" />} label="Active" value={stats.active} />
+          <LicenseMetric icon={<ShieldAlert className="h-4 w-4" />} label="Flagged" value={stats.flagged} />
+          <LicenseMetric icon={<Activity className="h-4 w-4" />} label="At activation limit" value={stats.saturated} />
+        </div>
+        <div className="mt-5 grid gap-3 md:grid-cols-[1fr_auto]">
+          <label className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/38" />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search keys, customers, products, notes"
+              className="h-11 w-full rounded-md border border-white/10 bg-black/24 pl-10 pr-3 text-sm text-white outline-none focus:border-[#ff6262]/60"
+            />
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {["All", ...licenseStatuses].map((status) => (
+              <button
+                key={status}
+                type="button"
+                onClick={() => setStatusFilter(status)}
+                className={cn(
+                  "rounded-md border px-3 py-2 text-xs font-semibold transition",
+                  statusFilter === status
+                    ? "border-white bg-white text-black"
+                    : "border-white/10 bg-white/[0.035] text-white/58 hover:text-white",
+                )}
+              >
+                {status}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {visibleItems.length === 0 ? (
+        <div className="surface rounded-lg p-8 text-sm text-white/54">
+          No licenses match this filter. Generate a key or clear the search to review all license records.
+        </div>
+      ) : null}
+
+      {visibleItems.map((license) => (
         <form
           key={license.id}
           onSubmit={(event) => {
@@ -858,11 +992,7 @@ export function LicenseManager({
           }}
           className="surface rounded-lg p-5"
         >
-          <ResourceSummary
-            title={license.key}
-            meta={`${license.status} / ${license.product?.name || "No product"} / ${license.customer?.email || "No customer"}`}
-            description={`${license.currentActivations}/${license.maxActivations} activations`}
-          />
+          <LicenseSummary license={license} />
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <SelectField label="Status" name="status" defaultValue={license.status} options={licenseStatuses} />
             <SelectField label="License type" name="licenseType" defaultValue={license.licenseType || "Lifetime"} options={["Permanent", "Monthly", "Yearly", "Lifetime", "Trial", "Custom"]} />
@@ -881,10 +1011,75 @@ export function LicenseManager({
             <TextArea label="Allowed versions" name="allowedVersionsJson" defaultValue={jsonListToText(license.allowedVersionsJson)} />
             <TextArea label="Notes" name="notes" defaultValue={license.notes} />
           </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            <LicenseTimeline title="Activations" empty="No active activations." items={(license.activations || []).map((activation) => ({
+              id: activation.id,
+              title: `${activation.deviceId} / ${activation.instanceId}`,
+              meta: `${activation.status} / ${activation.productVersion || "No version"}`,
+              detail: `${activation.ipAddress || "No IP"} / ${formatDate(activation.lastSeenAt)}`,
+            }))} />
+            <LicenseTimeline title="Validation history" empty="No validations yet." items={(license.validations || []).map((validation) => ({
+              id: validation.id,
+              title: `${validation.result} / ${validation.reason}`,
+              meta: validation.deviceId || validation.instanceId || "No runtime ID",
+              detail: `${validation.ipAddress || "No IP"} / ${formatDate(validation.createdAt)}`,
+            }))} />
+            <LicenseTimeline title="Open flags" empty="No open flags." items={(license.suspiciousFlags || []).map((flag) => ({
+              id: flag.id,
+              title: `${flag.severity} / ${flag.reason}`,
+              meta: flag.status,
+              detail: formatDate(flag.createdAt),
+            }))} />
+          </div>
           <div className="mt-5 flex flex-wrap gap-3">
             <ActionButton>
               <Save className="h-4 w-4" /> Save license
             </ActionButton>
+            <button
+              type="button"
+              onClick={() => runAction(license.id, "reset-activations", "Reset activations")}
+              className="inline-flex min-h-10 items-center gap-2 rounded-md border border-[#ffd166]/30 bg-[#ffd166]/10 px-3 text-sm font-semibold text-[#ffe6a3]"
+            >
+              <RefreshCw className="h-4 w-4" /> Reset activations
+            </button>
+            <button
+              type="button"
+              onClick={() => runAction(license.id, "clear-ip-bindings", "Clear IP bindings")}
+              className="inline-flex min-h-10 items-center gap-2 rounded-md border border-white/10 bg-white/[0.035] px-3 text-sm font-semibold text-white/72"
+            >
+              <Activity className="h-4 w-4" /> Clear IPs
+            </button>
+            {license.status === "Active" ? (
+              <button
+                type="button"
+                onClick={() => runAction(license.id, "suspend", "Suspend license")}
+                className="inline-flex min-h-10 items-center gap-2 rounded-md border border-[#ff9f43]/30 bg-[#ff9f43]/10 px-3 text-sm font-semibold text-[#ffd8a8]"
+              >
+                <Ban className="h-4 w-4" /> Suspend
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => runAction(license.id, "activate", "Reactivate license")}
+                className="inline-flex min-h-10 items-center gap-2 rounded-md border border-[#40dca5]/30 bg-[#40dca5]/10 px-3 text-sm font-semibold text-[#b9ffe6]"
+              >
+                <Check className="h-4 w-4" /> Reactivate
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => runAction(license.id, "revoke", "Revoke license")}
+              className="inline-flex min-h-10 items-center gap-2 rounded-md border border-[#ff5f6d]/30 bg-[#ff5f6d]/10 px-3 text-sm font-semibold text-[#ffd0dc]"
+            >
+              <ShieldAlert className="h-4 w-4" /> Revoke
+            </button>
+            <button
+              type="button"
+              onClick={() => runAction(license.id, "append-note", "Add note")}
+              className="inline-flex min-h-10 items-center gap-2 rounded-md border border-white/10 bg-white/[0.035] px-3 text-sm font-semibold text-white/72"
+            >
+              Add note
+            </button>
             <button
               type="button"
               onClick={() => remove(license.id)}
@@ -895,6 +1090,98 @@ export function LicenseManager({
           </div>
         </form>
       ))}
+    </div>
+  );
+}
+
+function formatDate(value?: string | Date | null) {
+  if (!value) return "Never";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Unknown";
+  return date.toLocaleDateString();
+}
+
+function maskLicense(value: string) {
+  const parts = value.split("-");
+  if (parts.length >= 4) return `${parts[0]}-${parts[1]}-...-${parts.at(-1)}`;
+  return `${value.slice(0, 6)}...${value.slice(-4)}`;
+}
+
+function LicenseMetric({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+  return (
+    <div className="rounded-md border border-white/10 bg-white/[0.035] p-4">
+      <div className="flex items-center gap-2 text-[#ff6262]">{icon}</div>
+      <p className="mt-3 text-2xl font-semibold text-white">{value}</p>
+      <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/38">{label}</p>
+    </div>
+  );
+}
+
+function LicenseSummary({ license }: { license: LicenseItem }) {
+  const isRisky = license.blacklisted || (license.suspiciousFlags || []).length > 0 || license.status !== "Active";
+  const activationLabel = `${license.currentActivations}/${license.maxActivations} activations`;
+
+  return (
+    <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+      <div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={cn(
+              "rounded-md border px-2.5 py-1 text-xs font-semibold",
+              isRisky
+                ? "border-[#ff9f43]/35 bg-[#ff9f43]/10 text-[#ffd8a8]"
+                : "border-[#40dca5]/30 bg-[#40dca5]/10 text-[#b9ffe6]",
+            )}
+          >
+            {license.status}
+          </span>
+          <span className="rounded-md border border-white/10 bg-white/[0.035] px-2.5 py-1 text-xs font-semibold text-white/58">
+            {license.licenseType}
+          </span>
+          <span className="rounded-md border border-white/10 bg-white/[0.035] px-2.5 py-1 text-xs font-semibold text-white/58">
+            {activationLabel}
+          </span>
+        </div>
+        <h3 className="mt-3 break-all font-mono text-xl font-semibold text-white">{maskLicense(license.key)}</h3>
+        <p className="mt-2 text-sm leading-6 text-white/54">
+          {license.product?.name || "No product assigned"} / {license.customer?.email || "No customer assigned"}
+        </p>
+      </div>
+      <div className="grid gap-2 rounded-md border border-white/10 bg-black/20 p-4 text-xs text-white/52">
+        <span>Last validation: {formatDate(license.lastValidatedAt)}</span>
+        <span>Last reset: {formatDate(license.lastResetAt)}</span>
+        <span>Reset count: {license.resetCount ?? 0}</span>
+        <span>Transfers: {license.transferCount ?? 0}</span>
+      </div>
+    </div>
+  );
+}
+
+function LicenseTimeline({
+  title,
+  empty,
+  items,
+}: {
+  title: string;
+  empty: string;
+  items: Array<{ id: string; title: string; meta: string; detail: string }>;
+}) {
+  return (
+    <div className="rounded-md border border-white/10 bg-black/18 p-4">
+      <h4 className="text-sm font-semibold text-white">{title}</h4>
+      <div className="mt-3 grid gap-2">
+        {items.length ? (
+          items.map((item) => (
+            <div key={item.id} className="rounded-md border border-white/8 bg-white/[0.025] p-3">
+              <p className="truncate text-xs font-semibold text-white/78">{item.title}</p>
+              <p className="mt-1 truncate text-xs text-white/42">{item.meta}</p>
+              <p className="mt-1 truncate text-xs text-white/34">{item.detail}</p>
+            </div>
+          ))
+        ) : (
+          <p className="text-xs leading-5 text-white/38">{empty}</p>
+        )}
+      </div>
     </div>
   );
 }

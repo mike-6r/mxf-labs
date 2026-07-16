@@ -8,6 +8,14 @@ import { licenseUpdateSchema } from "@/lib/validation/schemas";
 
 type Params = { params: Promise<{ id: string }> };
 
+const licenseInclude = {
+  customer: true,
+  product: true,
+  activations: { orderBy: { lastSeenAt: "desc" as const }, take: 5 },
+  suspiciousFlags: { where: { status: "Open" }, orderBy: { createdAt: "desc" as const }, take: 5 },
+  validations: { orderBy: { createdAt: "desc" as const }, take: 5 },
+};
+
 export async function PATCH(request: Request, { params }: Params) {
   const { admin, response } = await requireAdminApi("licenses.manage");
 
@@ -36,7 +44,7 @@ export async function PATCH(request: Request, { params }: Params) {
       blacklistedAt: parsed.data.blacklisted === undefined ? undefined : parsed.data.blacklisted ? new Date() : null,
       blacklisted: parsed.data.blacklisted,
     },
-    include: { customer: true, product: true },
+    include: licenseInclude,
   });
 
   await logActivity({

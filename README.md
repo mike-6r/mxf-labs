@@ -143,6 +143,15 @@ Public docs:
 
 Architecture documents live in `documentation/`.
 
+Legacy Cosmix import review:
+
+- `documentation/COSMIX_IMPORT_AUDIT.md`
+
+Runtime client examples:
+
+- `examples/license-node-client.mjs`
+- `examples/LicenseClient.java`
+
 ## Checks
 
 ```bash
