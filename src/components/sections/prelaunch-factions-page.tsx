@@ -98,11 +98,11 @@ const featureGroups = [
 
 const productPillars = [
   { label: "One cohesive platform", icon: Layers3 },
-  { label: "Enterprise-grade architecture", icon: Server },
+  { label: "Production-ready architecture", icon: Server },
   { label: "Competitive season infrastructure", icon: Trophy },
-  { label: "Modern modular YAML", icon: ScrollText },
+  { label: "Clean modular YAML", icon: ScrollText },
   { label: "High performance caching", icon: Gauge },
-  { label: "Future-ready developer API", icon: DatabaseZap },
+  { label: "Developer API ready", icon: DatabaseZap },
 ];
 
 const timeline = [
@@ -323,10 +323,10 @@ export function PrelaunchFactionsPage() {
       <section id="systems" className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-16 md:px-8 lg:grid-cols-[0.7fr_1.3fr]">
         <div className="lg:sticky lg:top-28 lg:self-start">
           <p className="font-mono text-xs uppercase tracking-[0.22em] text-[#ff6262]">Platform systems</p>
-          <h2 className="mt-4 text-4xl font-semibold leading-tight text-white md:text-6xl">One plugin surface. An entire competitive server stack.</h2>
+          <h2 className="mt-4 text-4xl font-semibold leading-tight text-white md:text-6xl">Everything your factions server needs, in one product.</h2>
           <p className="mt-5 text-sm leading-7 text-white/54">
-            Instead of stitching together dozens of fragile plugins, MxF organizes the major factions systems into a consistent command,
-            permissions, GUI, config, API, and documentation standard.
+            MxF Factions brings claims, roles, events, seasons, leaderboards, economy tools, staff controls, and polished menus into
+            one consistent system built for serious server owners.
           </p>
           <div className="mt-7 flex flex-wrap gap-2">
             {productPillars.map((pillar) => {
@@ -373,10 +373,10 @@ export function PrelaunchFactionsPage() {
         <GuiShowcase />
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.22em] text-[#ffd166]">Player experience</p>
-          <h2 className="mt-4 text-4xl font-semibold leading-tight text-white md:text-6xl">A complete GUI framework, not a pile of commands.</h2>
+          <h2 className="mt-4 text-4xl font-semibold leading-tight text-white md:text-6xl">Menus players can actually use.</h2>
           <p className="mt-5 text-sm leading-7 text-white/54">
-            Main menus, faction menus, upgrades, shields, vaults, warps, settings, permissions, shops, battle pass, missions,
-            KOTH, outposts, statistics, and admin panels are designed as one interface language.
+            Faction menus, upgrades, shields, vaults, warps, permissions, shops, battle pass, missions, KOTH, outposts,
+            statistics, and admin tools all follow the same clean interaction style.
           </p>
           <div className="mt-7 grid gap-3 sm:grid-cols-2">
             {guiItems.map((item) => (
@@ -394,10 +394,10 @@ export function PrelaunchFactionsPage() {
           <div className="relative grid gap-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
             <div>
               <p className="font-mono text-xs uppercase tracking-[0.22em] text-[#ff6262]">Compatibility</p>
-              <h2 className="mt-4 text-4xl font-semibold leading-tight text-white md:text-5xl">Built for old-school PvP and modern networks.</h2>
+              <h2 className="mt-4 text-4xl font-semibold leading-tight text-white md:text-5xl">Made for the servers factions players still care about.</h2>
               <p className="mt-5 text-sm leading-7 text-white/54">
-                Support targets Minecraft 1.8.8 through 1.20.x with Java 8+ compatibility, SQL persistence, PlaceholderAPI,
-                Vault, Discord integration, and future-ready APIs.
+                Built around 1.8.8-first PvP expectations while preparing for modern Paper/Spigot networks, SQL persistence,
+                PlaceholderAPI, Vault, Discord, and API-driven tooling.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">

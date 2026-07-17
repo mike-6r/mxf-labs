@@ -839,16 +839,17 @@ export function FactionsDocsBrowser() {
   const activeSection = allVisibleSections.find((section) => section.slug === activeSlug) ?? allVisibleSections[0] ?? null;
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-white/10 bg-[#07090d]/92 premium-depth">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,98,98,0.13),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(255,209,102,0.08),transparent_34%)]" />
+    <div className="relative overflow-hidden rounded-xl border border-white/10 bg-[#07090d]/88 premium-depth">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(255,98,98,0.14),transparent_30%),radial-gradient(circle_at_92%_18%,rgba(255,209,102,0.07),transparent_34%)]" />
+      <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#ff6262]/60 to-transparent" />
       <div className="relative border-b border-white/10 p-5 md:p-7">
-        <div className="grid gap-5 lg:grid-cols-[1fr_25rem] lg:items-end">
+        <div className="grid gap-5 lg:grid-cols-[1fr_24rem] lg:items-end">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.22em] text-[#ff6262]">MxF Factions docs</p>
-            <h2 className="mt-3 text-3xl font-semibold text-white md:text-5xl">GitBook-style docs, built into the product page.</h2>
+            <p className="font-mono text-xs uppercase tracking-[0.22em] text-[#ff6262]">Product manual</p>
+            <h2 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight text-white md:text-5xl">MxF Factions documentation.</h2>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/54">
-              Searchable customer documentation for setup, configuration, gameplay systems, commands, permissions,
-              placeholders, staff operations, and troubleshooting.
+              Install guidance, configuration maps, gameplay systems, commands, permissions, placeholders, staff
+              operations, and support notes for server owners.
             </p>
           </div>
           <label className="relative block">
@@ -863,8 +864,8 @@ export function FactionsDocsBrowser() {
         </div>
       </div>
 
-      <div className="relative grid min-h-[42rem] lg:grid-cols-[19rem_1fr]">
-        <aside className="border-b border-white/10 bg-black/18 p-4 lg:border-b-0 lg:border-r">
+      <div className="relative grid min-h-[42rem] lg:grid-cols-[18rem_1fr]">
+        <aside className="border-b border-white/10 bg-black/16 p-4 lg:border-b-0 lg:border-r">
           <div className="max-h-[34rem] overflow-y-auto pr-1 lg:sticky lg:top-32">
             {filteredGroups.length === 0 ? (
               <div className="rounded-lg border border-white/10 bg-white/[0.026] p-4 text-sm text-white/50">
@@ -904,7 +905,7 @@ export function FactionsDocsBrowser() {
           </div>
         </aside>
 
-        <main className="min-w-0 p-5 md:p-8">
+        <main className="min-w-0 bg-black/[0.08] p-5 md:p-8">
           {activeSection ? (
             <article className="mx-auto max-w-4xl">
               <div className="mb-7 flex flex-col gap-4 border-b border-white/10 pb-7">
