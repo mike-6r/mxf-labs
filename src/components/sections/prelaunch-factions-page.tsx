@@ -27,6 +27,7 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+import { FactionsDocsBrowser } from "@/components/sections/factions-docs-browser";
 
 const heroStats = [
   { label: "Launch price", value: "$20" },
@@ -111,41 +112,6 @@ const timeline = [
   { phase: "04", title: "Launch Platform", copy: "GUI framework, Discord sync, docs, secure downloads, licensing, APIs, and support flow." },
 ];
 
-const docsChapters = [
-  "Quick start",
-  "Requirements",
-  "Configuration",
-  "Core commands",
-  "Owner checklist",
-  "Troubleshooting",
-];
-
-const docsSteps = [
-  "Stop the server and back up the world, permissions, economy, and existing Factions data.",
-  "Remove other factions jars, upload MxF-Factions.jar, then start once to generate files.",
-  "Configure plugins/Factions and plugins/Factions/mxf before opening the server to players.",
-  "Run /f reload, /f version, /f create, /f claim, /f map, and /f saveall for first-pass validation.",
-];
-
-const docsRequirements = [
-  ["Server", "Spigot, Paper, or Purpur with 1.8.8-first compatibility"],
-  ["Java", "Java 8+ runtime target"],
-  ["Storage", "SQLite for simple setups, MySQL for production networks"],
-  ["Recommended", "Vault, PlaceholderAPI, WorldEdit, WorldGuard"],
-];
-
-const docsCommandGroups = [
-  { title: "Players", commands: ["/f create", "/f invite", "/f claim", "/f home", "/f warp", "/f map"] },
-  { title: "Competition", commands: ["/f top", "/f ptop", "/f season", "/f outpost", "/f koth", "/f raid"] },
-  { title: "Staff", commands: ["/f reload", "/f saveall", "/f logs", "/f compatibility", "/f rules", "/f points"] },
-];
-
-const docsTroubleshooting = [
-  ["Plugin will not load", "Check the first startup error, Java version, and that only one factions jar is installed."],
-  ["GUI does not open", "Verify menus are enabled and the server version supports the configured materials."],
-  ["Missing economy features", "Install Vault plus a compatible economy plugin, then restart and test again."],
-];
-
 const metrics = [
   { label: "Systems combined", value: "30+" },
   { label: "GUI surfaces", value: "15+" },
@@ -158,8 +124,8 @@ const pageNav = [
   { href: "#systems", label: "Systems" },
   { href: "#interface", label: "GUI" },
   { href: "#stack", label: "Stack" },
-  { href: "#architecture", label: "Architecture" },
   { href: "#docs", label: "Docs" },
+  { href: "#architecture", label: "Architecture" },
   { href: "#roadmap", label: "Roadmap" },
 ];
 
@@ -277,118 +243,6 @@ function GuiShowcase() {
               {item}
             </div>
           ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DocsPreview() {
-  return (
-    <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.028]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,98,98,0.16),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(255,209,102,0.1),transparent_34%)]" />
-      <div className="relative grid lg:grid-cols-[18rem_1fr]">
-        <aside className="border-b border-white/10 bg-black/18 p-5 lg:border-b-0 lg:border-r lg:p-6">
-          <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-md border border-[#ff6262]/25 bg-[#ff6262]/10 text-[#ffd8d8]">
-              <ScrollText className="h-4 w-4" aria-hidden="true" />
-            </span>
-            <div>
-              <p className="text-sm font-semibold text-white">MxF Docs</p>
-              <p className="text-xs text-white/40">Customer preview</p>
-            </div>
-          </div>
-          <nav className="mt-6 grid gap-1">
-            {docsChapters.map((chapter, index) => (
-              <a
-                key={chapter}
-                href="#docs"
-                className={`rounded-md px-3 py-2 text-sm font-semibold transition ${index === 0 ? "bg-white text-black" : "text-white/54 hover:bg-white/[0.055] hover:text-white"}`}
-              >
-                {chapter}
-              </a>
-            ))}
-          </nav>
-        </aside>
-
-        <div className="p-5 md:p-8">
-          <div className="flex flex-col justify-between gap-5 border-b border-white/10 pb-6 md:flex-row md:items-start">
-            <div>
-              <p className="font-mono text-xs uppercase tracking-[0.22em] text-[#ff6262]">Documentation preview</p>
-              <h2 className="mt-3 text-3xl font-semibold text-white md:text-5xl">The useful setup docs, trimmed for server owners.</h2>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-white/54">
-                A focused customer version of the MxF Factions documentation: installation, requirements, commands,
-                configuration locations, and the checks needed before opening a server.
-              </p>
-            </div>
-            <Link href="/portal" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-md border border-white/12 bg-white/[0.04] px-4 text-sm font-semibold text-white/78 transition hover:border-[#ff6262]/45 hover:text-white">
-              Full docs in portal
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
-          </div>
-
-          <div className="mt-6 grid gap-5 xl:grid-cols-[1fr_0.82fr]">
-            <article className="rounded-lg border border-white/10 bg-black/18 p-5">
-              <p className="font-mono text-[0.68rem] uppercase tracking-[0.2em] text-[#ffd166]">Quick start</p>
-              <h3 className="mt-2 text-2xl font-semibold text-white">Clean install flow</h3>
-              <div className="mt-5 grid gap-3">
-                {docsSteps.map((step, index) => (
-                  <div key={step} className="flex gap-3 rounded-md border border-white/8 bg-white/[0.028] p-3">
-                    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-[#ff6262]/12 font-mono text-xs text-[#ff9d9d]">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <p className="text-sm leading-6 text-white/58">{step}</p>
-                  </div>
-                ))}
-              </div>
-            </article>
-
-            <article className="rounded-lg border border-white/10 bg-black/18 p-5">
-              <p className="font-mono text-[0.68rem] uppercase tracking-[0.2em] text-[#ffd166]">Requirements</p>
-              <h3 className="mt-2 text-2xl font-semibold text-white">Before install</h3>
-              <div className="mt-5 divide-y divide-white/8">
-                {docsRequirements.map(([label, value]) => (
-                  <div key={label} className="grid gap-1 py-3 sm:grid-cols-[8rem_1fr]">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/34">{label}</p>
-                    <p className="text-sm leading-6 text-white/62">{value}</p>
-                  </div>
-                ))}
-              </div>
-            </article>
-          </div>
-
-          <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_1fr]">
-            <article className="rounded-lg border border-white/10 bg-black/18 p-5">
-              <p className="font-mono text-[0.68rem] uppercase tracking-[0.2em] text-[#ff6262]">Command reference</p>
-              <div className="mt-5 grid gap-3">
-                {docsCommandGroups.map((group) => (
-                  <div key={group.title} className="rounded-md border border-white/8 bg-white/[0.028] p-4">
-                    <h4 className="text-sm font-semibold text-white">{group.title}</h4>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {group.commands.map((command) => (
-                        <code key={command} className="rounded border border-white/10 bg-black/28 px-2.5 py-1.5 font-mono text-xs text-[#ff9d9d]">
-                          {command}
-                        </code>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </article>
-
-            <article className="rounded-lg border border-white/10 bg-black/18 p-5">
-              <p className="font-mono text-[0.68rem] uppercase tracking-[0.2em] text-[#ff6262]">Support notes</p>
-              <h3 className="mt-2 text-2xl font-semibold text-white">Common fixes without the noise.</h3>
-              <div className="mt-5 grid gap-3">
-                {docsTroubleshooting.map(([problem, fix]) => (
-                  <div key={problem} className="rounded-md border border-white/8 bg-white/[0.028] p-4">
-                    <p className="text-sm font-semibold text-white">{problem}</p>
-                    <p className="mt-2 text-sm leading-6 text-white/52">{fix}</p>
-                  </div>
-                ))}
-              </div>
-            </article>
-          </div>
         </div>
       </div>
     </div>
@@ -559,7 +413,7 @@ export function PrelaunchFactionsPage() {
       </section>
 
       <section id="docs" className="mx-auto w-full max-w-7xl px-5 py-16 md:px-8">
-        <DocsPreview />
+        <FactionsDocsBrowser />
       </section>
 
       <section id="architecture" className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-16 md:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
