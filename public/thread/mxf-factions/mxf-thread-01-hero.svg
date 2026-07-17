@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="840" viewBox="0 0 1000 840">
+  <defs>
+    <linearGradient id="mesh" x1="0" y1="0" x2="1000" y2="840" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1b080d"/>
+      <stop offset=".42" stop-color="#05070a"/>
+      <stop offset="1" stop-color="#141008"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#ff6262"/>
+      <stop offset=".58" stop-color="#ff9f7a"/>
+      <stop offset="1" stop-color="#ffd166"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#172027" stop-opacity=".96"/>
+      <stop offset=".48" stop-color="#0c1117" stop-opacity=".98"/>
+      <stop offset="1" stop-color="#090c10"/>
+    </linearGradient>
+    <linearGradient id="glassWarm" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#ff6262" stop-opacity=".16"/>
+      <stop offset=".5" stop-color="#111820" stop-opacity=".96"/>
+      <stop offset="1" stop-color="#090c10"/>
+    </linearGradient>
+    <pattern id="grid" width="42" height="42" patternUnits="userSpaceOnUse">
+      <path d="M42 0H0V42" fill="none" stroke="#ffffff" stroke-opacity=".055"/>
+    </pattern>
+    <pattern id="fine" width="18" height="18" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r=".7" fill="#ffffff" fill-opacity=".12"/>
+    </pattern>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="26" stdDeviation="28" flood-color="#000000" flood-opacity=".42"/>
+    </filter>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="34"/>
+    </filter>
+  </defs>
+  <rect width="1000" height="840" fill="#05070a"/>
+  <rect width="1000" height="840" fill="url(#mesh)"/>
+  <rect width="1000" height="840" fill="url(#grid)" opacity=".78"/>
+  <rect width="1000" height="840" fill="url(#fine)" opacity=".28"/>
+  <circle cx="84" cy="120" r="230" fill="#ff6262" fill-opacity=".08" filter="url(#glow)"/>
+  <circle cx="920" cy="655" r="260" fill="#ffd166" fill-opacity=".045" filter="url(#glow)"/>
+  
+      
+    <g>
+      
+    <g transform="translate(62 42) scale(0.75)">
+      <rect width="64" height="64" rx="12" fill="#090c10" stroke="#ffffff" stroke-opacity=".16"/>
+      <path d="M14 45V19h7l11 14 11-14h7v26h-8V31L32 44 22 31v14h-8Z" fill="#f7f7f7"/>
+      <path d="M12 10h40v4H12V10Zm0 40h40v4H12v-4Z" fill="#ff6262"/>
+      <path d="M8 16h4v32H8V16Zm44 0h4v32h-4V16Z" fill="#ff9f7a"/>
+    </g>
+  
+      <text x="126" y="66" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="18" font-weight="800" text-anchor="start" letter-spacing="0">MxF Labs</text>
+      <text x="126" y="88" fill="#78838d" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="10" font-weight="800" text-anchor="start" letter-spacing="1.8">SOFTWARE STUDIO</text>
+      <rect x="706" y="48" width="232" height="40" rx="12" fill="#ffffff" fill-opacity=".045" stroke="#ffffff" stroke-opacity=".11"/>
+      <text x="728" y="73" fill="#f5b0b0" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="11" font-weight="800" text-anchor="start" letter-spacing="1.4">MXF FACTIONS</text>
+      <text x="920" y="73" fill="#77828c" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="11" font-weight="800" text-anchor="end" letter-spacing="1.4">01 / HERO</text>
+    </g>
+  
+      <text x="70" y="190" fill="#ff6262" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="13" font-weight="900" text-anchor="start" letter-spacing="4">MXF FACTIONS</text>
+      <text x="70" y="268" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="64" font-weight="900"><tspan x="70" dy="0">The ultimate</tspan><tspan x="70" dy="68">competitive</tspan><tspan x="70" dy="68">factions</tspan><tspan x="70" dy="68">platform.</tspan></text>
+      <text x="72" y="548" fill="#9aa3ad" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="18" font-weight="600"><tspan x="72" dy="0">Familiar factions gameplay, rebuilt with MxF</tspan><tspan x="72" dy="30">polish: claims, wars, outposts, analytics, premium</tspan><tspan x="72" dy="30">GUIs, YAML configuration, and long-term support.</tspan></text>
+      
+    <rect x="72" y="646" width="168" height="34" rx="10" fill="#ffffff" fill-opacity=".055" stroke="#ff6262" stroke-opacity=".34"/>
+    <circle cx="89" cy="663" r="4" fill="#ff6262"/>
+    <text x="102" y="668" fill="#d7dde3" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="11" font-weight="800" text-anchor="start" letter-spacing="0">1.8.8-first target</text>
+  
+      
+    <rect x="254" y="646" width="168" height="34" rx="10" fill="#ffffff" fill-opacity=".055" stroke="#ffd166" stroke-opacity=".34"/>
+    <circle cx="271" cy="663" r="4" fill="#ffd166"/>
+    <text x="284" y="668" fill="#d7dde3" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="11" font-weight="800" text-anchor="start" letter-spacing="0">YAML configurable</text>
+  
+      
+    <rect x="436" y="646" width="178" height="34" rx="10" fill="#ffffff" fill-opacity=".055" stroke="#ff8a8a" stroke-opacity=".34"/>
+    <circle cx="453" cy="663" r="4" fill="#ff8a8a"/>
+    <text x="466" y="668" fill="#d7dde3" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="11" font-weight="800" text-anchor="start" letter-spacing="0">Premium GUI suite</text>
+  
+      
+    <rect x="72" y="696" width="185" height="34" rx="10" fill="#ffffff" fill-opacity=".055" stroke="#f6b84a" stroke-opacity=".34"/>
+    <circle cx="89" cy="713" r="4" fill="#f6b84a"/>
+    <text x="102" y="718" fill="#d7dde3" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="11" font-weight="800" text-anchor="start" letter-spacing="0">Competitive seasons</text>
+  
+      
+    <rect x="272" y="696" width="164" height="34" rx="10" fill="#ffffff" fill-opacity=".055" stroke="#ff6262" stroke-opacity=".34"/>
+    <circle cx="289" cy="713" r="4" fill="#ff6262"/>
+    <text x="302" y="718" fill="#d7dde3" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="11" font-weight="800" text-anchor="start" letter-spacing="0">Raid intelligence</text>
+  
+      
+    <rect x="450" y="696" width="145" height="34" rx="10" fill="#ffffff" fill-opacity=".055" stroke="#8be9b1" stroke-opacity=".34"/>
+    <circle cx="467" cy="713" r="4" fill="#8be9b1"/>
+    <text x="480" y="718" fill="#d7dde3" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="11" font-weight="800" text-anchor="start" letter-spacing="0">Support-ready</text>
+  
+
+      
+    <g opacity="1">
+      <rect x="638" y="172" width="292" height="432" rx="18" fill="url(#glassWarm)" stroke="#ffffff" stroke-opacity=".105" filter="url(#shadow)"/>
+      <path d="M656 173H908" stroke="#ff6262" stroke-opacity=".75" stroke-width="2.4" stroke-linecap="round"/>
+      
+        <text x="666" y="218" fill="#ff6262" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="11" font-weight="900" text-anchor="start" letter-spacing="2.6">FACTION CONTROL</text>
+        <text x="666" y="252" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="25" font-weight="900" text-anchor="start" letter-spacing="0">War command surface</text>
+        <rect x="666" y="292" width="236" height="10" rx="5" fill="#ffffff" fill-opacity=".075"/>
+        <rect x="666" y="292" width="172" height="10" rx="5" fill="url(#line)"/>
+        <text x="666" y="328" fill="#9aa3ad" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="12" font-weight="800" text-anchor="start" letter-spacing="0">Build progress</text>
+        <text x="902" y="328" fill="#ffd166" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="12" font-weight="900" text-anchor="end" letter-spacing="0">72%</text>
+        
+    <rect x="666" y="360" width="112" height="62" rx="9" fill="#ffffff" fill-opacity=".04" stroke="#ffffff" stroke-opacity=".08"/>
+    <text x="678" y="382" fill="#78838d" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="9" font-weight="900" text-anchor="start" letter-spacing="1.4">OUTPOST ALPHA</text>
+    <text x="678" y="406" fill="#ff6262" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="13" font-weight="800" text-anchor="start" letter-spacing="0">Contested</text>
+  
+        
+    <rect x="790" y="360" width="112" height="62" rx="9" fill="#ffffff" fill-opacity=".04" stroke="#ffffff" stroke-opacity=".08"/>
+    <text x="802" y="382" fill="#78838d" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="9" font-weight="900" text-anchor="start" letter-spacing="1.4">WAR QUEUE</text>
+    <text x="802" y="406" fill="#ffd166" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="13" font-weight="800" text-anchor="start" letter-spacing="0">Armed</text>
+  
+        
+    <rect x="666" y="444" width="112" height="62" rx="9" fill="#ffffff" fill-opacity=".04" stroke="#ffffff" stroke-opacity=".08"/>
+    <text x="678" y="466" fill="#78838d" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="9" font-weight="900" text-anchor="start" letter-spacing="1.4">FTOP SYNC</text>
+    <text x="678" y="490" fill="#8be9b1" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="13" font-weight="800" text-anchor="start" letter-spacing="0">Live</text>
+  
+        
+    <rect x="790" y="444" width="112" height="62" rx="9" fill="#ffffff" fill-opacity=".04" stroke="#ffffff" stroke-opacity=".08"/>
+    <text x="802" y="466" fill="#78838d" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="9" font-weight="900" text-anchor="start" letter-spacing="1.4">CONFIG LAYER</text>
+    <text x="802" y="490" fill="#ff8a8a" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="13" font-weight="800" text-anchor="start" letter-spacing="0">Drafting</text>
+  
+        
+    <rect x="666" y="536" width="236" height="92" rx="10" fill="#05070a" stroke="#ffffff" stroke-opacity=".08"/>
+    <rect x="688" y="558" width="36" height="52" rx="5" fill="url(#line)" fill-opacity="0.62"/><rect x="740" y="578" width="36" height="32" rx="5" fill="url(#line)" fill-opacity="0.7"/><rect x="792" y="548" width="36" height="62" rx="5" fill="url(#line)" fill-opacity="0.78"/><rect x="844" y="568" width="36" height="42" rx="5" fill="url(#line)" fill-opacity="0.86"/>
+    <text x="684" y="559" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="12" font-weight="900" text-anchor="start" letter-spacing="0">Season Operations</text>
+    <text x="684" y="577" fill="#9aa3ad" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="10" font-weight="700" text-anchor="start" letter-spacing="0">Claims, wars, progression, analytics.</text>
+  
+      
+    </g>
+  
+      <text x="70" y="786" fill="#6f7a84" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="12" font-weight="900" text-anchor="start" letter-spacing="3">BUILT FOR SERIOUS FACTIONS NETWORKS</text>
+      <text x="930" y="786" fill="#6f7a84" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="12" font-weight="900" text-anchor="end" letter-spacing="3">MXF-LABS.COM</text>
+    
+</svg>

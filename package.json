@@ -16,6 +16,7 @@
     "db:studio": "prisma studio",
     "production:check": "node scripts/production-check.mjs",
     "deploy:check": "npm run production:check && npm run typecheck && npm run lint && npm run build",
+    "asset:factions-thread": "node scripts/generate-mxf-factions-thread.mjs",
     "asset:discord-thread": "node scripts/generate-discord-thread-showcase.mjs",
     "start": "next start",
     "test:flows": "node scripts/test-flows.mjs",
@@ -47,6 +48,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "prisma": "^6.19.3",
+    "sharp": "^0.35.3",
     "tailwindcss": "^4",
     "tsx": "^4.22.4",
     "typescript": "^5"

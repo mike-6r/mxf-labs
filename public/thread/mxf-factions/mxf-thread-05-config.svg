@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="940" viewBox="0 0 1000 940">
+  <defs>
+    <linearGradient id="mesh" x1="0" y1="0" x2="1000" y2="940" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1b080d"/>
+      <stop offset=".42" stop-color="#05070a"/>
+      <stop offset="1" stop-color="#141008"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#ffd166"/>
+      <stop offset=".58" stop-color="#ff9f7a"/>
+      <stop offset="1" stop-color="#f6b84a"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#172027" stop-opacity=".96"/>
+      <stop offset=".48" stop-color="#0c1117" stop-opacity=".98"/>
+      <stop offset="1" stop-color="#090c10"/>
+    </linearGradient>
+    <linearGradient id="glassWarm" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#ffd166" stop-opacity=".16"/>
+      <stop offset=".5" stop-color="#111820" stop-opacity=".96"/>
+      <stop offset="1" stop-color="#090c10"/>
+    </linearGradient>
+    <pattern id="grid" width="42" height="42" patternUnits="userSpaceOnUse">
+      <path d="M42 0H0V42" fill="none" stroke="#ffffff" stroke-opacity=".055"/>
+    </pattern>
+    <pattern id="fine" width="18" height="18" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r=".7" fill="#ffffff" fill-opacity=".12"/>
+    </pattern>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="26" stdDeviation="28" flood-color="#000000" flood-opacity=".42"/>
+    </filter>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="34"/>
+    </filter>
+  </defs>
+  <rect width="1000" height="940" fill="#05070a"/>
+  <rect width="1000" height="940" fill="url(#mesh)"/>
+  <rect width="1000" height="940" fill="url(#grid)" opacity=".78"/>
+  <rect width="1000" height="940" fill="url(#fine)" opacity=".28"/>
+  <circle cx="84" cy="120" r="230" fill="#ffd166" fill-opacity=".08" filter="url(#glow)"/>
+  <circle cx="920" cy="733" r="260" fill="#f6b84a" fill-opacity=".045" filter="url(#glow)"/>
+  
+      
+    <g>
+      
+    <g transform="translate(62 42) scale(0.75)">
+      <rect width="64" height="64" rx="12" fill="#090c10" stroke="#ffffff" stroke-opacity=".16"/>
+      <path d="M14 45V19h7l11 14 11-14h7v26h-8V31L32 44 22 31v14h-8Z" fill="#f7f7f7"/>
+      <path d="M12 10h40v4H12V10Zm0 40h40v4H12v-4Z" fill="#ff6262"/>
+      <path d="M8 16h4v32H8V16Zm44 0h4v32h-4V16Z" fill="#ff9f7a"/>
+    </g>
+  
+      <text x="126" y="66" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="18" font-weight="800" text-anchor="start" letter-spacing="0">MxF Labs</text>
+      <text x="126" y="88" fill="#78838d" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="10" font-weight="800" text-anchor="start" letter-spacing="1.8">SOFTWARE STUDIO</text>
+      <rect x="706" y="48" width="232" height="40" rx="12" fill="#ffffff" fill-opacity=".045" stroke="#ffffff" stroke-opacity=".11"/>
+      <text x="728" y="73" fill="#f5b0b0" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="11" font-weight="800" text-anchor="start" letter-spacing="1.4">MXF FACTIONS</text>
+      <text x="920" y="73" fill="#77828c" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="11" font-weight="800" text-anchor="end" letter-spacing="1.4">05 / CONFIG</text>
+    </g>
+  
+      
+    <text x="70" y="160" fill="#ffd166" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="12" font-weight="900" text-anchor="start" letter-spacing="4">OWNER CONTROL</text>
+    <text x="70" y="215" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="52" font-weight="900"><tspan x="70" dy="0">YAML-first</tspan><tspan x="70" dy="56">configuration.</tspan></text>
+    <text x="70" y="356" fill="#9aa3ad" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="16" font-weight="600"><tspan x="70" dy="0">Every major system is designed to be</tspan><tspan x="70" dy="27">owner-controlled: commands, permissions,</tspan><tspan x="70" dy="27">menus, messages, toggles, rewards, rules,</tspan><tspan x="70" dy="27">outposts, shops, raids, seasons, visuals, and</tspan><tspan x="70" dy="27">integrations.</tspan></text>
+  
+      
+    <g opacity="1">
+      <rect x="548" y="164" width="382" height="590" rx="18" fill="url(#glassWarm)" stroke="#ffffff" stroke-opacity=".105" filter="url(#shadow)"/>
+      <path d="M566 165H818" stroke="#ffd166" stroke-opacity=".75" stroke-width="2.4" stroke-linecap="round"/>
+      
+        <text x="576" y="212" fill="#ffd166" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="18" font-weight="900" text-anchor="start" letter-spacing="0">plugins/Factions</text>
+        
+              <rect x="576" y="239" width="326" height="29" rx="7" fill="#ffffff" fill-opacity=".048"/>
+              <text x="596" y="260" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="13" font-weight="900" text-anchor="start" letter-spacing="0">commands.yml</text>
+              <text x="902" y="260" fill="#9aa3ad" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="10" font-weight="700" text-anchor="end" letter-spacing="0">aliases, help, metadata</text>
+            
+              <rect x="576" y="277" width="326" height="29" rx="7" fill="#ffffff" fill-opacity=".026"/>
+              <text x="596" y="298" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="13" font-weight="900" text-anchor="start" letter-spacing="0">features.yml</text>
+              <text x="902" y="298" fill="#9aa3ad" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="10" font-weight="700" text-anchor="end" letter-spacing="0">global feature switches</text>
+            
+              <rect x="576" y="315" width="326" height="29" rx="7" fill="#ffffff" fill-opacity=".048"/>
+              <text x="596" y="336" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="13" font-weight="900" text-anchor="start" letter-spacing="0">menus.yml</text>
+              <text x="902" y="336" fill="#9aa3ad" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="10" font-weight="700" text-anchor="end" letter-spacing="0">layouts, sounds, item surfaces</text>
+            
+              <rect x="576" y="353" width="326" height="29" rx="7" fill="#ffffff" fill-opacity=".026"/>
+              <text x="596" y="374" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="13" font-weight="900" text-anchor="start" letter-spacing="0">messages.yml</text>
+              <text x="902" y="374" fill="#9aa3ad" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="10" font-weight="700" text-anchor="end" letter-spacing="0">prefixes, symbols, text</text>
+            
+              <rect x="576" y="391" width="326" height="29" rx="7" fill="#ffffff" fill-opacity=".048"/>
+              <text x="596" y="412" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="13" font-weight="900" text-anchor="start" letter-spacing="0">integrations.yml</text>
+              <text x="902" y="412" fill="#9aa3ad" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="10" font-weight="700" text-anchor="end" letter-spacing="0">Vault, PAPI, WorldEdit, WorldGuard</text>
+            
+              <rect x="576" y="429" width="326" height="29" rx="7" fill="#ffffff" fill-opacity=".026"/>
+              <text x="596" y="450" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="13" font-weight="900" text-anchor="start" letter-spacing="0">mxf/tnt.yml</text>
+              <text x="902" y="450" fill="#9aa3ad" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="10" font-weight="700" text-anchor="end" letter-spacing="0">bank, fill, audit rules</text>
+            
+              <rect x="576" y="467" width="326" height="29" rx="7" fill="#ffffff" fill-opacity=".048"/>
+              <text x="596" y="488" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="13" font-weight="900" text-anchor="start" letter-spacing="0">mxf/ftop.yml</text>
+              <text x="902" y="488" fill="#9aa3ad" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="10" font-weight="700" text-anchor="end" letter-spacing="0">leaderboards and cached values</text>
+            
+              <rect x="576" y="505" width="326" height="29" rx="7" fill="#ffffff" fill-opacity=".026"/>
+              <text x="596" y="526" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="13" font-weight="900" text-anchor="start" letter-spacing="0">mxf/raids.yml</text>
+              <text x="902" y="526" fill="#9aa3ad" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="10" font-weight="700" text-anchor="end" letter-spacing="0">timers, alerts, reports</text>
+            
+              <rect x="576" y="543" width="326" height="29" rx="7" fill="#ffffff" fill-opacity=".048"/>
+              <text x="596" y="564" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="13" font-weight="900" text-anchor="start" letter-spacing="0">mxf/outposts.yml</text>
+              <text x="902" y="564" fill="#9aa3ad" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="10" font-weight="700" text-anchor="end" letter-spacing="0">capture regions and rewards</text>
+            
+              <rect x="576" y="581" width="326" height="29" rx="7" fill="#ffffff" fill-opacity=".026"/>
+              <text x="596" y="602" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="13" font-weight="900" text-anchor="start" letter-spacing="0">mxf/seasons.yml</text>
+              <text x="902" y="602" fill="#9aa3ad" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="10" font-weight="700" text-anchor="end" letter-spacing="0">phases, points, archives</text>
+            
+              <rect x="576" y="619" width="326" height="29" rx="7" fill="#ffffff" fill-opacity=".048"/>
+              <text x="596" y="640" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="13" font-weight="900" text-anchor="start" letter-spacing="0">mxf/shop-definitions.yml</text>
+              <text x="902" y="640" fill="#9aa3ad" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="10" font-weight="700" text-anchor="end" letter-spacing="0">shops, limits, pricing</text>
+            
+              <rect x="576" y="657" width="326" height="29" rx="7" fill="#ffffff" fill-opacity=".026"/>
+              <text x="596" y="678" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="13" font-weight="900" text-anchor="start" letter-spacing="0">mxf/rule-definitions.yml</text>
+              <text x="902" y="678" fill="#9aa3ad" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="10" font-weight="700" text-anchor="end" letter-spacing="0">strikes, cases, sanctions</text>
+            
+      
+    </g>
+  
+      
+    <g opacity="1">
+      <rect x="70" y="590" width="400" height="164" rx="18" fill="url(#glass)" stroke="#ffffff" stroke-opacity=".105" filter="url(#shadow)"/>
+      <path d="M88 591H340" stroke="#ffd166" stroke-opacity=".75" stroke-width="2.4" stroke-linecap="round"/>
+      
+        <text x="102" y="640" fill="#f7f7f7" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="28" font-weight="900" text-anchor="start" letter-spacing="0">No recompiling.</text>
+        <text x="102" y="682" fill="#9aa3ad" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="15" font-weight="600"><tspan x="102" dy="0">Shape the server you actually want without</tspan><tspan x="102" dy="24">digging through Java or waiting on a</tspan><tspan x="102" dy="24">custom patch for every message, menu,</tspan><tspan x="102" dy="24">reward, or feature toggle.</tspan></text>
+      
+    </g>
+  
+      
+    <circle cx="94" cy="815" r="7" fill="#ffd166" fill-opacity=".1" stroke="#ffd166" stroke-opacity=".65"/>
+    <path d="m91 815 2 2 5-6" fill="none" stroke="#ffd166" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="112" y="820" fill="#c3cad1" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="start" letter-spacing="0">Readable files for support and handoff</text>
+  
+      
+    <circle cx="94" cy="853" r="7" fill="#ffd166" fill-opacity=".1" stroke="#ffd166" stroke-opacity=".65"/>
+    <path d="m91 853 2 2 5-6" fill="none" stroke="#ffd166" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="112" y="858" fill="#c3cad1" fill-opacity="1" font-family="Inter, Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="start" letter-spacing="0">Feature-specific modules instead of one giant config</text>
+  
+    
+</svg>

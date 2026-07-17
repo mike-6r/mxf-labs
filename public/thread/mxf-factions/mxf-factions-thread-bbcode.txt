@@ -1,0 +1,38 @@
+[CENTER]
+[IMG]https://mxf-labs.com/thread/mxf-factions/mxf-thread-01-hero.png[/IMG]
+
+[IMG]https://mxf-labs.com/thread/mxf-factions/mxf-thread-02-core.png[/IMG]
+
+[IMG]https://mxf-labs.com/thread/mxf-factions/mxf-thread-03-competitive.png[/IMG]
+
+[IMG]https://mxf-labs.com/thread/mxf-factions/mxf-thread-04-gui.png[/IMG]
+
+[IMG]https://mxf-labs.com/thread/mxf-factions/mxf-thread-05-config.png[/IMG]
+
+[IMG]https://mxf-labs.com/thread/mxf-factions/mxf-thread-06-rewards.png[/IMG]
+
+[IMG]https://mxf-labs.com/thread/mxf-factions/mxf-thread-07-staff-commands.png[/IMG]
+
+[IMG]https://mxf-labs.com/thread/mxf-factions/mxf-thread-08-cta.png[/IMG]
+[/CENTER]
+
+[HR][/HR]
+
+[CENTER][SIZE=6][B][COLOR=#FF6262]MXF FACTIONS[/COLOR][/B][/SIZE][/CENTER]
+
+[B]MxF Factions[/B] is a premium competitive factions platform for serious Minecraft servers. It keeps the familiar factions gameplay loop, then adds MxF systems for GUIs, claims, raids, outposts, analytics, economy, configuration, staff workflows, licensing, documentation, and support.
+
+[LIST]
+[*] Competitive factions gameplay
+[*] Advanced GUI system
+[*] Outposts, KOTH, raid tooling, War Center
+[*] FTop / PTop and analytics surfaces
+[*] Seasonal progression and reward economy
+[*] YAML-first configuration
+[*] Owner and staff tooling
+[*] Built for long-term support
+[/LIST]
+
+[B]Compatibility note:[/B] MxF Factions is focused on Java 8 bytecode and Spigot/Paper 1.8.8-first server setups, with modern Paper compatibility work on the roadmap. Always test your exact dependency versions before opening a production season.
+
+[CENTER][B][COLOR=#FFD166]mxf-labs.com[/COLOR][/B][/CENTER]
