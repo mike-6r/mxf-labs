@@ -14,6 +14,28 @@ type PageProps = {
 
 export const dynamic = "force-dynamic";
 
+const documentationCategories = [
+  "Getting Started",
+  "Installation",
+  "Requirements",
+  "Configuration",
+  "Commands",
+  "Permissions",
+  "Variables",
+  "Gameplay",
+  "Progression",
+  "Competitive",
+  "Staff Operations",
+  "API",
+  "Integrations",
+  "Licensing",
+  "Web Dashboard",
+  "Developer API",
+  "FAQ",
+  "Troubleshooting",
+  "Changelog",
+];
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const article = await getPublicDocumentationArticle(slug);
@@ -35,7 +57,7 @@ export default async function DocDetailPage({ params }: PageProps) {
   const previous = currentIndex > 0 ? articles[currentIndex - 1] : null;
   const next = currentIndex >= 0 && currentIndex < articles.length - 1 ? articles[currentIndex + 1] : null;
   const productArticles = articles.filter((item) => (article.product ? item.product?.slug === article.product.slug : !item.product));
-  const categories = [...new Set(productArticles.map((item) => item.category))];
+  const categories = [...new Set(productArticles.map((item) => item.category))].sort(categorySorter);
 
   return (
     <section className="px-5 py-16 md:px-8 md:py-24">
@@ -140,4 +162,10 @@ function DocMetric({ icon: Icon, label, value }: { icon: LucideIcon; label: stri
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" }).format(date);
+}
+
+function categorySorter(a: string, b: string) {
+  const rankA = documentationCategories.includes(a) ? documentationCategories.indexOf(a) : documentationCategories.length;
+  const rankB = documentationCategories.includes(b) ? documentationCategories.indexOf(b) : documentationCategories.length;
+  return rankA - rankB || a.localeCompare(b);
 }
