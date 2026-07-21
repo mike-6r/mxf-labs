@@ -5,7 +5,9 @@ import Link from "next/link";
 import { PortalShell, PortalSignIn } from "@/components/portal/portal-shell";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getCurrentCustomer } from "@/lib/auth/customer";
+import { getContentMode } from "@/lib/content-mode";
 import { prisma } from "@/lib/db/prisma";
+import { visibleSupportTickets } from "@/lib/support/visibility";
 
 export const dynamic = "force-dynamic";
 
@@ -38,19 +40,21 @@ export default async function PortalPage({ searchParams }: PageProps) {
     );
   }
 
-  const [licenses, orders, tickets, notifications, announcements] = await Promise.all([
+  const [licenses, orders, tickets, notifications, announcements, contentMode] = await Promise.all([
     prisma.license.findMany({ where: { customerId: customer.id }, include: { product: true }, orderBy: { createdAt: "desc" } }),
     prisma.order.findMany({ where: { customerId: customer.id }, include: { product: true }, orderBy: { createdAt: "desc" }, take: 4 }),
-    prisma.supportTicket.findMany({ where: { customerId: customer.id }, include: { relatedProduct: true }, orderBy: { createdAt: "desc" }, take: 4 }),
+    prisma.supportTicket.findMany({ where: { customerId: customer.id }, include: { relatedProduct: true }, orderBy: { createdAt: "desc" }, take: 20 }),
     prisma.customerNotification.findMany({ where: { customerId: customer.id }, orderBy: { createdAt: "desc" }, take: 4 }),
     prisma.announcement.findMany({ where: { active: true, visibility: "Public" }, orderBy: [{ pinned: "desc" }, { createdAt: "desc" }], take: 2 }),
+    getContentMode(),
   ]);
 
   const primaryLicense = licenses[0];
-  const openTickets = tickets.filter((ticket) => !["Resolved", "Closed"].includes(ticket.status));
+  const portalTickets = visibleSupportTickets(tickets, contentMode).slice(0, 4);
+  const openTickets = portalTickets.filter((ticket) => !["Resolved", "Closed"].includes(ticket.status));
   const recentActivity = [
     ...notifications.map((notice) => ({ id: notice.id, title: notice.title, detail: notice.body, type: notice.type, at: notice.createdAt })),
-    ...tickets.map((ticket) => ({ id: ticket.id, title: `Ticket ${ticket.ticketNumber}`, detail: `${ticket.status}: ${ticket.subject}`, type: "Support", at: ticket.createdAt })),
+    ...portalTickets.map((ticket) => ({ id: ticket.id, title: `Ticket ${ticket.ticketNumber}`, detail: `${ticket.status}: ${ticket.subject}`, type: "Support", at: ticket.createdAt })),
     ...orders.map((order) => ({ id: order.id, title: order.product?.name || "Order", detail: `${order.status} order`, type: "Order", at: order.createdAt })),
     ...announcements.map((announcement) => ({ id: announcement.id, title: announcement.title, detail: announcement.body, type: announcement.type, at: announcement.createdAt })),
   ]

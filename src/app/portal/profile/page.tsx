@@ -1,6 +1,8 @@
 import { PortalShell, PortalSignIn } from "@/components/portal/portal-shell";
 import { getCurrentCustomer } from "@/lib/auth/customer";
+import { getContentMode } from "@/lib/content-mode";
 import { prisma } from "@/lib/db/prisma";
+import { visibleSupportTickets } from "@/lib/support/visibility";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Portal Profile | MxF Labs" };
@@ -16,12 +18,17 @@ export default async function PortalProfilePage() {
     );
   }
 
-  const [orders, licenses, tickets, logins] = await Promise.all([
+  const [orders, licenses, ticketsRaw, logins, contentMode] = await Promise.all([
     prisma.order.count({ where: { customerId: customer.id } }),
     prisma.license.count({ where: { customerId: customer.id } }),
-    prisma.supportTicket.count({ where: { customerId: customer.id } }),
+    prisma.supportTicket.findMany({
+      where: { customerId: customer.id },
+      select: { ticketNumber: true, email: true, discordUsername: true, subject: true, message: true, internalNotes: true },
+    }),
     prisma.customerLoginEvent.findMany({ where: { customerId: customer.id }, orderBy: { createdAt: "desc" }, take: 6 }),
+    getContentMode(),
   ]);
+  const tickets = visibleSupportTickets(ticketsRaw, contentMode).length;
 
   return (
     <PortalShell title="Profile." description="Customer identity, Discord connection, account history, and product ownership summary." customer={customer}>

@@ -20,16 +20,48 @@ export async function POST(request: Request) {
   const message = typeof body.message === "string" ? body.message : "Created from the MxF Labs Discord bot.";
   const productSlug = typeof body.productSlug === "string" ? body.productSlug : "";
   const licenseKey = typeof body.licenseKey === "string" ? body.licenseKey : "";
+  const discordUsername = typeof body.discordUsername === "string" ? body.discordUsername : null;
 
   if (!discordId && !email) {
     return NextResponse.json({ ok: false, message: "discordId or email is required." }, { status: 400 });
   }
 
-  const [customer, product, license] = await Promise.all([
-    discordId ? prisma.customer.findFirst({ where: { discordId } }) : email ? prisma.customer.findUnique({ where: { email } }) : null,
+  const [existingByDiscord, existingByEmail, product, license] = await Promise.all([
+    discordId ? prisma.customer.findUnique({ where: { discordId } }) : null,
+    email ? prisma.customer.findUnique({ where: { email } }) : null,
     productSlug ? prisma.product.findUnique({ where: { slug: productSlug } }) : null,
     licenseKey ? prisma.license.findUnique({ where: { key: licenseKey } }) : null,
   ]);
+  const customer =
+    existingByDiscord ||
+    (existingByEmail
+      ? !existingByEmail.discordId || existingByEmail.discordId === discordId
+        ? await prisma.customer.update({
+            where: { id: existingByEmail.id },
+            data: {
+              discordId: discordId || existingByEmail.discordId,
+              discordUsername: discordUsername || existingByEmail.discordUsername,
+              discordLinkedAt: existingByEmail.discordLinkedAt || (discordId ? new Date() : null),
+              discordLastSyncedAt: new Date(),
+              discordSyncStatus: discordId ? "Synced" : existingByEmail.discordSyncStatus,
+            },
+          })
+        : existingByEmail
+      : null) ||
+    (discordId || email
+      ? await prisma.customer.create({
+          data: {
+            name,
+            email: email || `${discordId}@discord.mxf-labs.local`,
+            discordId: discordId || null,
+            discordUsername,
+            discordLinkedAt: discordId ? new Date() : null,
+            discordLastSyncedAt: new Date(),
+            discordSyncStatus: discordId ? "Synced" : "Email only",
+            notes: "Created from Discord support ticket sync.",
+          },
+        })
+      : null);
 
   const ticket = await prisma.supportTicket.create({
     data: {
@@ -37,7 +69,7 @@ export async function POST(request: Request) {
       customerId: customer?.id || null,
       name,
       email: email || customer?.email || `${discordId}@discord.mxf-labs.local`,
-      discordUsername: typeof body.discordUsername === "string" ? body.discordUsername : null,
+      discordUsername: discordUsername || customer?.discordUsername || null,
       relatedProductId: product?.id || null,
       relatedLicenseId: license?.id || null,
       priority,

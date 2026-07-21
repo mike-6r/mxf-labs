@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       customerId: customer?.id || null,
       name: parsed.data.name,
       email: parsed.data.email,
-      discordUsername: parsed.data.discordUsername || null,
+      discordUsername: parsed.data.discordUsername || customer?.discordUsername || null,
       relatedProductId: parsed.data.relatedProductId || null,
       relatedLicenseId: parsed.data.relatedLicenseId || null,
       priority: parsed.data.priority,
@@ -42,6 +42,7 @@ export async function POST(request: Request) {
       message: parsed.data.message,
       attachmentName: parsed.data.attachmentName || null,
       attachmentsJson: parsed.data.attachmentName ? JSON.stringify([parsed.data.attachmentName]) : "[]",
+      internalNotes: customer?.discordId ? `Created from portal by Discord-linked customer ${customer.discordId}.` : "",
     },
   });
 

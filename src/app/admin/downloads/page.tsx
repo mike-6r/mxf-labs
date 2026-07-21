@@ -77,7 +77,7 @@ export default async function AdminDownloadsPage() {
           createdAt: token.createdAt.toISOString(),
         }))}
         initialTab="downloads"
-        enabledTabs={["downloads", "activity"]}
+        enabledTabs={["releases", "downloads", "activity"]}
       />
     </AdminShell>
   );

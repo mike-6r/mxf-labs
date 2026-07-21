@@ -3,7 +3,9 @@ import Link from "next/link";
 import { PortalShell, PortalSignIn } from "@/components/portal/portal-shell";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getCurrentCustomer } from "@/lib/auth/customer";
+import { getContentMode } from "@/lib/content-mode";
 import { prisma } from "@/lib/db/prisma";
+import { visibleSupportTickets } from "@/lib/support/visibility";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Portal Support | MxF Labs" };
@@ -28,12 +30,16 @@ export default async function PortalSupportPage() {
     );
   }
 
-  const tickets = await prisma.supportTicket.findMany({
-    where: { customerId: customer.id },
-    include: { relatedProduct: true, relatedLicense: true, notes: { orderBy: { createdAt: "desc" }, take: 1 } },
-    orderBy: { createdAt: "desc" },
-  });
+  const [ticketsRaw, contentMode] = await Promise.all([
+    prisma.supportTicket.findMany({
+      where: { customerId: customer.id },
+      include: { relatedProduct: true, relatedLicense: true, notes: { orderBy: { createdAt: "desc" }, take: 1 } },
+      orderBy: { createdAt: "desc" },
+    }),
+    getContentMode(),
+  ]);
 
+  const tickets = visibleSupportTickets(ticketsRaw, contentMode);
   const openTickets = tickets.filter((ticket) => !["Resolved", "Closed"].includes(ticket.status));
 
   return (

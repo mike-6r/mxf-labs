@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Ban, Check, KeyRound, Plus, RefreshCw, Save, Search, ShieldAlert, Trash2 } from "lucide-react";
+import { Activity, Ban, Check, Eye, EyeOff, KeyRound, Plus, RefreshCw, Save, Search, ShieldAlert, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { PRODUCT_STATUS_OPTIONS } from "@/lib/products/status";
 import { cn } from "@/lib/utils";
@@ -107,9 +107,13 @@ type LicenseItem = {
     id: string;
     deviceId: string;
     instanceId: string;
+    discordId: string | null;
     ipAddress: string | null;
+    country: string | null;
     productVersion: string | null;
     status: string;
+    activationCount: number;
+    firstSeenAt: string | Date;
     lastSeenAt: string | Date;
   }>;
   validations?: Array<{
@@ -1014,15 +1018,29 @@ export function LicenseManager({
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             <LicenseTimeline title="Activations" empty="No active activations." items={(license.activations || []).map((activation) => ({
               id: activation.id,
-              title: `${activation.deviceId} / ${activation.instanceId}`,
-              meta: `${activation.status} / ${activation.productVersion || "No version"}`,
-              detail: `${activation.ipAddress || "No IP"} / ${formatDate(activation.lastSeenAt)}`,
+              title: `${activation.status} activation`,
+              meta: `${activation.productVersion || "No version"} / ${activation.activationCount} checks`,
+              detail: `Last seen ${formatDate(activation.lastSeenAt)}`,
+              secretLines: [
+                `HWID: ${activation.deviceId}`,
+                `Instance: ${activation.instanceId}`,
+                `IP: ${activation.ipAddress || "No IP recorded"}`,
+                `Discord: ${activation.discordId || "Not linked"}`,
+                `Country: ${activation.country || "Not recorded"}`,
+                `First seen: ${formatDate(activation.firstSeenAt)}`,
+              ],
             }))} />
             <LicenseTimeline title="Validation history" empty="No validations yet." items={(license.validations || []).map((validation) => ({
               id: validation.id,
               title: `${validation.result} / ${validation.reason}`,
               meta: validation.deviceId || validation.instanceId || "No runtime ID",
               detail: `${validation.ipAddress || "No IP"} / ${formatDate(validation.createdAt)}`,
+              secretLines: [
+                `HWID: ${validation.deviceId || "Not recorded"}`,
+                `Instance: ${validation.instanceId || "Not recorded"}`,
+                `IP: ${validation.ipAddress || "No IP recorded"}`,
+                `Version: ${validation.productVersion || "No version"}`,
+              ],
             }))} />
             <LicenseTimeline title="Open flags" empty="No open flags." items={(license.suspiciousFlags || []).map((flag) => ({
               id: flag.id,
@@ -1037,10 +1055,10 @@ export function LicenseManager({
             </ActionButton>
             <button
               type="button"
-              onClick={() => runAction(license.id, "reset-activations", "Reset activations")}
+              onClick={() => runAction(license.id, "reset-activations", "Reset HWID/device bindings")}
               className="inline-flex min-h-10 items-center gap-2 rounded-md border border-[#ffd166]/30 bg-[#ffd166]/10 px-3 text-sm font-semibold text-[#ffe6a3]"
             >
-              <RefreshCw className="h-4 w-4" /> Reset activations
+              <RefreshCw className="h-4 w-4" /> Reset HWID/device
             </button>
             <button
               type="button"
@@ -1048,6 +1066,13 @@ export function LicenseManager({
               className="inline-flex min-h-10 items-center gap-2 rounded-md border border-white/10 bg-white/[0.035] px-3 text-sm font-semibold text-white/72"
             >
               <Activity className="h-4 w-4" /> Clear IPs
+            </button>
+            <button
+              type="button"
+              onClick={() => runAction(license.id, "sync-activation-count", "Sync activation count")}
+              className="inline-flex min-h-10 items-center gap-2 rounded-md border border-white/10 bg-white/[0.035] px-3 text-sm font-semibold text-white/72"
+            >
+              <Activity className="h-4 w-4" /> Sync count
             </button>
             {license.status === "Active" ? (
               <button
@@ -1164,20 +1189,48 @@ function LicenseTimeline({
 }: {
   title: string;
   empty: string;
-  items: Array<{ id: string; title: string; meta: string; detail: string }>;
+  items: Array<{ id: string; title: string; meta: string; detail: string; secretLines?: string[] }>;
 }) {
+  const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+
   return (
     <div className="rounded-md border border-white/10 bg-black/18 p-4">
       <h4 className="text-sm font-semibold text-white">{title}</h4>
       <div className="mt-3 grid gap-2">
         {items.length ? (
-          items.map((item) => (
-            <div key={item.id} className="rounded-md border border-white/8 bg-white/[0.025] p-3">
-              <p className="truncate text-xs font-semibold text-white/78">{item.title}</p>
-              <p className="mt-1 truncate text-xs text-white/42">{item.meta}</p>
-              <p className="mt-1 truncate text-xs text-white/34">{item.detail}</p>
-            </div>
-          ))
+          items.map((item) => {
+            const isRevealed = Boolean(revealed[item.id]);
+            return (
+              <div key={item.id} className="rounded-md border border-white/8 bg-white/[0.025] p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-semibold text-white/78">{item.title}</p>
+                    <p className="mt-1 truncate text-xs text-white/42">{item.meta}</p>
+                    <p className="mt-1 truncate text-xs text-white/34">{item.detail}</p>
+                  </div>
+                  {item.secretLines?.length ? (
+                    <button
+                      type="button"
+                      onClick={() => setRevealed((current) => ({ ...current, [item.id]: !isRevealed }))}
+                      className="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-white/10 bg-white/[0.04] text-white/52 transition hover:border-[#ff6262]/35 hover:text-white"
+                      aria-label={isRevealed ? "Hide binding details" : "Reveal binding details"}
+                    >
+                      {isRevealed ? <EyeOff className="h-3.5 w-3.5" aria-hidden="true" /> : <Eye className="h-3.5 w-3.5" aria-hidden="true" />}
+                    </button>
+                  ) : null}
+                </div>
+                {isRevealed && item.secretLines?.length ? (
+                  <div className="mt-3 grid gap-1 rounded-md border border-white/8 bg-black/24 p-2">
+                    {item.secretLines.map((line) => (
+                      <p key={line} className="break-all font-mono text-[11px] leading-5 text-white/52">
+                        {line}
+                      </p>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            );
+          })
         ) : (
           <p className="text-xs leading-5 text-white/38">{empty}</p>
         )}

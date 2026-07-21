@@ -21,6 +21,20 @@ const loginSchema = z.object({
   twoFactorCode: z.string().max(32).optional().or(z.literal("")),
 });
 
+function envAdminCredentials() {
+  const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const password = process.env.ADMIN_PASSWORD;
+
+  if (!email || !password) return null;
+
+  return { email, password };
+}
+
+function matchesEnvAdmin(email: string, password: string) {
+  const envAdmin = envAdminCredentials();
+  return Boolean(envAdmin && email.trim().toLowerCase() === envAdmin.email && password === envAdmin.password);
+}
+
 export async function POST(request: Request) {
   const crossSiteResponse = crossSiteAdminResponse(request.headers, request.method, new URL(request.url).origin);
   if (crossSiteResponse) return crossSiteResponse;
@@ -38,9 +52,38 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, message: "Invalid credentials." }, { status: 400 });
   }
 
-  const admin = await prisma.adminUser.findFirst({
+  let admin = await prisma.adminUser.findFirst({
     where: { email: parsed.data.email, isActive: true },
   });
+
+  if (!admin) {
+    if (matchesEnvAdmin(parsed.data.email, parsed.data.password)) {
+      admin = await prisma.adminUser.upsert({
+        where: { email: parsed.data.email.toLowerCase() },
+        update: {
+          isActive: true,
+          role: "OWNER",
+          passwordHash: await bcrypt.hash(parsed.data.password, 12),
+        },
+        create: {
+          email: parsed.data.email.toLowerCase(),
+          name: "MxF Admin",
+          role: "OWNER",
+          permissionsJson: JSON.stringify(["*"]),
+          passwordHash: await bcrypt.hash(parsed.data.password, 12),
+          isActive: true,
+        },
+      });
+
+      await logActivity({
+        actorEmail: admin.email,
+        action: "synced admin password from environment",
+        entityType: "AdminUser",
+        entityId: admin.id,
+        metadata: { reason: "env_admin_recovery", ipAddress },
+      }).catch(() => undefined);
+    }
+  }
 
   if (!admin) {
     await logActivity({
@@ -52,7 +95,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, message: "Invalid credentials." }, { status: 401 });
   }
 
-  const valid = await bcrypt.compare(parsed.data.password, admin.passwordHash);
+  let valid = await bcrypt.compare(parsed.data.password, admin.passwordHash);
+
+  if (!valid && matchesEnvAdmin(parsed.data.email, parsed.data.password)) {
+    admin = await prisma.adminUser.update({
+      where: { id: admin.id },
+      data: {
+        passwordHash: await bcrypt.hash(parsed.data.password, 12),
+        isActive: true,
+        role: "OWNER",
+      },
+    });
+    valid = true;
+
+    await logActivity({
+      actorEmail: admin.email,
+      action: "refreshed admin password hash from environment",
+      entityType: "AdminUser",
+      entityId: admin.id,
+      metadata: { reason: "env_password_hash_mismatch", ipAddress },
+    }).catch(() => undefined);
+  }
 
   if (!valid) {
     await logActivity({

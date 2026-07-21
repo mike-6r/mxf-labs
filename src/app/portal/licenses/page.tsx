@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { Activity, KeyRound, LifeBuoy, RefreshCw, ShieldCheck } from "lucide-react";
 import Link from "next/link";
+import { LicenseActivationList } from "@/components/portal/license-activation-list";
 import { LicenseKeyControl } from "@/components/portal/license-key-control";
 import { PortalShell, PortalSignIn } from "@/components/portal/portal-shell";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -71,15 +72,21 @@ export default async function PortalLicensesPage() {
                 </div>
 
                 <div id="activations" className="mt-5 grid gap-2">
-                  {license.activations.length ? (
-                    license.activations.slice(0, 4).map((activation) => (
-                      <p key={activation.id} className="rounded-md border border-white/8 bg-white/[0.03] px-3 py-2 text-xs leading-5 text-white/48">
-                        {activation.deviceId} / {activation.instanceId} / {activation.status} / last seen {activation.lastSeenAt.toLocaleString()}
-                      </p>
-                    ))
-                  ) : (
-                    <p className="rounded-md border border-white/8 bg-white/[0.03] px-3 py-2 text-xs text-white/44">No activations recorded yet.</p>
-                  )}
+                  <LicenseActivationList
+                    activations={license.activations.map((activation) => ({
+                      id: activation.id,
+                      deviceId: activation.deviceId,
+                      instanceId: activation.instanceId,
+                      ipAddress: activation.ipAddress,
+                      discordId: activation.discordId,
+                      country: activation.country,
+                      productVersion: activation.productVersion,
+                      status: activation.status,
+                      activationCount: activation.activationCount,
+                      firstSeenAt: activation.firstSeenAt.toISOString(),
+                      lastSeenAt: activation.lastSeenAt.toISOString(),
+                    }))}
+                  />
                 </div>
               </article>
             );

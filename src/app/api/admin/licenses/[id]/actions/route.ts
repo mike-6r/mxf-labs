@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db/prisma";
 
 type Params = { params: Promise<{ id: string }> };
 
-const allowedActions = new Set(["activate", "suspend", "revoke", "reset-activations", "clear-ip-bindings", "append-note"]);
+const allowedActions = new Set(["activate", "suspend", "revoke", "reset-activations", "clear-ip-bindings", "sync-activation-count", "append-note"]);
 
 const licenseInclude = {
   customer: true,
@@ -67,6 +67,19 @@ export async function POST(request: Request, { params }: Params) {
         resetCount: { increment: 1 },
         lastResetAt: new Date(),
         notes: `${existing.notes}\nAdmin cleared IP bindings: ${reason}`.trim(),
+      },
+    });
+  }
+
+  if (action === "sync-activation-count") {
+    const currentActivations = await prisma.licenseActivation.count({
+      where: { licenseId: id, status: "Active" },
+    });
+    await prisma.license.update({
+      where: { id },
+      data: {
+        currentActivations,
+        notes: `${existing.notes}\nAdmin synced activation count: ${reason}`.trim(),
       },
     });
   }
