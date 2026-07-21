@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireCustomerApi } from "@/lib/auth/customer";
+import { getCurrentCustomer } from "@/lib/auth/customer";
 import { prisma } from "@/lib/db/prisma";
 import { createDownloadToken, consumeDownloadToken } from "@/lib/downloads/tokens";
 import { evaluateDownloadActivity } from "@/lib/license/server";
@@ -12,6 +12,19 @@ const paidStatuses = ["Paid", "Fulfilled"];
 
 function hasUsableLicense(license: { expirationDate: Date | null } | null) {
   return Boolean(license && (!license.expirationDate || license.expirationDate > new Date()));
+}
+
+function customerAuthRequired(request: Request) {
+  const accept = request.headers.get("accept") || "";
+
+  if (accept.includes("text/html")) {
+    const url = new URL(request.url);
+    const loginUrl = new URL("/api/auth/discord/start", url.origin);
+    loginUrl.searchParams.set("returnTo", `${url.pathname}${url.search}`);
+    return NextResponse.redirect(loginUrl, { status: 303 });
+  }
+
+  return NextResponse.json({ ok: false, message: "Customer authentication required." }, { status: 401 });
 }
 
 async function deny(downloadId: string | undefined, customerId: string | undefined, request: Request, message: string, status = 403) {
@@ -29,8 +42,8 @@ async function deny(downloadId: string | undefined, customerId: string | undefin
 }
 
 export async function GET(request: Request, { params }: Params) {
-  const { customer, response } = await requireCustomerApi();
-  if (response) return response;
+  const customer = await getCurrentCustomer();
+  if (!customer) return customerAuthRequired(request);
 
   const { fileId } = await params;
   const download = await prisma.productDownload.findUnique({
