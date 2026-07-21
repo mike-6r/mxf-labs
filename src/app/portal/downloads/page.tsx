@@ -24,14 +24,15 @@ export default async function PortalDownloadsPage() {
     include: { product: true },
     orderBy: { createdAt: "desc" },
   });
-  const productIds = licenses.map((license) => license.productId).filter((id): id is string => Boolean(id));
+  const usableLicenses = licenses.filter(isUsableLicense);
+  const productIds = usableLicenses.map((license) => license.productId).filter((id): id is string => Boolean(id));
   const downloads = await prisma.productDownload.findMany({
     where: { productId: { in: productIds }, visible: true },
     include: { product: true, release: true },
     orderBy: [{ createdAt: "desc" }],
   });
-  const licenseByProduct = new Map(licenses.filter((license) => license.productId).map((license) => [license.productId, license]));
-  const blockedLicenses = licenses.filter((license) => license.status !== "Active" || license.blacklisted);
+  const licenseByProduct = new Map(usableLicenses.filter((license) => license.productId).map((license) => [license.productId, license]));
+  const blockedLicenses = licenses.filter((license) => !isUsableLicense(license));
 
   return (
     <PortalShell
@@ -67,7 +68,7 @@ export default async function PortalDownloadsPage() {
         <div className="grid gap-5">
           {downloads.map((download) => {
             const license = licenseByProduct.get(download.productId);
-            const blocked = !license || license.status !== "Active" || license.blacklisted;
+            const blocked = !license;
             return (
               <article key={download.id} className={blocked ? "surface rounded-lg p-5 opacity-75" : "surface-strong rounded-lg p-5"}>
                 <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-start">
@@ -140,4 +141,8 @@ function formatFileSize(bytes: number) {
   if (!bytes) return "Not recorded";
   if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function isUsableLicense(license: { status: string; blacklisted: boolean; expirationDate: Date | null }) {
+  return license.status === "Active" && !license.blacklisted && (!license.expirationDate || license.expirationDate > new Date());
 }

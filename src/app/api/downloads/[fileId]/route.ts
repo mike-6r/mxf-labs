@@ -10,6 +10,10 @@ type Params = { params: Promise<{ fileId: string }> };
 
 const paidStatuses = ["Paid", "Fulfilled"];
 
+function hasUsableLicense(license: { expirationDate: Date | null } | null) {
+  return Boolean(license && (!license.expirationDate || license.expirationDate > new Date()));
+}
+
 async function deny(downloadId: string | undefined, customerId: string | undefined, request: Request, message: string, status = 403) {
   await prisma.downloadEvent.create({
     data: {
@@ -55,12 +59,13 @@ export async function GET(request: Request, { params }: Params) {
       },
     }),
   ]);
+  const licensed = hasUsableLicense(license);
 
-  if (!order) {
-    return deny(download.id, customer.id, request, "A paid order is required for this download.");
+  if (!order && !licensed) {
+    return deny(download.id, customer.id, request, "An active license or paid order is required for this download.");
   }
 
-  if (download.requiresLicense && !license) {
+  if (download.requiresLicense && !licensed) {
     return deny(download.id, customer.id, request, "An active license is required for this download.");
   }
 

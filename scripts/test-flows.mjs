@@ -309,6 +309,53 @@ await step("6. Secure download token", async () => {
   return `bytes=${text.length}`;
 });
 
+await step("6a. License-only download entitlement", async () => {
+  const download = await prisma.productDownload.findFirst({ where: { productId: product.id, visible: true } });
+  assert(download, "No product download found.");
+
+  const { response: loginResponse, json: loginJson } = await request("/api/auth/mock-discord", {
+    method: "POST",
+    body: {
+      email: "license.only@mxf-labs.test",
+      username: "license.only",
+      globalName: "License Only",
+      discordId: "444444444444444444",
+    },
+  });
+  const licenseOnlyCookie = cookieFrom(loginResponse);
+  assert(loginResponse.status === 200 && loginJson?.ok && licenseOnlyCookie, "License-only mock login failed.");
+
+  const licenseOnlyCustomer = await prisma.customer.findUnique({ where: { email: "license.only@mxf-labs.test" } });
+  assert(licenseOnlyCustomer, "License-only customer was not created.");
+
+  await prisma.order.deleteMany({ where: { customerId: licenseOnlyCustomer.id, productId: product.id } });
+  await prisma.license.upsert({
+    where: { key: "FLOW-LICENSE-ONLY-MXF-FACTIONS" },
+    update: {
+      customerId: licenseOnlyCustomer.id,
+      productId: product.id,
+      status: "Active",
+      blacklisted: false,
+      expirationDate: null,
+      maxActivations: 3,
+    },
+    create: {
+      key: "FLOW-LICENSE-ONLY-MXF-FACTIONS",
+      customerId: licenseOnlyCustomer.id,
+      productId: product.id,
+      status: "Active",
+      licenseType: "Manual",
+      blacklisted: false,
+      maxActivations: 3,
+      notes: "Flow test license-only download entitlement.",
+    },
+  });
+
+  const { response, text } = await request(`/api/downloads/${download.id}`, { headers: { cookie: licenseOnlyCookie } });
+  assert(response.status === 200 && text.length > 0, `License-only download failed with ${response.status}: ${text}`);
+  return "active license allowed download without paid order";
+});
+
 await step("7. Customer portal ownership", async () => {
   const { response, text } = await request("/portal/products", { headers: { cookie: customerCookie } });
   assert(response.status === 200 && text.includes("MxF Factions"), "Portal ownership did not show MxF Factions.");
