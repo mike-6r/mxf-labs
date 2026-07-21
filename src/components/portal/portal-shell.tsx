@@ -128,6 +128,11 @@ export async function PortalSignIn({ status }: { status?: string }) {
           Discord sign-in is not available yet. Open support if you need access while the customer portal is being prepared.
         </p>
       ) : null}
+      {status === "admin_discord_required" ? (
+        <p className="mt-5 rounded-md border border-[#ff6262]/20 bg-[#ff6262]/8 px-4 py-3 text-sm text-[#ffd8d8]">
+          That Discord account is signed in as a customer, but it is not configured for admin access.
+        </p>
+      ) : null}
       <div className="mt-6 flex flex-wrap gap-3">
         <a
           href="/api/auth/discord/start"

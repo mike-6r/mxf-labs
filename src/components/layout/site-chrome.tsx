@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { BookOpen, LockKeyhole, LogIn, Shield } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Footer } from "@/components/layout/footer";
 import { Logo } from "@/components/layout/logo";
 import { Navbar } from "@/components/layout/navbar";
@@ -36,11 +37,29 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
 }
 
 function PrelaunchNavbar({ pathname }: { pathname: string }) {
+  const [adminAccess, setAdminAccess] = useState(false);
   const tabs = [
     { href: "/", label: "Launch" },
     { href: "/mxf-factions", label: "MxF Factions" },
     { href: "/docs/mxf-factions", label: "Documentation" },
   ];
+
+  useEffect(() => {
+    let active = true;
+
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((payload) => {
+        if (active) setAdminAccess(Boolean(payload?.adminAccess));
+      })
+      .catch(() => {
+        if (active) setAdminAccess(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [pathname]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/8 bg-[#05070a]/78 backdrop-blur-xl">
@@ -93,13 +112,15 @@ function PrelaunchNavbar({ pathname }: { pathname: string }) {
             <span className="relative z-10 hidden sm:inline">Login</span>
             <span className="relative z-10 sm:hidden">Discord</span>
           </Link>
-          <Link
-            href="/admin/login"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/12 bg-white/[0.04] text-white/70 transition hover:border-[#ff6262]/45 hover:text-white"
-            aria-label="Admin login"
-          >
-            <LockKeyhole className="h-4 w-4" aria-hidden="true" />
-          </Link>
+          {adminAccess ? (
+            <Link
+              href="/admin"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/12 bg-white/[0.04] text-white/70 transition hover:border-[#ff6262]/45 hover:text-white"
+              aria-label="Admin panel"
+            >
+              <LockKeyhole className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          ) : null}
         </div>
       </nav>
     </header>

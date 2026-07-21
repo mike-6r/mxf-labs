@@ -64,6 +64,7 @@ export default async function PortalPage({ searchParams }: PageProps) {
     .slice(0, 6);
 
   const alerts = [
+    ...(status === "admin_discord_required" ? ["This Discord account is not configured for admin access."] : []),
     ...licenses.filter((license) => license.status !== "Active").map((license) => `${license.product?.name || "A product"} license is ${license.status}.`),
     ...(customer.discordId ? [] : ["Discord is not linked. Run Discord login to improve support verification."]),
     ...openTickets.slice(0, 1).map((ticket) => `Open support ticket: ${ticket.subject}`),

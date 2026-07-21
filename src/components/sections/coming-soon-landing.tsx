@@ -1,5 +1,7 @@
 import { ArrowRight, Bot, Boxes, Gauge, KeyRound, LockKeyhole, Radio, Shield, ShieldCheck, Sparkles, TerminalSquare } from "lucide-react";
 import Link from "next/link";
+import { getCurrentCustomer } from "@/lib/auth/customer";
+import { isAdminDiscordId } from "@/lib/auth/discord-owner-admin";
 
 const signals = [
   { label: "License portal", value: "Online" },
@@ -28,7 +30,10 @@ const systems = [
 
 const milestones = ["Private QA", "Product packaging", "Docs cleanup", "Launch access"];
 
-export function ComingSoonLanding() {
+export async function ComingSoonLanding() {
+  const customer = await getCurrentCustomer();
+  const adminAccess = isAdminDiscordId(customer?.discordId);
+
   return (
     <section className="relative isolate min-h-[calc(100svh-4rem)] overflow-hidden">
       <div className="absolute inset-0 -z-10 grid-layer opacity-70" />
@@ -66,13 +71,15 @@ export function ComingSoonLanding() {
               Customer login
               <ArrowRight className="relative z-10 h-4 w-4" aria-hidden="true" />
             </Link>
-            <Link
-              href="/admin/login"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-white/12 bg-white/[0.02] px-5 text-sm font-semibold text-white/62 transition hover:border-[#ff6262]/45 hover:text-white"
-            >
-              Admin console
-              <LockKeyhole className="h-4 w-4" aria-hidden="true" />
-            </Link>
+            {adminAccess ? (
+              <Link
+                href="/admin"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-white/12 bg-white/[0.02] px-5 text-sm font-semibold text-white/62 transition hover:border-[#ff6262]/45 hover:text-white"
+              >
+                Admin console
+                <LockKeyhole className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            ) : null}
           </div>
 
           <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:max-w-2xl">
