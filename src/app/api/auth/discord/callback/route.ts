@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createCustomerSession, setCustomerSessionCookie } from "@/lib/auth/customer";
 import { discordAvatarUrl, exchangeDiscordCode, fetchDiscordProfile } from "@/lib/auth/discord";
+import { setDiscordOwnerAdminSession } from "@/lib/auth/discord-owner-admin";
 import { DISCORD_OAUTH_STATE_COOKIE, verifyOAuthStateValue } from "@/lib/auth/session";
 import { canonicalSiteUrl, safeRelativeRedirectTarget } from "@/lib/auth/redirect";
 import { logCustomerActivity } from "@/lib/db/customer-activity";
@@ -89,6 +90,11 @@ export async function GET(request: Request) {
     const sessionValue = await createCustomerSession(customer);
     const redirect = NextResponse.redirect(new URL(safeRelativeRedirectTarget(statePayload.returnTo, "/portal"), siteUrl));
     setCustomerSessionCookie(redirect, sessionValue);
+    await setDiscordOwnerAdminSession(redirect, {
+      discordId: profile.id,
+      email,
+      name: profile.global_name || profile.username,
+    });
     redirect.cookies.delete(DISCORD_OAUTH_STATE_COOKIE);
     return redirect;
   } catch {

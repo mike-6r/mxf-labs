@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import type { LucideIcon } from "lucide-react";
-import { AlertCircle, Download, KeyRound, LifeBuoy, PackageCheck, RefreshCw, ServerCog } from "lucide-react";
+import { AlertCircle, Download, KeyRound, LifeBuoy, PackageCheck, RefreshCw, ShieldCheck, ServerCog } from "lucide-react";
 import Link from "next/link";
 import { PortalShell, PortalSignIn } from "@/components/portal/portal-shell";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getCurrentCustomer } from "@/lib/auth/customer";
+import { isAdminDiscordId } from "@/lib/auth/discord-owner-admin";
 import { getContentMode } from "@/lib/content-mode";
 import { prisma } from "@/lib/db/prisma";
 import { visibleSupportTickets } from "@/lib/support/visibility";
@@ -50,6 +51,7 @@ export default async function PortalPage({ searchParams }: PageProps) {
   ]);
 
   const primaryLicense = licenses[0];
+  const ownerAdmin = isAdminDiscordId(customer.discordId);
   const portalTickets = visibleSupportTickets(tickets, contentMode).slice(0, 4);
   const openTickets = portalTickets.filter((ticket) => !["Resolved", "Closed"].includes(ticket.status));
   const recentActivity = [
@@ -113,6 +115,7 @@ export default async function PortalPage({ searchParams }: PageProps) {
         <section className="surface rounded-lg p-5">
           <h2 className="text-xl font-semibold text-white">Quick actions</h2>
           <div className="mt-5 grid gap-3">
+            {ownerAdmin ? <ActionLink href="/admin" icon={ShieldCheck} label="Admin panel" /> : null}
             <ActionLink href="/portal/downloads" icon={Download} label="Download latest" />
             <ActionLink href="/portal/licenses" icon={KeyRound} label="View license" />
             <ActionLink href="/portal/support" icon={LifeBuoy} label="Open support ticket" />
