@@ -2,6 +2,7 @@ import {
   ArrowRight,
   BadgeCheck,
   BarChart3,
+  BookOpen,
   Boxes,
   Castle,
   CheckCircle2,
@@ -278,6 +279,10 @@ export function PrelaunchFactionsPage() {
             <Link href="/api/auth/discord/start" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-white/12 bg-white/[0.04] px-5 text-sm font-semibold text-white/78 transition hover:border-[#ff6262]/45 hover:text-white">
               Login with Discord
               <UsersRound className="h-4 w-4" aria-hidden="true" />
+            </Link>
+            <Link href="/docs/mxf-factions" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-white/12 bg-white/[0.04] px-5 text-sm font-semibold text-white/78 transition hover:border-[#ff6262]/45 hover:text-white">
+              Documentation
+              <BookOpen className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
 

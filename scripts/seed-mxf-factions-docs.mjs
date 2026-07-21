@@ -1,9 +1,11 @@
 import "dotenv/config";
+import { readFileSync } from "node:fs";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const asJson = (value) => JSON.stringify(value);
 const md = (lines) => lines.join("\n");
+const sourceDocs = JSON.parse(readFileSync(new URL("../src/data/mxf-factions-docs.json", import.meta.url), "utf8"));
 
 const productSeed = {
   name: "MxF Factions",
@@ -2134,6 +2136,19 @@ const articles = [
   },
 ];
 
+const seedArticles = mergeArticles([
+  ...articles,
+  ...sourceDocs,
+]);
+
+function mergeArticles(items) {
+  const bySlug = new Map();
+  for (const item of items) {
+    bySlug.set(item.slug, item);
+  }
+  return [...bySlug.values()].sort((a, b) => (a.sortOrder || 9999) - (b.sortOrder || 9999) || a.title.localeCompare(b.title));
+}
+
 async function ensureProduct() {
   return prisma.product.upsert({
     where: { slug: productSeed.slug },
@@ -2149,7 +2164,7 @@ async function ensureProduct() {
 async function main() {
   const product = await ensureProduct();
 
-  for (const article of articles) {
+  for (const article of seedArticles) {
     await prisma.documentationArticle.upsert({
       where: { slug: article.slug },
       update: {
@@ -2157,9 +2172,9 @@ async function main() {
         category: article.category,
         excerpt: article.excerpt,
         bodyMarkdown: article.bodyMarkdown,
-        version: product.version,
+        version: article.version || product.version,
         productId: product.id,
-        productVersion: product.version,
+        productVersion: article.productVersion || product.version,
         visible: true,
         sortOrder: article.sortOrder,
       },
@@ -2169,9 +2184,9 @@ async function main() {
         category: article.category,
         excerpt: article.excerpt,
         bodyMarkdown: article.bodyMarkdown,
-        version: product.version,
+        version: article.version || product.version,
         productId: product.id,
-        productVersion: product.version,
+        productVersion: article.productVersion || product.version,
         visible: true,
         sortOrder: article.sortOrder,
       },
@@ -2183,8 +2198,8 @@ async function main() {
       {
         ok: true,
         product: product.slug,
-        docs: articles.length,
-        slugs: articles.map((article) => article.slug),
+        docs: seedArticles.length,
+        slugs: seedArticles.map((article) => article.slug),
       },
       null,
       2,

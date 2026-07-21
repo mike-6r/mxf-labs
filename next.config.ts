@@ -19,7 +19,6 @@ const prelaunchRedirects = [
   "/changelog",
   "/checkout/:path*",
   "/contact",
-  "/docs/:path*",
   "/documentation",
   "/privacy",
   "/products/:path*",

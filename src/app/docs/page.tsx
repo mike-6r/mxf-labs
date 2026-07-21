@@ -4,7 +4,9 @@ import Link from "next/link";
 import { PageHero } from "@/components/sections/page-hero";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getPublicDocumentationArticles } from "@/lib/db/public";
+import { prelaunchModeEnabled } from "@/lib/launch-mode";
 import { cn } from "@/lib/utils";
+import MxfFactionsDocumentationPage from "./mxf-factions/page";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -43,6 +45,9 @@ export default async function DocsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const query = String(params?.q || params?.query || "").trim();
   const selectedProduct = String(params?.product || "all").trim();
+  if (prelaunchModeEnabled() || (selectedProduct === "mxf-factions" && !query)) {
+    return <MxfFactionsDocumentationPage />;
+  }
   const allArticles = await getPublicDocumentationArticles(query);
   const productOptions = uniqueProducts(allArticles);
   const articles = allArticles.filter((article) => {

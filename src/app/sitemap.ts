@@ -17,6 +17,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency: "weekly",
         priority: 0.9,
       },
+      {
+        url: new URL("/docs/mxf-factions", siteConfig.domain).toString(),
+        lastModified: new Date(),
+        changeFrequency: "weekly",
+        priority: 0.8,
+      },
     ];
   }
 

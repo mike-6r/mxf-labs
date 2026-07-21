@@ -16,6 +16,7 @@ export type ProductManualArticle = {
   version: string;
   productVersion: string | null;
   updatedAt: string;
+  sortOrder?: number;
 };
 
 type ProductDocsManualProps = {
@@ -157,7 +158,7 @@ export function ProductDocsManual({ productName, productSlug, description, artic
                     <p className="mt-4 max-w-3xl text-sm leading-7 text-white/56">{activeArticle.excerpt}</p>
                     <div className="mt-5 flex flex-wrap gap-2">
                       <SmallPill label={`Docs v${activeArticle.version}`} />
-                      <SmallPill label={activeArticle.productVersion ? `Product ${activeArticle.productVersion}` : "Product manual"} />
+                      <SmallPill label={activeArticle.productVersion ? `Product ${activeArticle.productVersion}` : "Product docs"} />
                       <SmallPill label={`Updated ${formatDate(activeArticle.updatedAt)}`} />
                     </div>
                   </div>
@@ -230,6 +231,10 @@ function ClientMarkdownBlock({ body }: { body: string }) {
       return;
     }
 
+    if (line.startsWith("# ")) {
+      return;
+    }
+
     if (line.startsWith("## ")) {
       nodes.push(
         <h3 key={index} className="mt-10 border-t border-white/10 pt-8 text-2xl font-semibold text-white">
@@ -245,6 +250,29 @@ function ClientMarkdownBlock({ body }: { body: string }) {
           {line.replace("### ", "")}
         </h4>,
       );
+      return;
+    }
+
+    if (line.startsWith("> ")) {
+      nodes.push(
+        <div key={index} className="my-4 rounded-md border border-[#ffd166]/16 bg-[#ffd166]/7 p-4 text-sm leading-7 text-[#ffe7b3]/78">
+          {inlineCode(line.replace(/^>\s?/, ""))}
+        </div>,
+      );
+      return;
+    }
+
+    if (line.startsWith("|") && lines[index + 1]?.startsWith("|") && lines[index + 1]?.includes("---")) {
+      const tableLines = [line];
+      let cursor = index + 2;
+      while (cursor < lines.length && lines[cursor].startsWith("|")) {
+        tableLines.push(lines[cursor]);
+        cursor += 1;
+      }
+      nodes.push(<MarkdownTable key={`table-${index}`} lines={tableLines} />);
+      for (let skip = index + 1; skip < cursor; skip += 1) {
+        lines[skip] = "";
+      }
       return;
     }
 
@@ -275,6 +303,48 @@ function ClientMarkdownBlock({ body }: { body: string }) {
   });
 
   return <div>{nodes}</div>;
+}
+
+function MarkdownTable({ lines }: { lines: string[] }) {
+  const [headerLine, ...bodyLines] = lines;
+  const rows = bodyLines.filter((line) => !line.includes("---"));
+  const headers = tableCells(headerLine);
+
+  return (
+    <div className="my-5 overflow-x-auto rounded-md border border-white/10 bg-black/24">
+      <table className="min-w-full border-collapse text-left text-sm">
+        <thead className="bg-white/[0.045]">
+          <tr>
+            {headers.map((cell) => (
+              <th key={cell} className="border-b border-white/10 px-4 py-3 font-semibold text-white">
+                {inlineCode(cell)}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-white/8">
+          {rows.map((row, rowIndex) => (
+            <tr key={`${row}-${rowIndex}`}>
+              {tableCells(row).map((cell, cellIndex) => (
+                <td key={`${cell}-${cellIndex}`} className="max-w-[28rem] px-4 py-3 leading-6 text-white/62">
+                  {inlineCode(cell)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function tableCells(line: string) {
+  return line
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) => cell.trim());
 }
 
 function CodeBlock({ language, value }: { language: string; value: string }) {
@@ -326,7 +396,7 @@ function groupArticles(articles: ProductManualArticle[]) {
     .sort(([a], [b]) => categoryRank(a) - categoryRank(b) || a.localeCompare(b))
     .map(([category, groupArticles]) => ({
       category,
-      articles: groupArticles,
+      articles: groupArticles.sort((a, b) => (a.sortOrder ?? 9999) - (b.sortOrder ?? 9999) || a.title.localeCompare(b.title)),
     }));
 }
 

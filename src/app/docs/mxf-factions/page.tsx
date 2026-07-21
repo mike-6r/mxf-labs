@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductDocsManual, type ProductManualArticle } from "@/components/docs/product-docs-manual";
+import sourceDocs from "@/data/mxf-factions-docs.json";
 import { getPublicDocumentationArticles, getPublicProduct } from "@/lib/db/public";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +18,7 @@ export default async function MxfFactionsDocumentationPage() {
     getPublicDocumentationArticles(),
   ]);
 
-  const articles = allArticles
+  const databaseArticles = allArticles
     .filter((article) => article.product?.slug === "mxf-factions")
     .map<ProductManualArticle>((article) => ({
       id: article.id,
@@ -29,7 +30,9 @@ export default async function MxfFactionsDocumentationPage() {
       version: article.version,
       productVersion: article.productVersion,
       updatedAt: article.updatedAt.toISOString(),
+      sortOrder: article.sortOrder,
     }));
+  const articles = mergeManualArticles(staticArticles(), databaseArticles);
 
   if (!product && !articles.length) {
     notFound();
@@ -43,4 +46,33 @@ export default async function MxfFactionsDocumentationPage() {
       articles={articles}
     />
   );
+}
+
+function staticArticles(): ProductManualArticle[] {
+  return sourceDocs.map((article) => ({
+    id: `static-${article.slug}`,
+    slug: article.slug,
+    title: article.title,
+    category: article.category,
+    excerpt: article.excerpt,
+    bodyMarkdown: article.bodyMarkdown,
+    version: article.version,
+    productVersion: article.productVersion,
+    updatedAt: article.updatedAt,
+    sortOrder: article.sortOrder,
+  }));
+}
+
+function mergeManualArticles(staticManual: ProductManualArticle[], databaseArticles: ProductManualArticle[]) {
+  const bySlug = new Map<string, ProductManualArticle>();
+
+  for (const article of databaseArticles) {
+    bySlug.set(article.slug, article);
+  }
+
+  for (const article of staticManual) {
+    bySlug.set(article.slug, article);
+  }
+
+  return [...bySlug.values()].sort((a, b) => (a.sortOrder ?? 9999) - (b.sortOrder ?? 9999) || a.title.localeCompare(b.title));
 }
