@@ -19,6 +19,7 @@ const documentationCategories = [
   "Installation",
   "Requirements",
   "Configuration",
+  "Feature Setup",
   "Commands",
   "Permissions",
   "Variables",
