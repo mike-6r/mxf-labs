@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { LockKeyhole, LogIn, Shield } from "lucide-react";
+import { BookOpen, LockKeyhole, LogIn, Shield } from "lucide-react";
 import Link from "next/link";
 import { Footer } from "@/components/layout/footer";
 import { Logo } from "@/components/layout/logo";
@@ -39,6 +39,7 @@ function PrelaunchNavbar({ pathname }: { pathname: string }) {
   const tabs = [
     { href: "/", label: "Launch" },
     { href: "/mxf-factions", label: "MxF Factions" },
+    { href: "/docs/mxf-factions", label: "Documentation" },
   ];
 
   return (
@@ -47,7 +48,7 @@ function PrelaunchNavbar({ pathname }: { pathname: string }) {
         <Logo />
         <div className="hidden items-center gap-1 rounded-md border border-white/10 bg-white/[0.035] p-1 md:flex">
           {tabs.map((tab) => {
-            const active = pathname === tab.href;
+            const active = pathname === tab.href || (tab.href === "/docs/mxf-factions" && pathname.startsWith("/docs"));
             return (
               <Link
                 key={tab.href}
@@ -57,6 +58,7 @@ function PrelaunchNavbar({ pathname }: { pathname: string }) {
                 }`}
               >
                 {tab.href === "/mxf-factions" ? <Shield className="h-3.5 w-3.5" aria-hidden="true" /> : null}
+                {tab.href === "/docs/mxf-factions" ? <BookOpen className="h-3.5 w-3.5" aria-hidden="true" /> : null}
                 {tab.label}
               </Link>
             );
@@ -69,6 +71,13 @@ function PrelaunchNavbar({ pathname }: { pathname: string }) {
           >
             <Shield className="h-4 w-4" aria-hidden="true" />
             Factions
+          </Link>
+          <Link
+            href="/docs/mxf-factions"
+            className="hidden min-h-10 items-center gap-2 rounded-md border border-white/12 bg-white/[0.04] px-3 text-sm font-semibold text-white/74 transition hover:border-[#ff6262]/45 hover:text-white lg:inline-flex"
+          >
+            <BookOpen className="h-4 w-4" aria-hidden="true" />
+            Docs
           </Link>
           <Link
             href="/portal"

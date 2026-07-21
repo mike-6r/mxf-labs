@@ -118,7 +118,7 @@ const launchProducts = [
     ],
     changelog: ["Launch product record seeded.", "Public product page connected to admin-managed content."],
     licenseRules: minecraftLicenseRules,
-    documentationLink: "/docs?product=mxf-factions",
+    documentationLink: "/docs/mxf-factions",
     supportLink: "/support?product=mxf-factions",
   },
   {

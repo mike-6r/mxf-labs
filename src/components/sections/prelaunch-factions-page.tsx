@@ -27,7 +27,6 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { FactionsDocsBrowser } from "@/components/sections/factions-docs-browser";
 
 const heroStats = [
   { label: "Launch price", value: "$20" },
@@ -124,7 +123,7 @@ const pageNav = [
   { href: "#systems", label: "Systems" },
   { href: "#interface", label: "GUI" },
   { href: "#stack", label: "Stack" },
-  { href: "#docs", label: "Docs" },
+  { href: "/docs/mxf-factions", label: "Documentation" },
   { href: "#architecture", label: "Architecture" },
   { href: "#roadmap", label: "Roadmap" },
 ];
@@ -410,10 +409,6 @@ export function PrelaunchFactionsPage() {
             </div>
           </div>
         </div>
-      </section>
-
-      <section id="docs" className="mx-auto w-full max-w-7xl px-5 py-16 md:px-8">
-        <FactionsDocsBrowser />
       </section>
 
       <section id="architecture" className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-16 md:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
