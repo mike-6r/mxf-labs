@@ -19,6 +19,7 @@ function customerAuthRequired(request: Request) {
 
   if (accept.includes("text/html")) {
     const url = new URL(request.url);
+    url.searchParams.delete("token");
     const loginUrl = new URL("/api/auth/discord/start", url.origin);
     loginUrl.searchParams.set("returnTo", `${url.pathname}${url.search}`);
     return NextResponse.redirect(loginUrl, { status: 303 });

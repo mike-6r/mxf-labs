@@ -12,10 +12,22 @@ export function discordConfigured() {
 }
 
 export function discordRedirectUri(requestUrl: string) {
-  return (
-    process.env.DISCORD_REDIRECT_URI ||
-    `${new URL(requestUrl).origin}/api/auth/discord/callback`
-  );
+  const requestOrigin = new URL(requestUrl).origin;
+  const siteOrigin = originFrom(process.env.NEXT_PUBLIC_SITE_URL);
+  const fallbackOrigin = siteOrigin || requestOrigin;
+  const configuredRedirect = process.env.DISCORD_REDIRECT_URI?.trim();
+
+  if (configuredRedirect) {
+    const configuredOrigin = originFrom(configuredRedirect);
+    const configuredIsLocal = configuredOrigin ? isLocalOrigin(configuredOrigin) : configuredRedirect.includes("localhost");
+    const fallbackIsLocal = isLocalOrigin(fallbackOrigin);
+
+    if (!configuredIsLocal || fallbackIsLocal) {
+      return configuredRedirect;
+    }
+  }
+
+  return `${fallbackOrigin}/api/auth/discord/callback`;
 }
 
 export function discordAuthorizeUrl({
@@ -83,4 +95,23 @@ export function discordAvatarUrl(profile: DiscordProfile) {
 
   const extension = profile.avatar.startsWith("a_") ? "gif" : "png";
   return `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.${extension}`;
+}
+
+function originFrom(value?: string | null) {
+  if (!value) return null;
+
+  try {
+    return new URL(value).origin;
+  } catch {
+    return null;
+  }
+}
+
+function isLocalOrigin(origin: string) {
+  try {
+    const hostname = new URL(origin).hostname;
+    return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+  } catch {
+    return origin.includes("localhost") || origin.includes("127.0.0.1");
+  }
 }
